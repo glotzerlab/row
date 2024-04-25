@@ -1,0 +1,14 @@
+[workspace]
+value_file = "value.json"
+
+[[action]]
+name = "process_point"
+command = "echo {directory}"
+[action.group]
+include = [["/type", "equal_to", "point"]]
+
+[[action]]
+name = "process_letter"
+command = "echo {directory}"
+[action.group]
+include = [["/type", "equal_to", "letter"]]

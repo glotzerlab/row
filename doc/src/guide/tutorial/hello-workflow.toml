@@ -1,0 +1,3 @@
+[[action]]
+name = "hello"
+command = 'echo "Hello, {directory}!"'

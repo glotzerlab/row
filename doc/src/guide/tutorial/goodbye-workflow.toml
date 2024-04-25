@@ -1,0 +1,9 @@
+[[action]]
+name = "hello"
+command = 'echo "Hello, {directory}!" | tee workspace/{directory}/hello.out'
+products = ["hello.out"]
+
+[[action]]
+name = "goodbye"
+command = 'echo "Goodbye, {directory}!"'
+previous_actions = ["hello"]
