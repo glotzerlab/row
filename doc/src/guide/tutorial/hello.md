@@ -77,4 +77,5 @@ you can find a way to submit this workflow only on `directory2`.
 ## Next steps
 
 You have created your first **row** workflow and executed it! The next section of this
-tutorial will show you how to
+tutorial will show you how to configure one **action** that will execute after another
+action **completes**.

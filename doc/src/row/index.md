@@ -7,16 +7,15 @@ row [OPTIONS] <COMMAND>
 
 `<COMMAND>` must be one of:
 * [`init`](init.md)
-* [`show status`](show-status.md)
-* [`show directories`](show-directories.md)
+* [`show`](show/index.md)
 * [`submit`](submit.md)
 * [`scan`](scan.md)
 * [`uncomplete`](uncomplete.md)
 
 <div class="warning">
 You should execute only <b>one</b> instance of <b>row</b> at a time for a given project.
-<b>Row</b> maintains a cache and concurrent invocations may corrupt it.
-The <code>scan</code> command is the one exception to this rule.
+<b>Row</b> maintains a cache and concurrent invocations may corrupt it. The
+<code>scan</code> command is excepted from this rule.
 </div>
 
 ## `[OPTIONS]`
@@ -41,7 +40,7 @@ default.
 ### `--cluster`
 
 Set the name of the cluster to check for submitted jobs. By default, **row** autodetects
-the cluster based on the rules in [clusters.toml](../clusters/index.md). Set the
+the cluster based on the rules in [`clusters.toml`](../clusters/index.md). Set the
 environment variable `ROW_CLUSTER` to change this default.
 
 **Row** always shows the count of submitted jobs from *all* clusters known in the

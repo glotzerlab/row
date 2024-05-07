@@ -80,6 +80,12 @@ fn main_detail() -> Result<(), Box<dyn Error>> {
                 &mut multi_progress_container,
                 &mut output,
             )?,
+            ShowArgs::Cluster(args) => {
+                cli::cluster::cluster(options.global_options.clone(), args, &mut output)?
+            }
+            ShowArgs::Launchers(args) => {
+                cli::launchers::launchers(options.global_options.clone(), args, &mut output)?
+            }
         },
         Some(Commands::Scan(args)) => cli::scan::scan(
             options.global_options.clone(),

@@ -13,10 +13,10 @@ two            0       200      800    1000   8K GPU-hours
 ```
 
 For each action, the summary details the number of directories in each
-[status](../guide/concepts/status.md).
+[status](../../guide/concepts/status.md).
 `row show status` also estimates the remaining cost in either CPU-hours or GPU-hours
 based on the number of submitted, eligible, and waiting jobs and the
-[resources used by the action](../workflow/action/resources.md).
+[resources used by the action](../../workflow/action/resources.md).
 
 ## `[DIRECTORIES]`
 

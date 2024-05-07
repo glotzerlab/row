@@ -18,15 +18,15 @@ dir6      completed            0.3
 ```
 
 `row show directories` lists each selected directory with its
-[status](../guide/concepts/status.md) and scheduler job ID (when submitted) for the
+[status](../../guide/concepts/status.md) and scheduler job ID (when submitted) for the
 given `<ACTION>`. You can also show elements from the directory's value, accessed by
-[JSON pointer](../guide/concepts/json-pointers.md). Blank lines separate
-[groups](../workflow/action/group.md).
+[JSON pointer](../../guide/concepts/json-pointers.md). Blank lines separate
+[groups](../../workflow/action/group.md).
 
 ## `[DIRECTORIES]`
 
 List these specific directories. By default, **row** shows all directories that match
-the action's [include condition](../workflow/action/group.md#include)
+the action's [include condition](../../workflow/action/group.md#include)
 For example:
 ```bash
 row show directories action dir1 dir2 dir3

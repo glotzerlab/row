@@ -1,3 +1,5 @@
+"""Populate the workspace."""
+
 import signac
 
 N = 10

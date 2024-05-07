@@ -15,8 +15,6 @@ use wildmatch::WildMatch;
 
 use crate::cli::GlobalOptions;
 use row::project::Project;
-use row::scheduler::bash::Bash;
-use row::scheduler::Scheduler;
 use row::workflow::{Action, ResourceCost};
 use row::MultiProgressContainer;
 
@@ -25,10 +23,6 @@ pub struct SubmitArgs {
     /// Select the actions to summarize with a wildcard pattern.
     #[arg(short, long, value_name = "pattern", default_value_t=String::from("*"), display_order=0)]
     action: String,
-
-    /// Check the job submission status on the given cluster. Autodetected by default.
-    #[arg(long, env = "ROW_CLUSTER", display_order = 0)]
-    cluster: Option<String>,
 
     /// Select directories to summarize (defaults to all).
     directories: Vec<PathBuf>,
@@ -57,7 +51,7 @@ pub fn submit<W: Write>(
     debug!("Submitting workflow actions to the scheduler.");
     let action_matcher = WildMatch::new(&args.action);
 
-    let mut project = Project::open(options.io_threads, multi_progress)?;
+    let mut project = Project::open(options.io_threads, options.cluster, multi_progress)?;
 
     let query_directories = if args.directories.is_empty() {
         project.state().list_directories()
@@ -139,11 +133,8 @@ pub fn submit<W: Write>(
 
     // TODO: Validate submit_whole
 
-    // TODO: Move scheduler into project, which will dynamically create a scheduler depending on the
-    // detected cluster.
-    let scheduler = Bash::new(&args.cluster.unwrap_or("none".into()));
-
     if args.dry_run {
+        let scheduler = project.scheduler();
         info!("Would submit the following scripts...");
         for (index, (action, directories)) in action_directories.iter().enumerate() {
             info!("script {}/{}:", index + 1, action_directories.len());
@@ -222,6 +213,7 @@ pub fn submit<W: Write>(
     let instant = Instant::now();
 
     for (index, (action, directories)) in action_directories.iter().enumerate() {
+        let scheduler = project.scheduler();
         let mut message = format!(
             "[{}/{}] Submitting action '{}' on directory {}",
             HumanCount((index + 1) as u64),
@@ -237,8 +229,6 @@ pub fn submit<W: Write>(
         message += &format!(" ({}).", style(HumanDuration(instant.elapsed())).dim());
         println!("{message}");
 
-        // TODO: Change to the project directory before submitting.
-
         let result = scheduler.submit(
             &project.workflow().root,
             action,
@@ -246,13 +236,22 @@ pub fn submit<W: Write>(
             Arc::clone(&should_terminate),
         );
 
-        // TODO: Implement the job ID store. Save it after all jobs are
-        // submitted, and when an error occurs. Need to capture successfully
-        // submitted jobs in the store even when later jobs fail.
-        if let Err(error) = result {
-            return Err(error.into());
+        match result {
+            Err(error) => {
+                // Save the submitted cache for any jobs submitted so far.
+                project.close(multi_progress)?;
+                return Err(error.into());
+            }
+            Ok(Some(job_id)) => {
+                println!("Row submitted job {job_id}.");
+                project.add_submitted(&action.name, directories, job_id);
+                continue;
+            }
+            Ok(None) => continue,
         }
     }
+
+    project.close(multi_progress)?;
 
     Ok(())
 }

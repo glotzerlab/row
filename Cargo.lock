@@ -452,6 +452,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea"
 
 [[package]]
+name = "home"
+version = "0.5.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e3d1354bf6b7235cb4a0576c2619fd4ed18183f689b12b006a0ee7329eeff9a5"
+dependencies = [
+ "windows-sys",
+]
+
+[[package]]
 name = "human_format"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -754,6 +763,7 @@ dependencies = [
  "clap-verbosity-flag",
  "console",
  "env_logger",
+ "home",
  "human_format",
  "indicatif",
  "indicatif-log-bridge",

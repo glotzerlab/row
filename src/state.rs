@@ -11,8 +11,11 @@ use std::path::PathBuf;
 use crate::workflow::Workflow;
 use crate::{
     progress_styles, workspace, Error, MultiProgressContainer, COMPLETED_CACHE_FILE_NAME,
-    COMPLETED_DIRECTORY_NAME, DATA_DIRECTORY_NAME, MIN_PROGRESS_BAR_SIZE, VALUE_CACHE_FILE_NAME,
+    COMPLETED_DIRECTORY_NAME, DATA_DIRECTORY_NAME, MIN_PROGRESS_BAR_SIZE,
+    SUBMITTED_CACHE_FILE_NAME, VALUE_CACHE_FILE_NAME,
 };
+
+type SubmittedJobs = HashMap<String, HashMap<PathBuf, (String, u32)>>;
 
 /// The state of the project.
 ///
@@ -33,14 +36,20 @@ pub struct State {
     /// Completed directories for each action.
     completed: HashMap<String, HashSet<PathBuf>>,
 
+    /// Submitted jobs: action -> directory -> (cluster, job ID)
+    submitted: SubmittedJobs,
+
     /// Completion files read while synchronizing.
     completed_file_names: Vec<PathBuf>,
-    // TODO: scheduled jobs
+
     /// Set to true when `values` is modified from the on-disk cache.
     values_modified: bool,
 
     /// Set to true when `completed` is modified from the on-disk cache.
     completed_modified: bool,
+
+    /// Set to true when `submitted` is modified from the on-disk cache.
+    submitted_modified: bool,
 }
 
 impl State {
@@ -52,6 +61,70 @@ impl State {
     /// Get the set of directories completed for a given action.
     pub fn completed(&self) -> &HashMap<String, HashSet<PathBuf>> {
         &self.completed
+    }
+
+    /// Get the mapping of actions -> directories -> (cluster, submitted job ID)
+    pub fn submitted(&self) -> &SubmittedJobs {
+        &self.submitted
+    }
+
+    /// Test whether a given directory has a submitted job for the given action.
+    pub fn is_submitted(&self, action_name: &str, directory: &PathBuf) -> bool {
+        if let Some(submitted_directories) = self.submitted.get(action_name) {
+            submitted_directories.contains_key(directory)
+        } else {
+            false
+        }
+    }
+
+    /// Add a submitted job.
+    pub fn add_submitted(
+        &mut self,
+        action_name: &str,
+        directories: &[PathBuf],
+        cluster_name: &str,
+        job_id: u32,
+    ) {
+        for directory in directories {
+            self.submitted
+                .entry(action_name.into())
+                .and_modify(|e| {
+                    e.insert(directory.clone(), (cluster_name.to_string(), job_id));
+                })
+                .or_insert(HashMap::from([(
+                    directory.clone(),
+                    (cluster_name.to_string(), job_id),
+                )]));
+        }
+        self.submitted_modified = true;
+    }
+
+    /// Remove inactive jobs on the given cluster.
+    ///
+    /// Note: The argument lists the *active* jobs to keep!
+    ///
+    pub fn remove_inactive_submitted(&mut self, cluster_name: &str, active_job_ids: &HashSet<u32>) {
+        trace!("Removing inactive jobs from the submitted cache.");
+        self.submitted_modified = true;
+
+        for directories in self.submitted.values_mut() {
+            directories.retain(|_, v| v.0 != cluster_name || active_job_ids.contains(&v.1));
+        }
+    }
+
+    /// Get all submitted jobs on a given cluster.
+    pub fn jobs_submitted_on(&self, cluster_name: &str) -> Vec<u32> {
+        let mut set: HashSet<u32> = HashSet::new();
+
+        for directories in self.submitted.values() {
+            for (job_cluster, job_id) in directories.values() {
+                if job_cluster == cluster_name {
+                    set.insert(*job_id);
+                }
+            }
+        }
+
+        Vec::from_iter(set.drain())
     }
 
     /// List all directories in the state.
@@ -67,9 +140,11 @@ impl State {
         let mut state = State {
             values: Self::read_value_cache(workflow)?,
             completed: Self::read_completed_cache(workflow)?,
+            submitted: Self::read_submitted_cache(workflow)?,
             completed_file_names: Vec::new(),
             values_modified: false,
             completed_modified: false,
+            submitted_modified: false,
         };
 
         // Ensure that completed has keys for all actions in the workflow.
@@ -98,7 +173,7 @@ impl State {
             }
             Err(error) => match error.kind() {
                 io::ErrorKind::NotFound => {
-                    debug!(
+                    trace!(
                         "'{}' not found, initializing default values.",
                         value_file.display().to_string()
                     );
@@ -127,7 +202,7 @@ impl State {
             }
             Err(error) => match error.kind() {
                 io::ErrorKind::NotFound => {
-                    debug!(
+                    trace!(
                         "'{}' not found, initializing empty completions.",
                         completed_file.display().to_string()
                     );
@@ -135,6 +210,33 @@ impl State {
                 }
 
                 _ => Err(Error::FileRead(completed_file, error)),
+            },
+        }
+    }
+
+    /// Read the submitted job cache from disk.
+    fn read_submitted_cache(workflow: &Workflow) -> Result<SubmittedJobs, Error> {
+        let data_directory = workflow.root.join(DATA_DIRECTORY_NAME);
+        let submitted_file = data_directory.join(SUBMITTED_CACHE_FILE_NAME);
+
+        match fs::read(&submitted_file) {
+            Ok(bytes) => {
+                debug!("Reading cache '{}'.", submitted_file.display().to_string());
+
+                let result = postcard::from_bytes(&bytes)
+                    .map_err(|e| Error::PostcardParse(submitted_file, e))?;
+                Ok(result)
+            }
+            Err(error) => match error.kind() {
+                io::ErrorKind::NotFound => {
+                    debug!(
+                        "'{}' not found, assuming no submitted jobs.",
+                        submitted_file.display().to_string()
+                    );
+                    Ok(HashMap::new())
+                }
+
+                _ => Err(Error::FileRead(submitted_file, error)),
             },
         }
     }
@@ -153,6 +255,11 @@ impl State {
         if self.completed_modified {
             self.save_completed_cache(workflow, multi_progress)?;
             self.completed_modified = false;
+        }
+
+        if self.submitted_modified {
+            self.save_submitted_cache(workflow)?;
+            self.submitted_modified = false;
         }
 
         Ok(())
@@ -227,19 +334,45 @@ impl State {
         Ok(())
     }
 
+    /// Save the completed cache to the filesystem.
+    fn save_submitted_cache(&mut self, workflow: &Workflow) -> Result<(), Error> {
+        let data_directory = workflow.root.join(DATA_DIRECTORY_NAME);
+        let submitted_file = data_directory.join(SUBMITTED_CACHE_FILE_NAME);
+
+        debug!(
+            "Saving submitted job cache: '{}'.",
+            submitted_file.display().to_string()
+        );
+
+        let out_bytes: Vec<u8> = postcard::to_stdvec(&self.submitted)
+            .map_err(|e| Error::PostcardSerialize(submitted_file.clone(), e))?;
+
+        let mut file = File::create(&submitted_file)
+            .map_err(|e| Error::FileWrite(submitted_file.clone(), e))?;
+        file.write_all(&out_bytes)
+            .map_err(|e| Error::FileWrite(submitted_file.clone(), e))?;
+        file.sync_all()
+            .map_err(|e| Error::FileWrite(submitted_file.clone(), e))?;
+        drop(file);
+
+        Ok(())
+    }
+
     /// Synchronize a workspace on disk with a `State`.
     ///
     /// * Remove directories from the state that are no longer present on the filesystem.
     /// * Make no changes to directories in the state that remain.
     /// * When new directories are present on the filesystem, add them to the state -
     ///   which includes reading the value file and checking which actions are completed.
+    /// * Remove actions that are no longer present from the completed and submitted caches.
+    /// * Remove directories that are no longer present from the completed and submitted caches.
     ///
     /// # Errors
     ///
     /// * Returns `Error<row::Error>` when there is an I/O error reading the
     ///   workspace directory
     ///
-    pub fn synchronize_workspace(
+    pub(crate) fn synchronize_workspace(
         &mut self,
         workflow: &Workflow,
         io_threads: u16,
@@ -325,6 +458,7 @@ impl State {
 
         self.insert_staged_completed(new_complete);
         self.remove_missing_completed(workflow);
+        self.remove_missing_submitted(workflow);
 
         Ok(self)
     }
@@ -374,8 +508,44 @@ impl State {
         }
     }
 
+    /// Remove missing submitted actions and directories.
+    fn remove_missing_submitted(&mut self, workflow: &Workflow) {
+        let current_actions: HashSet<String> =
+            workflow.action.iter().map(|a| a.name.clone()).collect();
+
+        let actions_to_remove: Vec<String> = self
+            .submitted
+            .keys()
+            .filter(|a| !current_actions.contains(*a))
+            .cloned()
+            .collect();
+
+        for action_name in actions_to_remove {
+            warn!("Removing action '{}' from the submitted cache as it is no longer present in the workflow.", action_name);
+            self.submitted.remove(&action_name);
+            self.submitted_modified = true;
+        }
+
+        for (_, directory_map) in self.submitted.iter_mut() {
+            let directories_to_remove: Vec<PathBuf> = directory_map
+                .keys()
+                .filter(|d| !self.values.contains_key(*d))
+                .cloned()
+                .collect();
+
+            for directory_name in directories_to_remove {
+                trace!("Removing directory '{}' from the submitted cache as it is no longer present in the workspace.", directory_name.display());
+                directory_map.remove(&directory_name);
+                self.submitted_modified = true;
+            }
+        }
+
+        // Note: A separate method takes care of removing submitted job IDs that are
+        // no longer submitted.
+    }
+
     /// Synchronize with completion files on the filesystem.
-    pub fn synchronize_completion_files(
+    fn synchronize_completion_files(
         &mut self,
         workflow: &Workflow,
         multi_progress: &mut MultiProgressContainer,
@@ -466,6 +636,7 @@ mod tests {
     use assert_fs::prelude::*;
     use assert_fs::TempDir;
     use indicatif::{MultiProgress, ProgressDrawTarget};
+    use serial_test::parallel;
 
     use super::*;
 
@@ -483,7 +654,8 @@ mod tests {
     }
 
     #[test]
-    fn test_no_workspace() {
+    #[parallel]
+    fn no_workspace() {
         let mut multi_progress = setup();
 
         let temp = TempDir::new().unwrap();
@@ -500,7 +672,8 @@ mod tests {
     }
 
     #[test]
-    fn test_empty_workspace() {
+    #[parallel]
+    fn empty_workspace() {
         let mut multi_progress = setup();
 
         let temp = TempDir::new().unwrap();
@@ -515,7 +688,8 @@ mod tests {
     }
 
     #[test]
-    fn test_add_remove() {
+    #[parallel]
+    fn add_remove() {
         let mut multi_progress = setup();
 
         let temp = TempDir::new().unwrap();
@@ -547,7 +721,8 @@ mod tests {
     }
 
     #[test]
-    fn test_value() {
+    #[parallel]
+    fn value() {
         let mut multi_progress = setup();
 
         let temp = TempDir::new().unwrap();
@@ -601,7 +776,8 @@ products = ["g"]
     }
 
     #[test]
-    fn test_new_completeions_and_cache() {
+    #[parallel]
+    fn new_completeions_and_cache() {
         let mut multi_progress = setup();
 
         let temp = TempDir::new().unwrap();
@@ -639,7 +815,8 @@ products = ["g"]
     }
 
     #[test]
-    fn test_completions_not_synced_for_known_directories() {
+    #[parallel]
+    fn completions_not_synced_for_known_directories() {
         let mut multi_progress = setup();
 
         let temp = TempDir::new().unwrap();
@@ -663,7 +840,8 @@ products = ["g"]
     }
 
     #[test]
-    fn test_completed_removed() {
+    #[parallel]
+    fn completed_removed() {
         let mut multi_progress = setup();
 
         let temp = TempDir::new().unwrap();
@@ -709,5 +887,154 @@ products = ["g"]
                 assert!(state.completed["e"].contains(&directory));
             }
         }
+    }
+
+    #[test]
+    #[parallel]
+    fn new_submitted_and_cache() {
+        let mut multi_progress = setup();
+
+        let temp = TempDir::new().unwrap();
+        let n = 8;
+
+        let workflow = setup_completion_directories(&temp, n);
+        let workflow = Workflow::open_str(temp.path(), &workflow).unwrap();
+
+        let mut state = State::default();
+        let result = state.synchronize_workspace(&workflow, 2, &mut multi_progress);
+        assert!(result.is_ok());
+
+        assert!(state.submitted.is_empty());
+
+        state.add_submitted("b", &["dir1".into(), "dir5".into()], "cluster1", 11);
+        state.add_submitted("b", &["dir3".into(), "dir4".into()], "cluster2", 12);
+        state.add_submitted("e", &["dir6".into(), "dir7".into()], "cluster2", 13);
+
+        assert!(state.is_submitted("b", &"dir1".into()));
+        assert!(!state.is_submitted("b", &"dir2".into()));
+        assert!(state.is_submitted("b", &"dir3".into()));
+        assert!(state.is_submitted("b", &"dir4".into()));
+        assert!(state.is_submitted("b", &"dir5".into()));
+        assert!(!state.is_submitted("b", &"dir6".into()));
+        assert!(!state.is_submitted("b", &"dir7".into()));
+
+        assert!(!state.is_submitted("e", &"dir1".into()));
+        assert!(!state.is_submitted("e", &"dir2".into()));
+        assert!(!state.is_submitted("e", &"dir3".into()));
+        assert!(!state.is_submitted("e", &"dir4".into()));
+        assert!(!state.is_submitted("e", &"dir5".into()));
+        assert!(state.is_submitted("e", &"dir6".into()));
+        assert!(state.is_submitted("e", &"dir7".into()));
+
+        assert_eq!(state.jobs_submitted_on("cluster1"), vec![11]);
+        let mut jobs_on_cluster2 = state.jobs_submitted_on("cluster2");
+        jobs_on_cluster2.sort();
+        assert_eq!(jobs_on_cluster2, vec![12, 13]);
+
+        state
+            .save_cache(&workflow, &mut multi_progress)
+            .expect("Cache saved.");
+
+        let cached_state = State::from_cache(&workflow).expect("Read state from cache");
+        assert_eq!(state, cached_state);
+    }
+
+    #[test]
+    #[parallel]
+    fn remove_submitted_actions_and_dirs() {
+        let mut multi_progress = setup();
+
+        let temp = TempDir::new().unwrap();
+        let n = 8;
+
+        let workflow = setup_completion_directories(&temp, n);
+        let workflow = Workflow::open_str(temp.path(), &workflow).unwrap();
+
+        let mut state = State::default();
+        let result = state.synchronize_workspace(&workflow, 2, &mut multi_progress);
+        assert!(result.is_ok());
+
+        assert!(state.submitted.is_empty());
+
+        state.add_submitted("b", &["dir25".into(), "dir27".into()], "cluster1", 18);
+        state.add_submitted("b", &["dir1".into(), "dir2".into()], "cluster1", 19);
+        state.add_submitted("f", &["dir3".into(), "dir4".into()], "cluster2", 27);
+
+        assert!(state.is_submitted("b", &"dir1".into()));
+        assert!(state.is_submitted("b", &"dir2".into()));
+        assert!(state.is_submitted("b", &"dir25".into()));
+        assert!(state.is_submitted("b", &"dir27".into()));
+
+        assert!(state.is_submitted("f", &"dir3".into()));
+        assert!(state.is_submitted("f", &"dir4".into()));
+
+        state
+            .save_cache(&workflow, &mut multi_progress)
+            .expect("Cache saved.");
+
+        let mut cached_state = State::from_cache(&workflow).expect("Read state from cache");
+        assert_eq!(state, cached_state);
+
+        let result = cached_state.synchronize_workspace(&workflow, 2, &mut multi_progress);
+        assert!(result.is_ok());
+
+        assert!(!cached_state.submitted.contains_key("f"));
+        assert!(!cached_state.is_submitted("f", &"dir3".into()));
+        assert!(!cached_state.is_submitted("f", &"dir4".into()));
+
+        assert!(cached_state.is_submitted("b", &"dir1".into()));
+        assert!(cached_state.is_submitted("b", &"dir2".into()));
+        assert!(!cached_state.is_submitted("b", &"dir25".into()));
+        assert!(!cached_state.is_submitted("b", &"dir27".into()));
+    }
+
+    #[test]
+    #[parallel]
+    fn remove_inactive() {
+        let mut multi_progress = setup();
+
+        let temp = TempDir::new().unwrap();
+        let n = 8;
+
+        let workflow = setup_completion_directories(&temp, n);
+        let workflow = Workflow::open_str(temp.path(), &workflow).unwrap();
+
+        let mut state = State::default();
+        let result = state.synchronize_workspace(&workflow, 2, &mut multi_progress);
+        assert!(result.is_ok());
+
+        assert!(state.submitted.is_empty());
+
+        state.add_submitted("b", &["dir1".into(), "dir5".into()], "cluster1", 11);
+        state.add_submitted("b", &["dir3".into(), "dir4".into()], "cluster2", 12);
+        state.add_submitted("e", &["dir6".into(), "dir7".into()], "cluster2", 13);
+
+        assert!(state.is_submitted("b", &"dir1".into()));
+        assert!(!state.is_submitted("b", &"dir2".into()));
+        assert!(state.is_submitted("b", &"dir3".into()));
+        assert!(state.is_submitted("b", &"dir4".into()));
+        assert!(state.is_submitted("b", &"dir5".into()));
+        assert!(!state.is_submitted("b", &"dir6".into()));
+        assert!(!state.is_submitted("b", &"dir7".into()));
+
+        assert!(!state.is_submitted("e", &"dir1".into()));
+        assert!(!state.is_submitted("e", &"dir2".into()));
+        assert!(!state.is_submitted("e", &"dir3".into()));
+        assert!(!state.is_submitted("e", &"dir4".into()));
+        assert!(!state.is_submitted("e", &"dir5".into()));
+        assert!(state.is_submitted("e", &"dir6".into()));
+        assert!(state.is_submitted("e", &"dir7".into()));
+
+        state.remove_inactive_submitted("cluster2", &HashSet::from([13]));
+        assert!(state.is_submitted("b", &"dir1".into()));
+        assert!(state.is_submitted("b", &"dir5".into()));
+        assert!(!state.is_submitted("b", &"dir3".into()));
+        assert!(!state.is_submitted("b", &"dir4".into()));
+        assert!(state.is_submitted("e", &"dir6".into()));
+        assert!(state.is_submitted("e", &"dir7".into()));
+
+        state.remove_inactive_submitted("cluster1", &HashSet::from([]));
+        assert!(!state.is_submitted("b", &"dir1".into()));
+        assert!(!state.is_submitted("b", &"dir5".into()));
     }
 }

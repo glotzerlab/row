@@ -64,7 +64,7 @@ command = "echo Message && python action.py {directory}"
 command. A launcher is a prefix placed before the command in the submission script. The
 cluster configuration [`clusters.toml`](../../clusters/index.md) defines what launchers
 are available on each cluster and how they are invoked. The example for `action_two`
-above (`launchers = ["openmpi", "mpi"]`) would expand into something like:
+above (`launchers = ["openmp", "mpi"]`) would expand into something like:
 ```bash
 OM_NUM_THREADS=4 srun --ntasks=128 --cpus-per-task=4 python action_two.py ...
 ```

@@ -2,6 +2,7 @@ use assert_cmd::Command;
 use assert_fs::prelude::*;
 use assert_fs::TempDir;
 use predicates::prelude::*;
+use serial_test::parallel;
 use std::fs;
 
 /// Create a sample workflow and workspace to use with the tests.
@@ -59,6 +60,7 @@ fn complete_action(
 }
 
 #[test]
+#[parallel]
 fn requires_subcommand() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("row")?;
 
@@ -70,12 +72,13 @@ fn requires_subcommand() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[test]
+#[parallel]
 fn no_workflow_file() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("row")?;
     let temp = TempDir::new()?;
 
-    cmd.args(&["show", "status"])
-        .args(&["--cluster", "none"])
+    cmd.args(["show", "status"])
+        .args(["--cluster", "none"])
         .current_dir(temp.path());
     cmd.assert()
         .failure()
@@ -85,6 +88,7 @@ fn no_workflow_file() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[test]
+#[parallel]
 fn help() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("row")?;
 
@@ -97,15 +101,17 @@ fn help() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[test]
+#[parallel]
 fn empty_workflow() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("row")?;
+    cmd.env("ROW_HOME", "/not/a/path");
 
     let temp = TempDir::new()?;
     temp.child("workflow.toml").touch()?;
     temp.child("workspace").create_dir_all()?;
 
-    cmd.args(&["show", "status"])
-        .args(&["--cluster", "none"])
+    cmd.args(["show", "status"])
+        .args(["--cluster", "none"])
         .current_dir(temp.path());
     cmd.assert()
         .success()
@@ -115,16 +121,18 @@ fn empty_workflow() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[test]
+#[parallel]
 fn status() -> Result<(), Box<dyn std::error::Error>> {
     let temp = TempDir::new()?;
     let _ = setup_sample_workflow(&temp, 10);
 
     Command::cargo_bin("row")?
-        .args(&["show", "status"])
-        .args(&["--cluster", "none"])
+        .args(["show", "status"])
+        .args(["--cluster", "none"])
         .current_dir(temp.path())
         .env_remove("ROW_COLOR")
         .env_remove("CLICOLOR")
+        .env("ROW_HOME", "/not/a/path")
         .assert()
         .success()
         .stdout(predicate::str::is_match("(?m)^one +0 +0 +10 +0")?)
@@ -134,18 +142,20 @@ fn status() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[test]
+#[parallel]
 fn status_action_selection() -> Result<(), Box<dyn std::error::Error>> {
     let temp = TempDir::new()?;
     let _ = setup_sample_workflow(&temp, 10);
 
     Command::cargo_bin("row")?
-        .args(&["show", "status"])
-        .args(&["--cluster", "none"])
+        .args(["show", "status"])
+        .args(["--cluster", "none"])
         .arg("-a")
         .arg("one")
         .current_dir(temp.path())
         .env_remove("ROW_COLOR")
         .env_remove("CLICOLOR")
+        .env("ROW_HOME", "/not/a/path")
         .assert()
         .success()
         .stdout(predicate::str::is_match("(?m)^one +0 +0 +10 +0")?)
@@ -155,19 +165,21 @@ fn status_action_selection() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[test]
+#[parallel]
 fn status_directories() -> Result<(), Box<dyn std::error::Error>> {
     let temp = TempDir::new()?;
     let _ = setup_sample_workflow(&temp, 10);
 
     Command::cargo_bin("row")?
-        .args(&["show", "status"])
-        .args(&["--cluster", "none"])
+        .args(["show", "status"])
+        .args(["--cluster", "none"])
         .arg("dir1")
         .arg("dir2")
         .arg("nodir")
         .current_dir(temp.path())
         .env_remove("ROW_COLOR")
         .env_remove("CLICOLOR")
+        .env("ROW_HOME", "/not/a/path")
         .assert()
         .success()
         .stdout(predicate::str::is_match("(?m)^one +0 +0 +2 +0")?)
@@ -178,18 +190,20 @@ fn status_directories() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[test]
+#[parallel]
 fn status_directories_stdin() -> Result<(), Box<dyn std::error::Error>> {
     let temp = TempDir::new()?;
     let _ = setup_sample_workflow(&temp, 10);
 
     Command::cargo_bin("row")?
-        .args(&["show", "status"])
-        .args(&["--cluster", "none"])
+        .args(["show", "status"])
+        .args(["--cluster", "none"])
         .arg("-")
         .current_dir(temp.path())
         .write_stdin("dir1\ndir2\nnodir\n")
         .env_remove("ROW_COLOR")
         .env_remove("CLICOLOR")
+        .env("ROW_HOME", "/not/a/path")
         .assert()
         .success()
         .stdout(predicate::str::is_match("(?m)^one +0 +0 +2 +0")?)
@@ -200,16 +214,18 @@ fn status_directories_stdin() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[test]
+#[parallel]
 fn scan() -> Result<(), Box<dyn std::error::Error>> {
     let temp = TempDir::new()?;
     let _ = setup_sample_workflow(&temp, 10);
 
     Command::cargo_bin("row")?
-        .args(&["show", "status"])
-        .args(&["--cluster", "none"])
+        .args(["show", "status"])
+        .args(["--cluster", "none"])
         .current_dir(temp.path())
         .env_remove("ROW_COLOR")
         .env_remove("CLICOLOR")
+        .env("ROW_HOME", "/not/a/path")
         .assert()
         .success()
         .stdout(predicate::str::is_match("(?m)^one +0 +0 +10 +0")?)
@@ -219,11 +235,12 @@ fn scan() -> Result<(), Box<dyn std::error::Error>> {
     complete_action("two", &temp, 4)?;
 
     Command::cargo_bin("row")?
-        .args(&["show", "status"])
-        .args(&["--cluster", "none"])
+        .args(["show", "status"])
+        .args(["--cluster", "none"])
         .current_dir(temp.path())
         .env_remove("ROW_COLOR")
         .env_remove("CLICOLOR")
+        .env("ROW_HOME", "/not/a/path")
         .assert()
         .success()
         .stdout(predicate::str::is_match("(?m)^one +0 +0 +10 +0")?)
@@ -244,11 +261,12 @@ fn scan() -> Result<(), Box<dyn std::error::Error>> {
     assert_eq!(fs::read_dir(completed.path())?.count(), 1);
 
     Command::cargo_bin("row")?
-        .args(&["show", "status"])
-        .args(&["--cluster", "none"])
+        .args(["show", "status"])
+        .args(["--cluster", "none"])
         .current_dir(temp.path())
         .env_remove("ROW_COLOR")
         .env_remove("CLICOLOR")
+        .env("ROW_HOME", "/not/a/path")
         .assert()
         .success()
         .stdout(predicate::str::is_match("(?m)^one +8 +0 +2 +0")?)
@@ -260,16 +278,18 @@ fn scan() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[test]
+#[parallel]
 fn scan_action() -> Result<(), Box<dyn std::error::Error>> {
     let temp = TempDir::new()?;
     let _ = setup_sample_workflow(&temp, 10);
 
     Command::cargo_bin("row")?
-        .args(&["show", "status"])
-        .args(&["--cluster", "none"])
+        .args(["show", "status"])
+        .args(["--cluster", "none"])
         .current_dir(temp.path())
         .env_remove("ROW_COLOR")
         .env_remove("CLICOLOR")
+        .env("ROW_HOME", "/not/a/path")
         .assert()
         .success()
         .stdout(predicate::str::is_match("(?m)^one +0 +0 +10 +0")?)
@@ -285,15 +305,17 @@ fn scan_action() -> Result<(), Box<dyn std::error::Error>> {
         .current_dir(temp.path())
         .env_remove("ROW_COLOR")
         .env_remove("CLICOLOR")
+        .env("ROW_HOME", "/not/a/path")
         .assert()
         .success();
 
     Command::cargo_bin("row")?
-        .args(&["show", "status"])
-        .args(&["--cluster", "none"])
+        .args(["show", "status"])
+        .args(["--cluster", "none"])
         .current_dir(temp.path())
         .env_remove("ROW_COLOR")
         .env_remove("CLICOLOR")
+        .env("ROW_HOME", "/not/a/path")
         .assert()
         .success()
         .stdout(predicate::str::is_match("(?m)^one +8 +0 +2 +0")?)
@@ -303,16 +325,18 @@ fn scan_action() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[test]
+#[parallel]
 fn scan_directories() -> Result<(), Box<dyn std::error::Error>> {
     let temp = TempDir::new()?;
     let _ = setup_sample_workflow(&temp, 10);
 
     Command::cargo_bin("row")?
-        .args(&["show", "status"])
-        .args(&["--cluster", "none"])
+        .args(["show", "status"])
+        .args(["--cluster", "none"])
         .current_dir(temp.path())
         .env_remove("ROW_COLOR")
         .env_remove("CLICOLOR")
+        .env("ROW_HOME", "/not/a/path")
         .assert()
         .success()
         .stdout(predicate::str::is_match("(?m)^one +0 +0 +10 +0")?)
@@ -327,15 +351,17 @@ fn scan_directories() -> Result<(), Box<dyn std::error::Error>> {
         .current_dir(temp.path())
         .env_remove("ROW_COLOR")
         .env_remove("CLICOLOR")
+        .env("ROW_HOME", "/not/a/path")
         .assert()
         .success();
 
     Command::cargo_bin("row")?
-        .args(&["show", "status"])
-        .args(&["--cluster", "none"])
+        .args(["show", "status"])
+        .args(["--cluster", "none"])
         .current_dir(temp.path())
         .env_remove("ROW_COLOR")
         .env_remove("CLICOLOR")
+        .env("ROW_HOME", "/not/a/path")
         .assert()
         .success()
         .stdout(predicate::str::is_match("(?m)^one +1 +0 +9 +0")?)
@@ -345,25 +371,28 @@ fn scan_directories() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[test]
+#[parallel]
 fn submit() -> Result<(), Box<dyn std::error::Error>> {
     let temp = TempDir::new()?;
     let _ = setup_sample_workflow(&temp, 10);
 
     Command::cargo_bin("row")?
         .arg("submit")
-        .args(&["--cluster", "none"])
+        .args(["--cluster", "none"])
         .current_dir(temp.path())
         .env_remove("ROW_COLOR")
         .env_remove("CLICOLOR")
+        .env("ROW_HOME", "/not/a/path")
         .assert()
         .success();
 
     Command::cargo_bin("row")?
-        .args(&["show", "status"])
-        .args(&["--cluster", "none"])
+        .args(["show", "status"])
+        .args(["--cluster", "none"])
         .current_dir(temp.path())
         .env_remove("ROW_COLOR")
         .env_remove("CLICOLOR")
+        .env("ROW_HOME", "/not/a/path")
         .assert()
         .success()
         .stdout(predicate::str::is_match("(?m)^one +10 +0 +0 +0")?)
@@ -373,15 +402,17 @@ fn submit() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[test]
+#[parallel]
 fn directories_no_action() -> Result<(), Box<dyn std::error::Error>> {
     let temp = TempDir::new()?;
     let _ = setup_sample_workflow(&temp, 10);
 
     Command::cargo_bin("row")?
-        .args(&["show", "directories"])
-        .args(&["--cluster", "none"])
+        .args(["show", "directories"])
+        .args(["--cluster", "none"])
         .env_remove("ROW_COLOR")
         .env_remove("CLICOLOR")
+        .env("ROW_HOME", "/not/a/path")
         .current_dir(temp.path())
         .assert()
         .failure()
@@ -391,78 +422,84 @@ fn directories_no_action() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[test]
+#[parallel]
 fn directories() -> Result<(), Box<dyn std::error::Error>> {
     let temp = TempDir::new()?;
     let _ = setup_sample_workflow(&temp, 10);
 
     Command::cargo_bin("row")?
-        .args(&["show", "directories"])
-        .args(&["--cluster", "none"])
+        .args(["show", "directories"])
+        .args(["--cluster", "none"])
         .arg("one")
         .current_dir(temp.path())
         .env_remove("ROW_COLOR")
         .env_remove("CLICOLOR")
+        .env("ROW_HOME", "/not/a/path")
         .assert()
         .success()
-        .stdout(predicate::str::is_match("(?m)^Directory Status")?)
-        .stdout(predicate::str::is_match("(?m)^dir0 *eligible$")?)
-        .stdout(predicate::str::is_match("(?m)^dir1 *eligible$")?)
-        .stdout(predicate::str::is_match("(?m)^dir2 *eligible$")?)
-        .stdout(predicate::str::is_match("(?m)^dir3 *eligible$")?)
-        .stdout(predicate::str::is_match("(?m)^dir4 *eligible$")?)
-        .stdout(predicate::str::is_match("(?m)^dir5 *eligible$")?)
-        .stdout(predicate::str::is_match("(?m)^dir6 *eligible$")?)
-        .stdout(predicate::str::is_match("(?m)^dir7 *eligible$")?)
-        .stdout(predicate::str::is_match("(?m)^dir8 *eligible$")?)
-        .stdout(predicate::str::is_match("(?m)^dir9 *eligible$")?);
+        .stdout(predicate::str::is_match("(?m)^Directory Status +Job ID")?)
+        .stdout(predicate::str::is_match("(?m)^dir0 *eligible *$")?)
+        .stdout(predicate::str::is_match("(?m)^dir1 *eligible *$")?)
+        .stdout(predicate::str::is_match("(?m)^dir2 *eligible *$")?)
+        .stdout(predicate::str::is_match("(?m)^dir3 *eligible *$")?)
+        .stdout(predicate::str::is_match("(?m)^dir4 *eligible *$")?)
+        .stdout(predicate::str::is_match("(?m)^dir5 *eligible *$")?)
+        .stdout(predicate::str::is_match("(?m)^dir6 *eligible *$")?)
+        .stdout(predicate::str::is_match("(?m)^dir7 *eligible *$")?)
+        .stdout(predicate::str::is_match("(?m)^dir8 *eligible *$")?)
+        .stdout(predicate::str::is_match("(?m)^dir9 *eligible *$")?);
 
     Ok(())
 }
 
 #[test]
+#[parallel]
 fn directories_select_directories() -> Result<(), Box<dyn std::error::Error>> {
     let temp = TempDir::new()?;
     let _ = setup_sample_workflow(&temp, 10);
 
     Command::cargo_bin("row")?
-        .args(&["show", "directories"])
-        .args(&["--cluster", "none"])
+        .args(["show", "directories"])
+        .args(["--cluster", "none"])
         .arg("one")
         .arg("dir3")
         .arg("dir9")
         .current_dir(temp.path())
         .env_remove("ROW_COLOR")
         .env_remove("CLICOLOR")
+        .env("ROW_HOME", "/not/a/path")
         .assert()
         .success()
-        .stdout(predicate::str::is_match("(?m)^Directory Status")?)
-        .stdout(predicate::str::is_match("(?m)^dir0 *eligible$")?.not())
-        .stdout(predicate::str::is_match("(?m)^dir1 *eligible$")?.not())
-        .stdout(predicate::str::is_match("(?m)^dir2 *eligible$")?.not())
-        .stdout(predicate::str::is_match("(?m)^dir3 *eligible$")?)
-        .stdout(predicate::str::is_match("(?m)^dir4 *eligible$")?.not())
-        .stdout(predicate::str::is_match("(?m)^dir5 *eligible$")?.not())
-        .stdout(predicate::str::is_match("(?m)^dir6 *eligible$")?.not())
-        .stdout(predicate::str::is_match("(?m)^dir7 *eligible$")?.not())
-        .stdout(predicate::str::is_match("(?m)^dir8 *eligible$")?.not())
-        .stdout(predicate::str::is_match("(?m)^dir9 *eligible$")?);
+        .stdout(predicate::str::is_match("(?m)^Directory Status +Job ID")?)
+        .stdout(predicate::str::is_match("(?m)^dir0 *eligible *$")?.not())
+        .stdout(predicate::str::is_match("(?m)^dir1 *eligible *$")?.not())
+        .stdout(predicate::str::is_match("(?m)^dir2 *eligible *$")?.not())
+        .stdout(predicate::str::is_match("(?m)^dir3 *eligible *$")?)
+        .stdout(predicate::str::is_match("(?m)^dir4 *eligible *$")?.not())
+        .stdout(predicate::str::is_match("(?m)^dir5 *eligible *$")?.not())
+        .stdout(predicate::str::is_match("(?m)^dir6 *eligible *$")?.not())
+        .stdout(predicate::str::is_match("(?m)^dir7 *eligible *$")?.not())
+        .stdout(predicate::str::is_match("(?m)^dir8 *eligible *$")?.not())
+        .stdout(predicate::str::is_match("(?m)^dir9 *eligible *$")?);
 
     Ok(())
 }
 
 #[test]
+#[parallel]
 fn directories_no_header() -> Result<(), Box<dyn std::error::Error>> {
     let temp = TempDir::new()?;
     let _ = setup_sample_workflow(&temp, 10);
 
     Command::cargo_bin("row")?
-        .args(&["show", "directories"])
-        .args(&["--cluster", "none"])
+        .args(["show", "directories"])
+        .args(["--cluster", "none"])
         .arg("one")
         .arg("--no-header")
         .current_dir(temp.path())
         .env_remove("ROW_COLOR")
         .env_remove("CLICOLOR")
+        .env("ROW_HOME", "/not/a/path")
         .assert()
         .success()
         .stdout(predicate::str::is_match("(?m)^Directory Status")?.not());
@@ -471,26 +508,68 @@ fn directories_no_header() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[test]
+#[parallel]
 fn directories_value() -> Result<(), Box<dyn std::error::Error>> {
     let temp = TempDir::new()?;
     let _ = setup_sample_workflow(&temp, 10);
 
     Command::cargo_bin("row")?
-        .args(&["show", "directories"])
-        .args(&["--cluster", "none"])
-        .args(&["--value", "/v"])
-        .args(&["--value", "/v2"])
+        .args(["show", "directories"])
+        .args(["--cluster", "none"])
+        .args(["--value", "/v"])
+        .args(["--value", "/v2"])
         .arg("one")
         .arg("dir3")
         .arg("dir9")
         .current_dir(temp.path())
         .env_remove("ROW_COLOR")
         .env_remove("CLICOLOR")
+        .env("ROW_HOME", "/not/a/path")
         .assert()
         .success()
-        .stdout(predicate::str::is_match("(?m)^Directory +Status +/v +/v2")?)
+        .stdout(predicate::str::is_match(
+            "(?m)^Directory +Status +Job ID +/v +/v2",
+        )?)
         .stdout(predicate::str::is_match("(?m)^dir3 +eligible +3 +1$")?)
         .stdout(predicate::str::is_match("(?m)^dir9 +eligible +9 +4$")?);
+
+    Ok(())
+}
+
+#[test]
+#[parallel]
+fn show_cluster() -> Result<(), Box<dyn std::error::Error>> {
+    let temp = TempDir::new()?;
+
+    Command::cargo_bin("row")?
+        .args(["show", "cluster"])
+        .args(["--cluster", "none"])
+        .current_dir(temp.path())
+        .env_remove("ROW_COLOR")
+        .env_remove("CLICOLOR")
+        .env("ROW_HOME", "/not/a/path")
+        .assert()
+        .success()
+        .stdout(predicate::str::contains(r#"name = "none""#));
+
+    Ok(())
+}
+
+#[test]
+#[parallel]
+fn show_launchers() -> Result<(), Box<dyn std::error::Error>> {
+    let temp = TempDir::new()?;
+
+    Command::cargo_bin("row")?
+        .args(["show", "launchers"])
+        .args(["--cluster", "none"])
+        .current_dir(temp.path())
+        .env_remove("ROW_COLOR")
+        .env_remove("CLICOLOR")
+        .env("ROW_HOME", "/not/a/path")
+        .assert()
+        .success()
+        .stdout(predicate::str::contains(r#"executable = "mpirun""#));
 
     Ok(())
 }

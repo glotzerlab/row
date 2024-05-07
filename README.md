@@ -7,6 +7,8 @@ actions have been submitted on which directories so that you don't submit the sa
 twice. Once a job completes, subsequent actions become eligible allowing you to process
 your entire workflow to completion over many submissions.
 
+The name is "row" as in "row, row, row your boat".
+
 Notable features:
 * Support both arbitrary directories and [signac](https://signac.io) workspaces.
 * Execute actions via arbitrary shell commands.
@@ -16,8 +18,10 @@ Notable features:
 * Execute groups in serial or parallel.
 * Schedule CPU and GPU resources.
 * Automatically determine the partition based on the batch job size.
-* Includes configure for many national and university HPC systems.
+* Built-in configurations for many national and university HPC systems.
 * Add custom cluster definitions for your resources.
+
+TODO: better demo script to get output for README and row show documentation examples.
 
 For example:
 ```bash
@@ -29,7 +33,7 @@ two            0       200      800    1000   8K GPU-hours
 
 ```bash
 > row show directories --value "/value"
-Directory Status        Job /value
+Directory Status     Job ID /value
 dir1      submitted 1432876    0.9
 dir2      submitted 1432876    0.8
 dir3      submitted 1432876    0.7
@@ -41,5 +45,3 @@ dir6      completed            0.3
 
 **Row** is a spiritual successor to
 [signac-flow](https://docs.signac.io/projects/flow/en/latest/).
-
-The name is "row" as in "row, row, row your boat".

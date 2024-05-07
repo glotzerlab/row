@@ -106,7 +106,8 @@ jobs:
         chmod a+x "$HOME/.cargo/bin/mdbook-linkcheck"
     - name: Add linkcheck configuration
       run: |
-        echo -e "[output.linkcheck]\nfollow-web-links=true" >> doc/book.toml
+        # echo -e "[output.linkcheck]\nfollow-web-links=true" >> doc/book.toml #TODO: enable web-link checks after row is public
+        echo -e "[output.linkcheck]\nfollow-web-links=false" >> doc/book.toml
         cat doc/book.toml
     - name: Build documentation
       run: mdbook build doc

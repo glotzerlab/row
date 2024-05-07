@@ -1,5 +1,5 @@
 use indicatif::{ProgressBar, ProgressDrawTarget};
-use log::{debug, trace};
+use log::debug;
 use serde_json::Value;
 use std::collections::{HashMap, HashSet};
 use std::ffi::OsStr;
@@ -8,6 +8,7 @@ use std::path::PathBuf;
 use std::sync::mpsc::{self, Receiver};
 use std::sync::{Arc, Mutex};
 use std::thread::{self, JoinHandle};
+use std::time::Duration;
 
 use crate::workflow::Workflow;
 use crate::{progress_styles, Error, MultiProgressContainer, MIN_PROGRESS_BAR_SIZE};
@@ -25,6 +26,7 @@ pub fn list_directories(
         .add(ProgressBar::new_spinner().with_message("Listing workspace"));
     multi_progress.progress_bars.push(progress.clone());
     progress.set_style(progress_styles::counted_spinner());
+    progress.enable_steady_tick(Duration::from_millis(progress_styles::STEADY_TICK));
 
     let mut directories = Vec::new();
 
@@ -123,8 +125,6 @@ pub fn find_completed_directories(
         let progress = progress.clone();
 
         let thread_name = format!("find-completed-{i}");
-        trace!("Spawning thread {thread_name}.");
-
         let handle =
             thread::Builder::new()
                 .name(thread_name)
@@ -266,8 +266,6 @@ pub(crate) fn read_values(
         let value_file = workflow.workspace.value_file.clone();
 
         let thread_name = format!("read-values-{i}");
-        trace!("Spawning thread {thread_name}.");
-
         let handle =
             thread::Builder::new()
                 .name(thread_name)
@@ -344,6 +342,7 @@ mod tests {
     use assert_fs::prelude::*;
     use assert_fs::TempDir;
     use indicatif::{MultiProgress, ProgressDrawTarget};
+    use serial_test::parallel;
     use std::path::PathBuf;
 
     use super::*;
@@ -363,7 +362,8 @@ mod tests {
     }
 
     #[test]
-    fn test_list_directories() {
+    #[parallel]
+    fn list() {
         let mut multi_progress = setup();
 
         let temp = TempDir::new().unwrap();
@@ -389,7 +389,8 @@ mod tests {
     }
 
     #[test]
-    fn test_find_completed_directories() {
+    #[parallel]
+    fn find_completed() {
         let mut multi_progress = setup();
 
         let temp = TempDir::new().unwrap();
@@ -490,7 +491,8 @@ products = ["3", "4"]
     }
 
     #[test]
-    fn test_read_values() {
+    #[parallel]
+    fn read() {
         let mut multi_progress = setup();
 
         let temp = TempDir::new().unwrap();

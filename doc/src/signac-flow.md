@@ -19,8 +19,8 @@ Concepts:
 Commands:
 | flow | row |
 |------|-----|
-| `project.py status` | [`row show status`](row/show-status.md) |
-| `project.py status --detailed` | [`row show directories <ACTION>`](row/show-directories.md) |
+| `project.py status` | [`row show status`](row/show/status.md) |
+| `project.py status --detailed` | [`row show directories <ACTION>`](row/show/directories.md) |
 | `project.py run` | [`row submit --cluster=none`](row/submit.md) |
 | `project.py run --parallel` | A command may execute groups in parallel. |
 | `project.py exec ...` | Execute your action's command in the shell. |
@@ -58,4 +58,4 @@ Execution:
 | directives: `np`, `ngpu`, `omp_num_threads`, `walltime` | [resources](workflow/action/resources.md) in `workflow.toml` |
 | directives: Launch with MPI | [`launchers`](workflow/action/index.md#launchers) `= ["mpi"]` |
 | directives: Launch with OpenMP | [`launchers`](workflow/action/index.md#launchers) `= ["openmp"]` |
-| template job script: `script.sh` | [`cluster`](workflow/cluster.md) in `workflow.toml` |
+| template job script: `script.sh` | [`submit_options`](workflow/submit-options.md) in `workflow.toml` |

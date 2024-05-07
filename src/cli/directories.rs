@@ -16,10 +16,6 @@ pub struct DirectoriesArgs {
     /// Select the action to scan (defaults to all).
     action: String,
 
-    /// Print job IDs on the given cluster. Autodetected by default.
-    #[arg(long, env = "ROW_CLUSTER", display_order = 0)]
-    cluster: Option<String>,
-
     /// Select directories to summarize (defaults to all). Use 'show directories -' to read from stdin.
     directories: Vec<PathBuf>,
 
@@ -48,7 +44,7 @@ pub fn directories<W: Write>(
 ) -> Result<(), Box<dyn Error>> {
     debug!("Showing directories.");
 
-    let mut project = Project::open(options.io_threads, multi_progress)?;
+    let mut project = Project::open(options.io_threads, options.cluster, multi_progress)?;
 
     let query_directories =
         cli::parse_directories(args.directories, || Ok(project.state().list_directories()))?;
@@ -74,6 +70,7 @@ pub fn directories<W: Write>(
     table.header = vec![
         Item::new("Directory".to_string(), Style::new().underlined()),
         Item::new("Status".to_string(), Style::new().underlined()),
+        Item::new("Job ID".to_string(), Style::new().underlined()),
     ];
     for pointer in &args.value {
         table
@@ -83,6 +80,7 @@ pub fn directories<W: Write>(
 
     for (group_idx, group) in groups.iter().enumerate() {
         for directory in group {
+            // Format the directory status.
             let status = if completed.contains(directory) {
                 Item::new("completed".to_string(), Style::new().green().italic())
             } else if submitted.contains(directory) {
@@ -96,11 +94,27 @@ pub fn directories<W: Write>(
             };
 
             let mut row = Vec::new();
+
+            // The directory name
             row.push(Item::new(
                 directory.display().to_string(),
                 Style::new().bold(),
             ));
+
+            // Status
             row.push(status);
+
+            // Job ID
+            let submitted = project.state().submitted();
+
+            // Values
+            if let Some((cluster, job_id)) =
+                submitted.get(&action.name).and_then(|d| d.get(directory))
+            {
+                row.push(Item::new(format!("{}/{}", cluster, job_id), Style::new()));
+            } else {
+                row.push(Item::new("".into(), Style::new()));
+            }
             for pointer in &args.value {
                 let value = project.state().values()[directory]
                     .pointer(pointer)

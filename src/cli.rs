@@ -1,4 +1,6 @@
+pub mod cluster;
 pub mod directories;
+pub mod launchers;
 pub mod scan;
 pub mod status;
 pub mod submit;
@@ -9,7 +11,9 @@ use log::trace;
 use std::io;
 use std::path::PathBuf;
 
+use cluster::ClusterArgs;
 use directories::DirectoriesArgs;
+use launchers::LaunchersArgs;
 use scan::ScanArgs;
 use status::StatusArgs;
 use submit::SubmitArgs;
@@ -44,7 +48,10 @@ pub struct GlobalOptions {
     /// Clear progress bars on exit.
     #[arg(long, global = true, env = "ROW_CLEAR_PROGRESS", display_order = 2)]
     pub clear_progress: bool,
-    // TODO: make cluster a global option
+
+    /// Check the job submission status on the given cluster. Autodetected by default.
+    #[arg(long, global = true, env = "ROW_CLUSTER", display_order = 2)]
+    cluster: Option<String>,
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
@@ -66,6 +73,12 @@ pub enum ShowArgs {
 
     /// List directories in the workspace.
     Directories(DirectoriesArgs),
+
+    /// Show the cluster configuration.
+    Cluster(ClusterArgs),
+
+    /// Show launcher configurations.
+    Launchers(LaunchersArgs),
 }
 
 #[derive(Subcommand, Debug)]

@@ -1,7 +1,8 @@
 pub mod bash;
+pub mod slurm;
 
-use std::path::Path;
-use std::path::PathBuf;
+use std::collections::HashSet;
+use std::path::{Path, PathBuf};
 use std::sync::atomic::AtomicBool;
 use std::sync::Arc;
 
@@ -10,15 +11,13 @@ use crate::Error;
 
 /// A `Scheduler` creates and submits job scripts.
 pub trait Scheduler {
-    // TODO: give new schedulers the Launcher and partition instances from Cluster.
-    fn new(cluster_name: &str) -> Self;
-
     /// Make a job script given an `Action` and a list of directories.
     ///
     /// Useful for showing the script that would be submitted to the user.
     ///
     /// # Returns
     /// A `String` containing the job script.
+    ///
     fn make_script(&self, action: &Action, directories: &[PathBuf]) -> Result<String, Error>;
 
     /// Submit a job to the scheduler.
@@ -48,5 +47,21 @@ pub trait Scheduler {
         should_terminate: Arc<AtomicBool>,
     ) -> Result<Option<u32>, Error>;
 
-    // TODO: status -> run squeue and determine running jobs.
+    /// Query the scheduler and determine which jobs remain active.
+    ///
+    /// # Arguments
+    /// * `jobs`: Identifiers to query
+    ///
+    /// `active_jobs` returns a ActiveJobs object, which provides the final
+    /// result via a method. This allows implementations to be asynchronous so
+    /// that long-running subprocesses can complete in the background while the
+    /// collar performs other work.
+    ///
+    fn active_jobs(&self, jobs: &[u32]) -> Result<Box<dyn ActiveJobs>, Error>;
+}
+
+/// Deferred result containing jobs that are still active on the cluster.
+pub trait ActiveJobs {
+    /// Complete the operation and return the currently active jobs.
+    fn get(self: Box<Self>) -> Result<HashSet<u32>, Error>;
 }

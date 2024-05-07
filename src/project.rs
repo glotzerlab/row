@@ -1,10 +1,18 @@
+use indicatif::{ProgressBar, ProgressDrawTarget};
 use log::{debug, trace, warn};
 use serde_json::Value;
 use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::path::PathBuf;
+use std::time::Duration;
 
+use crate::cluster::{ClusterConfiguration, SchedulerType};
 use crate::expr;
+use crate::launcher::LauncherConfiguration;
+use crate::progress_styles;
+use crate::scheduler::bash::Bash;
+use crate::scheduler::slurm::Slurm;
+use crate::scheduler::Scheduler;
 use crate::state::State;
 use crate::workflow::{Action, Workflow};
 use crate::{Error, MultiProgressContainer};
@@ -13,28 +21,28 @@ use crate::{Error, MultiProgressContainer};
 ///
 /// When opened, `Project`:
 ///
+/// * Reads caches from disk.
 /// * Gets the status of submitted jobs from the scheduler.
 /// * Collects the staged completions.
 /// * Reads the workflow file
-/// * And synchronizes the system state with the workspace on disk.
+/// * Synchronizes the system state with the workspace on disk.
+/// * And removes any completed jobs from the submitted cache.
 ///
 /// These are common operations used by many CLI commands. A command that needs
 /// only a subset of these should use the individual classes directly.
 ///
-/// TODO: To provide the most responsive user interface, get the scheduler status
-/// asynchronously while reading the cache and synchronizing the workspace.
-///
-/// With a required call to `complete_pending_tasks`, saving the updated state
-/// and removing the completion staging files can be deferred and running in
-/// the background while the command completes.
-///
-#[derive(Debug)]
 pub struct Project {
     /// The project's workflow definition.
     workflow: Workflow,
 
     /// The state associate with the directories in the project.
     state: State,
+
+    /// The scheduler.
+    scheduler: Box<dyn Scheduler>,
+
+    /// The cluster's name.
+    cluster_name: String,
 }
 
 /// Store individual sets of jobs, separated by status for a given action.
@@ -64,16 +72,60 @@ impl Project {
     ///
     pub fn open(
         io_threads: u16,
+        cluster_name: Option<String>,
         multi_progress: &mut MultiProgressContainer,
     ) -> Result<Project, Error> {
         trace!("Opening project.");
         let workflow = Workflow::open()?;
+        let clusters = ClusterConfiguration::open()?;
+        let cluster = clusters.identify(cluster_name.as_deref())?;
+        let launchers = LauncherConfiguration::open()?.by_cluster(&cluster.name);
+        let cluster_name = cluster.name.clone();
+
+        let scheduler: Box<dyn Scheduler> = match cluster.scheduler {
+            SchedulerType::Bash => Box::new(Bash::new(cluster, launchers)),
+            SchedulerType::Slurm => Box::new(Slurm::new(cluster, launchers)),
+        };
 
         let mut state = State::from_cache(&workflow)?;
 
+        // squeue will likely take the longest to finish, start it first.
+        let jobs = state.jobs_submitted_on(&cluster_name);
+        let mut progress =
+            ProgressBar::new_spinner().with_message("Checking submitted job statuses");
+        if !jobs.is_empty() {
+            progress = multi_progress.multi_progress.add(progress);
+            multi_progress.progress_bars.push(progress.clone());
+            progress.enable_steady_tick(Duration::from_millis(progress_styles::STEADY_TICK));
+        } else {
+            progress.set_draw_target(ProgressDrawTarget::hidden());
+            // TODO: Refactor these types of code blocks into the MultiProgressContainer?
+        }
+
+        progress.set_style(progress_styles::uncounted_spinner());
+        progress.tick();
+
+        let active_jobs = scheduler.active_jobs(&jobs)?;
+
+        // Then synchronize with the workspace while squeue is running.
         state.synchronize_workspace(&workflow, io_threads, multi_progress)?;
 
-        Ok(Self { workflow, state })
+        // Now, wait for squeue to finish and remove any inactive jobs.
+        let active_jobs = active_jobs.get()?;
+        progress.finish();
+
+        if active_jobs.len() != jobs.len() {
+            state.remove_inactive_submitted(&cluster_name, &active_jobs);
+        } else if !jobs.is_empty() {
+            trace!("All submitted jobs remain active on {cluster_name}.");
+        }
+
+        Ok(Self {
+            workflow,
+            state,
+            scheduler,
+            cluster_name,
+        })
     }
 
     /// Close the project.
@@ -196,10 +248,11 @@ impl Project {
             }
 
             let completed = self.state.completed();
+
             if completed[&action.name].contains(&directory_name) {
                 status.completed.push(directory_name)
-            // } else if directory.scheduled_job_ids().contains_key(&action.name) {
-            //     status.submitted.push(name);
+            } else if self.state.is_submitted(&action.name, &directory_name) {
+                status.submitted.push(directory_name);
             } else if action
                 .previous_actions
                 .iter()
@@ -296,6 +349,17 @@ impl Project {
 
         Ok(result)
     }
+
+    /// Get the scheduler.
+    pub fn scheduler(&self) -> &dyn Scheduler {
+        self.scheduler.as_ref()
+    }
+
+    /// Add a new submitted job.
+    pub fn add_submitted(&mut self, action_name: &str, directories: &[PathBuf], job_id: u32) {
+        self.state
+            .add_submitted(action_name, directories, &self.cluster_name, job_id);
+    }
 }
 
 #[cfg(test)]
@@ -365,11 +429,11 @@ previous_actions = ["two"]
 
         temp.child("workflow.toml").write_str(&workflow).unwrap();
 
-        Project::open(2, &mut multi_progress).unwrap()
+        Project::open(2, None, &mut multi_progress).unwrap()
     }
 
     #[test]
-    #[serial(set_current_dir)]
+    #[serial]
     fn matching() {
         let project = setup(8);
 
@@ -406,7 +470,7 @@ previous_actions = ["two"]
     }
 
     #[test]
-    #[serial(set_current_dir)]
+    #[serial]
     fn status() {
         let project = setup(8);
 
@@ -442,7 +506,7 @@ previous_actions = ["two"]
     }
 
     #[test]
-    #[serial(set_current_dir)]
+    #[serial]
     fn group() {
         let project = setup(8);
 
@@ -457,7 +521,7 @@ previous_actions = ["two"]
     }
 
     #[test]
-    #[serial(set_current_dir)]
+    #[serial]
     fn group_reverse() {
         let project = setup(8);
 
@@ -475,7 +539,7 @@ previous_actions = ["two"]
     }
 
     #[test]
-    #[serial(set_current_dir)]
+    #[serial]
     fn group_max_size() {
         let project = setup(8);
 
@@ -498,7 +562,7 @@ previous_actions = ["two"]
     }
 
     #[test]
-    #[serial(set_current_dir)]
+    #[serial]
     fn group_sort() {
         let project = setup(8);
 
@@ -526,7 +590,7 @@ previous_actions = ["two"]
     }
 
     #[test]
-    #[serial(set_current_dir)]
+    #[serial]
     fn group_sort_and_split() {
         let project = setup(8);
 

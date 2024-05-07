@@ -2,14 +2,14 @@
 
 In **row**, actions execute arbitrary **shell commands**. When your action is
 **Python** code, you must structure that code so that it is a command line tool
-that takes directories as arguments. There are many ways you can achieve that.
+that takes directories as arguments. There are many ways you can achieve this goal.
 
 This guide will show you how to structure all of your actions in a single file:
 `actions.py`. This layout is inspired by **row's** predecessor: **signac-flow**
 and its `project.py`.
 
-> Note: Also check out [migrating from signac-flow](../../signac-flow.md) if you are
-> migrating from **signac-flow** to **row**.
+> Note: If you are familiar with **signac-fow**, see
+> [migrating from signac-flow](../../signac-flow.md) for many helpful tips.
 
 To demonstrate the structure of a project, let's build a workflow that computes the
 sum of squares. The focus of this guide is on structure and best practices. You need to
@@ -48,10 +48,10 @@ Now, create a file `actions.py` with the contents:
 {{#include actions.py}}
 ```
 
-It defines each **action** as a function with the same name. These functions take an
-array of jobs as an argument: `def square(*jobs)` and `def sum(*jobs)`. The `if __name__
-== "__main__":` block parses the command line arguments, forms an array of signac jobs
-and calls the requested **action** function.
+This file defines each **action** as a function with the same name. These functions take
+an array of jobs as an argument: `def square(*jobs)` and `def compute_sum(*jobs)`. The
+`if __name__ == "__main__":` block parses the command line arguments, forms an array of
+signac jobs and calls the requested **action** function.
 
 > Note: This example demonstrates looping over directories in **serial**. However, this
 > structure also gives you the power to choose **serial** or **parallel** execution.
@@ -84,7 +84,7 @@ threads, ...).
 
 ## Execute the workflow
 
-Now, submit the square action:
+Now, submit the *square* action:
 ```bash
 {{#include signac.sh:submit_square}}
 ```
@@ -95,7 +95,7 @@ Proceed? [Y/n]: y
 [1/1] Submitting action 'square' on directory 04bb77c1bbbb40e55ab9eb22d4c88447 and 9 more (0 seconds).
 ```
 
-Next, submit the sum action:
+Next, submit the *compute_sum* action:
 ```bash
 {{#include signac.sh:submit_sum}}
 ```
@@ -103,7 +103,7 @@ and you should see:
 ```plaintext
 Submitting 1 job that may cost up to 0 CPU-hours.
 Proceed? [Y/n]: y
-[1/1] Submitting action 'sum' on directory 04bb77c1bbbb40e55ab9eb22d4c88447 and 9 more (0 seconds).
+[1/1] Submitting action 'compute_sum' on directory 04bb77c1bbbb40e55ab9eb22d4c88447 and 9 more (0 seconds).
 285
 ```
 
@@ -126,7 +126,7 @@ to your `workflow.toml` file.
 > Note: You may write functions that take only one job `def action(job)` without
 > modifying the given implementation of `__main__`. However, you will need to set
 > `action.group.maximum_size = 1` or use `{directory}` to ensure that `action.py` is
-> given on a single directory. If you implement your code using arrays, you can use
+> given a single directory. If you implement your code using arrays, you can use
 > **row's** grouping functionality to your benefit.
 
 ## Next steps

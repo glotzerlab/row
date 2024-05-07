@@ -30,9 +30,9 @@ pub struct Workflow {
     #[serde(default)]
     pub workspace: Workspace,
 
-    /// The cluster parameters
+    /// The submission options
     #[serde(default)]
-    pub cluster: HashMap<String, ClusterParameters>,
+    pub submit_options: HashMap<String, SubmitOptions>,
 
     /// The actions.
     #[serde(default)]
@@ -54,14 +54,14 @@ pub struct Workspace {
     pub value_file: Option<PathBuf>,
 }
 
-/// The cluster parameters
+/// The submission options
 ///
-/// `ClusterParameters` stores the user-provided cluster specific parameters for a workflow or
+/// `SubmitOPtions` stores the user-provided cluster specific submission options for a workflow or
 /// action.
 ///
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Eq)]
 #[serde(deny_unknown_fields)]
-pub struct ClusterParameters {
+pub struct SubmitOptions {
     /// The account.
     pub account: Option<String>,
 
@@ -70,7 +70,7 @@ pub struct ClusterParameters {
 
     /// Custom options.
     #[serde(default)]
-    pub options: Vec<String>,
+    pub custom: Vec<String>,
 
     /// The partition.
     pub partition: Option<String>,
@@ -105,9 +105,9 @@ pub struct Action {
     #[serde(default)]
     pub resources: Resources,
 
-    /// The cluster parameters
+    /// The cluster specific submission options.
     #[serde(default)]
-    pub cluster: HashMap<String, ClusterParameters>,
+    pub submit_options: HashMap<String, SubmitOptions>,
 
     /// The group of jobs to submit.
     #[serde(default)]
@@ -289,6 +289,15 @@ impl Resources {
         self.total_processes(n_directories) * self.threads_per_process.unwrap_or(1)
     }
 
+    /// Determine the total number of GPUs this action will use.
+    ///
+    /// # Arguments
+    /// `n_directories`: Number of directories in the submission.
+    ///
+    pub fn total_gpus(&self, n_directories: usize) -> usize {
+        self.total_processes(n_directories) * self.gpus_per_process.unwrap_or(0)
+    }
+
     /// Determine the total walltime this action will use.
     ///
     /// # Arguments
@@ -401,24 +410,28 @@ impl Workflow {
                 return Err(Error::DuplicateAction(action.name.clone()));
             }
 
-            // Populate action's cluster with the global cluster options.
-            for (name, parameters) in &self.cluster {
-                if !action.cluster.contains_key(name) {
-                    action.cluster.insert(name.clone(), parameters.clone());
+            // Populate each action's submit_options with the global ones.
+            for (name, global_options) in &self.submit_options {
+                if !action.submit_options.contains_key(name) {
+                    action
+                        .submit_options
+                        .insert(name.clone(), global_options.clone());
                 } else {
-                    let action_parameters =
-                        action.cluster.get_mut(name).expect("Key should be present");
-                    if action_parameters.account.is_none() {
-                        action_parameters.account = parameters.account.clone();
+                    let action_options = action
+                        .submit_options
+                        .get_mut(name)
+                        .expect("Key should be present");
+                    if action_options.account.is_none() {
+                        action_options.account = global_options.account.clone();
                     }
-                    if action_parameters.setup.is_none() {
-                        action_parameters.setup = parameters.setup.clone();
+                    if action_options.setup.is_none() {
+                        action_options.setup = global_options.setup.clone();
                     }
-                    if action_parameters.partition.is_none() {
-                        action_parameters.partition = parameters.partition.clone();
+                    if action_options.partition.is_none() {
+                        action_options.partition = global_options.partition.clone();
                     }
-                    if action_parameters.options.is_empty() {
-                        action_parameters.options = parameters.options.clone();
+                    if action_options.custom.is_empty() {
+                        action_options.custom = global_options.custom.clone();
                     }
                 }
             }
@@ -505,14 +518,14 @@ fn find_and_open_workflow() -> Result<(PathBuf, File), Error> {
 mod tests {
     use assert_fs::prelude::*;
     use assert_fs::TempDir;
-    use serial_test::serial;
+    use serial_test::{parallel, serial};
     use std::env;
 
     use super::*;
 
     #[test]
-    #[serial(set_current_dir)]
-    fn test_no_workflow() {
+    #[serial]
+    fn no_workflow() {
         let temp = TempDir::new().unwrap();
         env::set_current_dir(temp.path()).unwrap();
 
@@ -530,8 +543,8 @@ mod tests {
     }
 
     #[test]
-    #[serial(set_current_dir)]
-    fn test_parent_search() {
+    #[serial]
+    fn parent_search() {
         let temp = TempDir::new().unwrap();
         temp.child("workflow.toml").touch().unwrap();
 
@@ -547,29 +560,27 @@ mod tests {
                 temp.path().canonicalize().unwrap()
             );
         } else {
-            assert!(
-                false,
-                "Expected to find a workflow file, but got {:?}",
-                result
-            );
+            panic!("Expected to find a workflow file, but got {:?}", result);
         }
     }
 
     #[test]
-    fn test_empty_workflow_file() {
+    #[parallel]
+    fn empty_workflow_file() {
         let temp = TempDir::new().unwrap();
         let workflow = "";
-        let workflow = Workflow::open_str(temp.path().into(), workflow).unwrap();
+        let workflow = Workflow::open_str(temp.path(), workflow).unwrap();
 
         assert_eq!(workflow.root, temp.path().canonicalize().unwrap());
         assert_eq!(workflow.workspace.path, PathBuf::from("workspace"));
         assert!(workflow.workspace.value_file.is_none());
-        assert!(workflow.cluster.is_empty());
+        assert!(workflow.submit_options.is_empty());
         assert!(workflow.action.is_empty());
     }
 
     #[test]
-    fn test_workspace() {
+    #[parallel]
+    fn workspace() {
         let temp = TempDir::new().unwrap();
         let workflow = r#"
 [workspace]
@@ -583,9 +594,10 @@ value_file = "s"
     }
 
     #[test]
-    fn test_cluster_parameter_defaults() {
+    #[parallel]
+    fn submit_options_defaults() {
         let temp = TempDir::new().unwrap();
-        let workflow = "[cluster.a]";
+        let workflow = "[submit_options.a]";
         let workflow = Workflow::open_str(temp.path(), workflow).unwrap();
 
         assert_eq!(
@@ -593,24 +605,25 @@ value_file = "s"
             temp.path().canonicalize().unwrap()
         );
 
-        assert_eq!(workflow.cluster.len(), 1);
-        assert!(workflow.cluster.contains_key("a"));
+        assert_eq!(workflow.submit_options.len(), 1);
+        assert!(workflow.submit_options.contains_key("a"));
 
-        let cluster_parameters = workflow.cluster.get("a").unwrap();
-        assert_eq!(cluster_parameters.account, None);
-        assert_eq!(cluster_parameters.setup, None);
-        assert!(cluster_parameters.options.is_empty());
-        assert_eq!(cluster_parameters.partition, None);
+        let submit_options = workflow.submit_options.get("a").unwrap();
+        assert_eq!(submit_options.account, None);
+        assert_eq!(submit_options.setup, None);
+        assert!(submit_options.custom.is_empty());
+        assert_eq!(submit_options.partition, None);
     }
 
     #[test]
-    fn test_cluster_parameter_nondefault() {
+    #[parallel]
+    fn submit_options_nondefault() {
         let temp = TempDir::new().unwrap();
         let workflow = r#"
-[cluster.a]
+[submit_options.a]
 account = "my_account"
 setup = "module load openmpi"
-options = ["--option1", "--option2"]
+custom = ["--option1", "--option2"]
 partition = "gpu"
 "#;
         let workflow = Workflow::open_str(temp.path(), workflow).unwrap();
@@ -620,21 +633,22 @@ partition = "gpu"
             temp.path().canonicalize().unwrap()
         );
 
-        assert_eq!(workflow.cluster.len(), 1);
-        assert!(workflow.cluster.contains_key("a"));
+        assert_eq!(workflow.submit_options.len(), 1);
+        assert!(workflow.submit_options.contains_key("a"));
 
-        let cluster_parameters = workflow.cluster.get("a").unwrap();
-        assert_eq!(cluster_parameters.account, Some(String::from("my_account")));
+        let submit_options = workflow.submit_options.get("a").unwrap();
+        assert_eq!(submit_options.account, Some(String::from("my_account")));
         assert_eq!(
-            cluster_parameters.setup,
+            submit_options.setup,
             Some(String::from("module load openmpi"))
         );
-        assert_eq!(cluster_parameters.options, vec!["--option1", "--option2"]);
-        assert_eq!(cluster_parameters.partition, Some(String::from("gpu")));
+        assert_eq!(submit_options.custom, vec!["--option1", "--option2"]);
+        assert_eq!(submit_options.partition, Some(String::from("gpu")));
     }
 
     #[test]
-    fn test_action_defaults() {
+    #[parallel]
+    fn action_defaults() {
         let temp = TempDir::new().unwrap();
         let workflow = r#"
 [[action]]
@@ -645,7 +659,7 @@ command = "c"
 
         assert_eq!(workflow.action.len(), 1);
 
-        let action = workflow.action.get(0).unwrap();
+        let action = workflow.action.first().unwrap();
         assert_eq!(action.name, "b");
         assert_eq!(action.command, "c");
         assert!(action.previous_actions.is_empty());
@@ -660,17 +674,18 @@ command = "c"
             Walltime::PerDirectory(Duration::new(true, 0, 3600, 0).unwrap())
         );
 
-        assert!(action.cluster.is_empty());
+        assert!(action.submit_options.is_empty());
         assert!(action.group.include.is_empty());
         assert!(action.group.sort_by.is_empty());
-        assert_eq!(action.group.split_by_sort_key, false);
+        assert!(!action.group.split_by_sort_key);
         assert_eq!(action.group.maximum_size, None);
-        assert_eq!(action.group.submit_whole, false);
-        assert_eq!(action.group.reverse_sort, false);
+        assert!(!action.group.submit_whole);
+        assert!(!action.group.reverse_sort);
     }
 
     #[test]
-    fn test_group_defaults() {
+    #[parallel]
+    fn group_defaults() {
         let temp = TempDir::new().unwrap();
         let workflow = r#"
 [[action]]
@@ -682,23 +697,24 @@ command = "c"
 
         assert_eq!(workflow.action.len(), 1);
 
-        let action = workflow.action.get(0).unwrap();
+        let action = workflow.action.first().unwrap();
         assert_eq!(
             action.resources.walltime,
             Walltime::PerDirectory(Duration::new(true, 0, 3600, 0).unwrap())
         );
 
-        assert!(action.cluster.is_empty());
+        assert!(action.submit_options.is_empty());
         assert!(action.group.include.is_empty());
         assert!(action.group.sort_by.is_empty());
-        assert_eq!(action.group.split_by_sort_key, false);
+        assert!(!action.group.split_by_sort_key);
         assert_eq!(action.group.maximum_size, None);
-        assert_eq!(action.group.submit_whole, false);
-        assert_eq!(action.group.reverse_sort, false);
+        assert!(!action.group.submit_whole);
+        assert!(!action.group.reverse_sort);
     }
 
     #[test]
-    fn test_action_duplicate() {
+    #[parallel]
+    fn action_duplicate() {
         let temp = TempDir::new().unwrap();
         let workflow = r#"
 [[action]]
@@ -723,7 +739,8 @@ command = "d"
     }
 
     #[test]
-    fn test_action_launchers() {
+    #[parallel]
+    fn action_launchers() {
         let temp = TempDir::new().unwrap();
         let workflow = r#"
 [[action]]
@@ -736,12 +753,13 @@ launchers = ["openmp", "mpi"]
 
         assert_eq!(workflow.action.len(), 1);
 
-        let action = workflow.action.get(0).unwrap();
+        let action = workflow.action.first().unwrap();
         assert_eq!(action.launchers, vec!["openmp", "mpi"]);
     }
 
     #[test]
-    fn test_action_previous_actions() {
+    #[parallel]
+    fn action_previous_actions() {
         let temp = TempDir::new().unwrap();
         let workflow = r#"
 [[action]]
@@ -771,7 +789,8 @@ previous_actions = ["b"]
     }
 
     #[test]
-    fn test_previous_action_error() {
+    #[parallel]
+    fn previous_action_error() {
         let temp = TempDir::new().unwrap();
         let workflow = r#"
 [[action]]
@@ -793,7 +812,8 @@ previous_actions = ["a"]
     }
 
     #[test]
-    fn test_action_resources() {
+    #[parallel]
+    fn action_resources() {
         let temp = TempDir::new().unwrap();
         let workflow = r#"
 [[action]]
@@ -810,7 +830,7 @@ walltime.per_submission = "4d, 05:32:11"
 
         assert_eq!(workflow.action.len(), 1);
 
-        let action = workflow.action.get(0).unwrap();
+        let action = workflow.action.first().unwrap();
         assert_eq!(action.resources.processes, Processes::PerSubmission(12));
         assert_eq!(action.resources.threads_per_process, Some(8));
         assert_eq!(action.resources.gpus_per_process, Some(1));
@@ -824,7 +844,8 @@ walltime.per_submission = "4d, 05:32:11"
     }
 
     #[test]
-    fn test_action_resources_per_directory() {
+    #[parallel]
+    fn action_resources_per_directory() {
         let temp = TempDir::new().unwrap();
         let workflow = r#"
 [[action]]
@@ -839,7 +860,7 @@ walltime.per_directory = "00:01"
 
         assert_eq!(workflow.action.len(), 1);
 
-        let action = workflow.action.get(0).unwrap();
+        let action = workflow.action.first().unwrap();
         assert_eq!(action.resources.processes, Processes::PerDirectory(1));
 
         assert_eq!(
@@ -851,7 +872,8 @@ walltime.per_directory = "00:01"
     }
 
     #[test]
-    fn test_processes_duplicate() {
+    #[parallel]
+    fn processes_duplicate() {
         let temp = TempDir::new().unwrap();
         let workflow = r#"
 [[action]]
@@ -877,7 +899,8 @@ processes.per_directory = 2
     }
 
     #[test]
-    fn test_walltime_duplicate() {
+    #[parallel]
+    fn walltime_duplicate() {
         let temp = TempDir::new().unwrap();
         let workflow = r#"
 [[action]]
@@ -902,7 +925,8 @@ walltime.per_directory = "01:00"
         );
     }
     #[test]
-    fn test_action_products() {
+    #[parallel]
+    fn action_products() {
         let temp = TempDir::new().unwrap();
         let workflow = r#"
 [[action]]
@@ -915,12 +939,13 @@ products = ["d", "e"]
 
         assert_eq!(workflow.action.len(), 1);
 
-        let action = workflow.action.get(0).unwrap();
+        let action = workflow.action.first().unwrap();
         assert_eq!(action.products, vec!["d".to_string(), "e".to_string()]);
     }
 
     #[test]
-    fn test_action_group() {
+    #[parallel]
+    fn action_group() {
         let temp = TempDir::new().unwrap();
         let workflow = r#"
 [[action]]
@@ -939,7 +964,7 @@ reverse_sort = true
 
         assert_eq!(workflow.action.len(), 1);
 
-        let action = workflow.action.get(0).unwrap();
+        let action = workflow.action.first().unwrap();
         assert_eq!(
             action.group.include,
             vec![
@@ -971,14 +996,15 @@ reverse_sort = true
             ]
         );
         assert_eq!(action.group.sort_by, vec![String::from("/sort")]);
-        assert_eq!(action.group.split_by_sort_key, true);
+        assert!(action.group.split_by_sort_key);
         assert_eq!(action.group.maximum_size, Some(10));
         assert!(action.group.submit_whole);
-        assert_eq!(action.group.reverse_sort, true);
+        assert!(action.group.reverse_sort);
     }
 
     #[test]
-    fn test_action_cluster_none() {
+    #[parallel]
+    fn action_submit_options_none() {
         let temp = TempDir::new().unwrap();
         let workflow = r#"
 [[action]]
@@ -990,48 +1016,50 @@ command = "c"
 
         assert_eq!(workflow.action.len(), 1);
 
-        let action = workflow.action.get(0).unwrap();
-        assert!(action.cluster.is_empty());
+        let action = workflow.action.first().unwrap();
+        assert!(action.submit_options.is_empty());
     }
 
     #[test]
-    fn test_action_cluster_default() {
+    #[parallel]
+    fn action_submit_options_default() {
         let temp = TempDir::new().unwrap();
         let workflow = r#"
 [[action]]
 name = "b"
 command = "c"
 
-[action.cluster.d]
+[action.submit_options.d]
 "#;
 
         let workflow = Workflow::open_str(temp.path(), workflow).unwrap();
 
         assert_eq!(workflow.action.len(), 1);
 
-        let action = workflow.action.get(0).unwrap();
-        assert!(!action.cluster.is_empty());
-        assert!(action.cluster.contains_key("d"));
+        let action = workflow.action.first().unwrap();
+        assert!(!action.submit_options.is_empty());
+        assert!(action.submit_options.contains_key("d"));
 
-        let cluster = action.cluster.get("d").unwrap();
-        assert_eq!(cluster.account, None);
-        assert_eq!(cluster.setup, None);
-        assert!(cluster.options.is_empty());
-        assert_eq!(cluster.partition, None);
+        let submit_options = action.submit_options.get("d").unwrap();
+        assert_eq!(submit_options.account, None);
+        assert_eq!(submit_options.setup, None);
+        assert!(submit_options.custom.is_empty());
+        assert_eq!(submit_options.partition, None);
     }
 
     #[test]
-    fn test_action_cluster_nondefault() {
+    #[parallel]
+    fn action_submit_options_nondefault() {
         let temp = TempDir::new().unwrap();
         let workflow = r#"
 [[action]]
 name = "b"
 command = "c"
 
-[action.cluster.d]
+[action.submit_options.d]
 account = "e"
 setup = "f"
-options = ["g", "h"]
+custom = ["g", "h"]
 partition = "i"
 "#;
 
@@ -1039,25 +1067,26 @@ partition = "i"
 
         assert_eq!(workflow.action.len(), 1);
 
-        let action = workflow.action.get(0).unwrap();
-        assert!(!action.cluster.is_empty());
-        assert!(action.cluster.contains_key("d"));
+        let action = workflow.action.first().unwrap();
+        assert!(!action.submit_options.is_empty());
+        assert!(action.submit_options.contains_key("d"));
 
-        let cluster = action.cluster.get("d").unwrap();
-        assert_eq!(cluster.account, Some("e".to_string()));
-        assert_eq!(cluster.setup, Some("f".to_string()));
-        assert_eq!(cluster.options, vec!["g", "h"]);
-        assert_eq!(cluster.partition, Some("i".to_string()));
+        let submit_options = action.submit_options.get("d").unwrap();
+        assert_eq!(submit_options.account, Some("e".to_string()));
+        assert_eq!(submit_options.setup, Some("f".to_string()));
+        assert_eq!(submit_options.custom, vec!["g", "h"]);
+        assert_eq!(submit_options.partition, Some("i".to_string()));
     }
 
     #[test]
-    fn test_action_cluster_global() {
+    #[parallel]
+    fn action_submit_options_global() {
         let temp = TempDir::new().unwrap();
         let workflow = r#"
-[cluster.d]
+[submit_options.d]
 account = "e"
 setup = "f"
-options = ["g", "h"]
+custom = ["g", "h"]
 partition = "i"
 
 [[action]]
@@ -1069,35 +1098,36 @@ command = "c"
 
         assert_eq!(workflow.action.len(), 1);
 
-        let action = workflow.action.get(0).unwrap();
-        assert!(!action.cluster.is_empty());
-        assert!(action.cluster.contains_key("d"));
+        let action = workflow.action.first().unwrap();
+        assert!(!action.submit_options.is_empty());
+        assert!(action.submit_options.contains_key("d"));
 
-        let cluster = action.cluster.get("d").unwrap();
-        assert_eq!(cluster.account, Some("e".to_string()));
-        assert_eq!(cluster.setup, Some("f".to_string()));
-        assert_eq!(cluster.options, vec!["g", "h"]);
-        assert_eq!(cluster.partition, Some("i".to_string()));
+        let submit_options = action.submit_options.get("d").unwrap();
+        assert_eq!(submit_options.account, Some("e".to_string()));
+        assert_eq!(submit_options.setup, Some("f".to_string()));
+        assert_eq!(submit_options.custom, vec!["g", "h"]);
+        assert_eq!(submit_options.partition, Some("i".to_string()));
     }
 
     #[test]
-    fn test_action_cluster_no_override() {
+    #[parallel]
+    fn action_submit_options_no_override() {
         let temp = TempDir::new().unwrap();
         let workflow = r#"
-[cluster.d]
+[submit_options.d]
 account = "e"
 setup = "f"
-options = ["g", "h"]
+custom = ["g", "h"]
 partition = "i"
 
 [[action]]
 name = "b"
 command = "c"
 
-[action.cluster.d]
+[action.submit_options.d]
 account = "j"
 setup = "k"
-options = ["l", "m"]
+custom = ["l", "m"]
 partition = "n"
 "#;
 
@@ -1105,51 +1135,53 @@ partition = "n"
 
         assert_eq!(workflow.action.len(), 1);
 
-        let action = workflow.action.get(0).unwrap();
-        assert!(!action.cluster.is_empty());
-        assert!(action.cluster.contains_key("d"));
+        let action = workflow.action.first().unwrap();
+        assert!(!action.submit_options.is_empty());
+        assert!(action.submit_options.contains_key("d"));
 
-        let cluster = action.cluster.get("d").unwrap();
-        assert_eq!(cluster.account, Some("j".to_string()));
-        assert_eq!(cluster.setup, Some("k".to_string()));
-        assert_eq!(cluster.options, vec!["l", "m"]);
-        assert_eq!(cluster.partition, Some("n".to_string()));
+        let submit_options = action.submit_options.get("d").unwrap();
+        assert_eq!(submit_options.account, Some("j".to_string()));
+        assert_eq!(submit_options.setup, Some("k".to_string()));
+        assert_eq!(submit_options.custom, vec!["l", "m"]);
+        assert_eq!(submit_options.partition, Some("n".to_string()));
     }
 
     #[test]
-    fn test_action_cluster_override() {
+    #[parallel]
+    fn action_submit_options_override() {
         let temp = TempDir::new().unwrap();
         let workflow = r#"
-[cluster.d]
+[submit_options.d]
 account = "e"
 setup = "f"
-options = ["g", "h"]
+custom = ["g", "h"]
 partition = "i"
 
 [[action]]
 name = "b"
 command = "c"
 
-[action.cluster.d]
+[action.submit_options.d]
 "#;
 
         let workflow = Workflow::open_str(temp.path(), workflow).unwrap();
 
         assert_eq!(workflow.action.len(), 1);
 
-        let action = workflow.action.get(0).unwrap();
-        assert!(!action.cluster.is_empty());
-        assert!(action.cluster.contains_key("d"));
+        let action = workflow.action.first().unwrap();
+        assert!(!action.submit_options.is_empty());
+        assert!(action.submit_options.contains_key("d"));
 
-        let cluster = action.cluster.get("d").unwrap();
-        assert_eq!(cluster.account, Some("e".to_string()));
-        assert_eq!(cluster.setup, Some("f".to_string()));
-        assert_eq!(cluster.options, vec!["g", "h"]);
-        assert_eq!(cluster.partition, Some("i".to_string()));
+        let submit_options = action.submit_options.get("d").unwrap();
+        assert_eq!(submit_options.account, Some("e".to_string()));
+        assert_eq!(submit_options.setup, Some("f".to_string()));
+        assert_eq!(submit_options.custom, vec!["g", "h"]);
+        assert_eq!(submit_options.partition, Some("i".to_string()));
     }
 
     #[test]
-    fn test_total_processes() {
+    #[parallel]
+    fn total_processes() {
         let r = Resources {
             processes: Processes::PerSubmission(10),
             ..Resources::default()
@@ -1170,7 +1202,8 @@ command = "c"
     }
 
     #[test]
-    fn test_total_cpus() {
+    #[parallel]
+    fn total_cpus() {
         let r = Resources {
             processes: Processes::PerSubmission(10),
             threads_per_process: Some(2),
@@ -1187,15 +1220,40 @@ command = "c"
             ..Resources::default()
         };
 
-        assert_eq!(r.total_processes(10), 100);
-        assert_eq!(r.total_processes(100), 1000);
-        assert_eq!(r.total_processes(1000), 10000);
+        assert_eq!(r.total_cpus(10), 100);
+        assert_eq!(r.total_cpus(100), 1000);
+        assert_eq!(r.total_cpus(1000), 10000);
     }
 
     #[test]
-    fn test_total_walltime() {
+    #[parallel]
+    fn total_gpus() {
         let r = Resources {
-            walltime: Walltime::PerDirectory(Duration::new(true, 1, 1 * 3600, 0).unwrap()),
+            processes: Processes::PerSubmission(10),
+            gpus_per_process: Some(2),
+            ..Resources::default()
+        };
+
+        assert_eq!(r.total_gpus(10), 20);
+        assert_eq!(r.total_gpus(100), 20);
+        assert_eq!(r.total_gpus(1000), 20);
+
+        let r = Resources {
+            processes: Processes::PerDirectory(10),
+            gpus_per_process: None,
+            ..Resources::default()
+        };
+
+        assert_eq!(r.total_gpus(10), 0);
+        assert_eq!(r.total_gpus(100), 0);
+        assert_eq!(r.total_gpus(1000), 0);
+    }
+
+    #[test]
+    #[parallel]
+    fn total_walltime() {
+        let r = Resources {
+            walltime: Walltime::PerDirectory(Duration::new(true, 1, 3600, 0).unwrap()),
             ..Resources::default()
         };
 
@@ -1213,29 +1271,30 @@ command = "c"
         );
 
         let r = Resources {
-            walltime: Walltime::PerSubmission(Duration::new(true, 1, 1 * 3600, 0).unwrap()),
+            walltime: Walltime::PerSubmission(Duration::new(true, 1, 3600, 0).unwrap()),
             ..Resources::default()
         };
 
         assert_eq!(
             r.total_walltime(2),
-            Duration::new(true, 1, 1 * 3600, 0).unwrap()
+            Duration::new(true, 1, 3600, 0).unwrap()
         );
         assert_eq!(
             r.total_walltime(4),
-            Duration::new(true, 1, 1 * 3600, 0).unwrap()
+            Duration::new(true, 1, 3600, 0).unwrap()
         );
         assert_eq!(
             r.total_walltime(8),
-            Duration::new(true, 1, 1 * 3600, 0).unwrap()
+            Duration::new(true, 1, 3600, 0).unwrap()
         );
     }
 
     #[test]
-    fn test_resource_cost() {
+    #[parallel]
+    fn resource_cost() {
         let r = Resources {
             processes: Processes::PerSubmission(10),
-            walltime: Walltime::PerDirectory(Duration::new(true, 0, 1 * 3600, 0).unwrap()),
+            walltime: Walltime::PerDirectory(Duration::new(true, 0, 3600, 0).unwrap()),
             ..Resources::default()
         };
 
@@ -1245,7 +1304,7 @@ command = "c"
 
         let r = Resources {
             processes: Processes::PerSubmission(10),
-            walltime: Walltime::PerDirectory(Duration::new(true, 0, 1 * 3600, 0).unwrap()),
+            walltime: Walltime::PerDirectory(Duration::new(true, 0, 3600, 0).unwrap()),
             threads_per_process: Some(4),
             ..Resources::default()
         };
@@ -1256,10 +1315,9 @@ command = "c"
 
         let r = Resources {
             processes: Processes::PerSubmission(10),
-            walltime: Walltime::PerDirectory(Duration::new(true, 0, 1 * 3600, 0).unwrap()),
+            walltime: Walltime::PerDirectory(Duration::new(true, 0, 3600, 0).unwrap()),
             threads_per_process: Some(4),
             gpus_per_process: Some(2),
-            ..Resources::default()
         };
 
         assert_eq!(r.cost(1), ResourceCost::with_values(0.0, 20.0));

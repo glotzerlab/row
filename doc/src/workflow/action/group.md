@@ -16,7 +16,7 @@ reverse_sort = true
 
 > Note: You may omit `[action.group]` entirely.
 
-Execute [`row show directories <ACTION>`](../../row/show-directories.md) to display the
+Execute [`row show directories <ACTION>`](../../row/show/directories.md) to display the
 groups of directories included in a given action.
 
 ## include

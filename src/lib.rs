@@ -1,4 +1,7 @@
+pub(crate) mod builtin;
+pub mod cluster;
 mod expr;
+pub mod launcher;
 pub mod progress_styles;
 pub mod project;
 pub mod scheduler;
@@ -18,6 +21,7 @@ pub const MIN_PROGRESS_BAR_SIZE: usize = 1;
 
 const VALUE_CACHE_FILE_NAME: &str = "values.json";
 const COMPLETED_CACHE_FILE_NAME: &str = "completed.postcard";
+const SUBMITTED_CACHE_FILE_NAME: &str = "submitted.postcard";
 
 /// Hold a MultiProgress and all of its progress bars.
 ///
@@ -34,7 +38,11 @@ pub struct MultiProgressContainer {
 pub enum Error {
     // OS errors
     #[error("OS error")]
-    OK(#[from] nix::errno::Errno),
+    OS(#[from] nix::errno::Errno),
+
+    #[error("No home directory")]
+    NoHome(),
+
     // IO errors
     #[error("I/O error: {0}")]
     IO(#[from] io::Error),
@@ -110,8 +118,49 @@ pub enum Error {
     #[error("Cannot compare {0} and {1} while checking directory '{2}'.")]
     CannotCompareInclude(Value, Value, PathBuf),
 
+    // submission errors
     #[error("Error encountered while executing action '{0}': {1}.")]
     ExecuteAction(String, String),
+
+    #[error("Error encountered while submitting action '{0}': {1}.")]
+    SubmitAction(String, String),
+
+    #[error("Unepxected output from {0}: {1}")]
+    UnexpectedOutput(String, String),
+
+    #[error("Error encountered while running squeue: {0}.\n{1}")]
+    ExecuteSqueue(String, String),
+
+    #[error("Interrupted")]
+    Interrupted,
+
+    // launcher errors
+    #[error("Launcher '{0}' does not contain a default configuration")]
+    LauncherMissingDefault(String),
+
+    #[error("Launcher '{0}' not found: Required by action '{1}'.")]
+    LauncherNotFound(String, String),
+
+    #[error("No process launcher for action '{0}' which requests {1} processes.")]
+    NoProcessLauncher(String, usize),
+
+    #[error("More than one process launcher for action '{0}'.")]
+    TooManyProcessLaunchers(String),
+
+    // cluster errors
+    #[error(
+        "Cluster '{0}' not found: execute 'row show cluster --all' to see available clusters."
+    )]
+    ClusterNameNotFound(String),
+
+    #[error("No cluster found: execute 'row show cluster -vvv' to see why.")]
+    ClusterNotFound(),
+
+    #[error("Partition '{0}' not found: execute 'row show cluster' to see available partitions.")]
+    PartitionNameNotFound(String),
+
+    #[error("No valid partitions:\n{0}\nExecute 'row show cluster' to see available partitions.")]
+    PartitionNotFound(String),
 
     // command errors
     #[error("Action '{0}' not found in the workflow.")]

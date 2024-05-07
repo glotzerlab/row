@@ -19,10 +19,6 @@ pub struct StatusArgs {
     #[arg(short, long, value_name = "pattern", default_value_t=String::from("*"), display_order=0)]
     action: String,
 
-    /// Check the job submission status on the given cluster. Autodetected by default.
-    #[arg(long, env = "ROW_CLUSTER", display_order = 0)]
-    cluster: Option<String>,
-
     /// Hide the table header.
     #[arg(long, display_order = 0)]
     no_header: bool,
@@ -87,7 +83,7 @@ pub fn status<W: Write>(
     debug!("Showing the workflow's status.");
     let action_matcher = WildMatch::new(&args.action);
 
-    let mut project = Project::open(options.io_threads, multi_progress)?;
+    let mut project = Project::open(options.io_threads, options.cluster, multi_progress)?;
 
     let query_directories =
         cli::parse_directories(args.directories, || Ok(project.state().list_directories()))?;
