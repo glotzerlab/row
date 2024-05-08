@@ -1,6 +1,14 @@
+#![warn(clippy::pedantic)]
+#![allow(clippy::cast_precision_loss)]
+#![allow(clippy::cast_possible_wrap)]
+#![allow(clippy::cast_possible_truncation)]
+#![allow(clippy::must_use_candidate)]
+#![warn(clippy::format_push_string)]
+
 pub(crate) mod builtin;
 pub mod cluster;
 mod expr;
+pub mod format;
 pub mod launcher;
 pub mod progress_styles;
 pub mod project;
@@ -9,7 +17,7 @@ pub mod state;
 pub mod workflow;
 pub mod workspace;
 
-use indicatif::{MultiProgress, ProgressBar};
+use indicatif::{MultiProgress, ProgressBar, ProgressDrawTarget};
 use serde_json::{self, Value};
 use std::io;
 use std::path::PathBuf;
@@ -23,14 +31,14 @@ const VALUE_CACHE_FILE_NAME: &str = "values.json";
 const COMPLETED_CACHE_FILE_NAME: &str = "completed.postcard";
 const SUBMITTED_CACHE_FILE_NAME: &str = "submitted.postcard";
 
-/// Hold a MultiProgress and all of its progress bars.
+/// Hold a `MultiProgress` and all of its progress bars.
 ///
-/// This is necessary because a dropped ProgressBar will be automatically
-/// removed from MultiProgress (https://github.com/console-rs/indicatif/issues/614)
+/// This is necessary because a dropped `ProgressBar` will be automatically
+/// removed from [MultiProgress](https://github.com/console-rs/indicatif/issues/614)
 ///
 pub struct MultiProgressContainer {
-    pub progress_bars: Vec<ProgressBar>,
-    pub multi_progress: MultiProgress,
+    progress_bars: Vec<ProgressBar>,
+    multi_progress: MultiProgress,
 }
 
 /// Errors that may be encountered when using the row crate.
@@ -178,4 +186,46 @@ pub enum Error {
 
     // #[error("Evalexpr error: {0}")]
     // Evalexpr(#[from] EvalexprError),
+}
+
+impl MultiProgressContainer {
+    /// Create a new multi-progress container.
+    pub fn new(multi_progress: MultiProgress) -> MultiProgressContainer {
+        MultiProgressContainer {
+            progress_bars: Vec::new(),
+            multi_progress,
+        }
+    }
+
+    /// Add a progress bar to the container or hide it.
+    pub fn add_or_hide(&mut self, mut progress_bar: ProgressBar, hide: bool) -> ProgressBar {
+        if hide {
+            progress_bar.set_draw_target(ProgressDrawTarget::hidden());
+        } else {
+            progress_bar = self.multi_progress.add(progress_bar);
+            self.progress_bars.push(progress_bar.clone());
+        }
+
+        progress_bar
+    }
+
+    /// Add a progress bar to the container.
+    pub fn add(&mut self, progress_bar: ProgressBar) -> ProgressBar {
+        self.progress_bars.push(progress_bar.clone());
+        self.multi_progress.add(progress_bar)
+    }
+
+    /// Clear all progress bars
+    ///
+    /// # Errors
+    /// Forwards the error from `indicatif::MultiProgress::clear`.
+    pub fn clear(&mut self) -> Result<(), std::io::Error> {
+        self.progress_bars.clear();
+        self.multi_progress.clear()
+    }
+
+    /// Suspend the progress bar updates while executing f.
+    pub fn suspend<F: FnOnce() -> R, R>(&self, f: F) -> R {
+        self.multi_progress.suspend(f)
+    }
 }

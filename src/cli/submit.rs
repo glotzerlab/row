@@ -1,6 +1,6 @@
 use clap::Args;
 use console::style;
-use indicatif::{HumanCount, HumanDuration};
+use indicatif::HumanCount;
 use log::{debug, info, trace, warn};
 use signal_hook::consts::{SIGINT, SIGTERM};
 use signal_hook::flag;
@@ -14,12 +14,13 @@ use std::time::Instant;
 use wildmatch::WildMatch;
 
 use crate::cli::GlobalOptions;
+use row::format::HumanDuration;
 use row::project::Project;
 use row::workflow::{Action, ResourceCost};
 use row::MultiProgressContainer;
 
 #[derive(Args, Debug)]
-pub struct SubmitArgs {
+pub struct Arguments {
     /// Select the actions to summarize with a wildcard pattern.
     #[arg(short, long, value_name = "pattern", default_value_t=String::from("*"), display_order=0)]
     action: String,
@@ -42,16 +43,17 @@ pub struct SubmitArgs {
 
 /// Submit workflow actions to the scheduler.
 ///
+#[allow(clippy::too_many_lines)]
 pub fn submit<W: Write>(
-    options: GlobalOptions,
-    args: SubmitArgs,
+    options: &GlobalOptions,
+    args: Arguments,
     multi_progress: &mut MultiProgressContainer,
     output: &mut W,
 ) -> Result<(), Box<dyn Error>> {
     debug!("Submitting workflow actions to the scheduler.");
     let action_matcher = WildMatch::new(&args.action);
 
-    let mut project = Project::open(options.io_threads, options.cluster, multi_progress)?;
+    let mut project = Project::open(options.io_threads, &options.cluster, multi_progress)?;
 
     let query_directories = if args.directories.is_empty() {
         project.state().list_directories()
@@ -114,7 +116,7 @@ pub fn submit<W: Write>(
                 if job_count == 1 { "job" } else { "jobs" },
                 cost,
                 action.name
-            )
+            );
         }
         total_cost = total_cost + cost;
 
@@ -140,7 +142,7 @@ pub fn submit<W: Write>(
             info!("script {}/{}:", index + 1, action_directories.len());
             let script = scheduler.make_script(action, directories)?;
 
-            write!(output, "{}", script)?;
+            write!(output, "{script}")?;
             output.flush()?;
         }
         project.close(multi_progress)?;
@@ -174,7 +176,7 @@ pub fn submit<W: Write>(
 
     if std::io::stdout().is_terminal() && !args.yes {
         let mut input = String::new();
-        multi_progress.multi_progress.suspend(|| {
+        multi_progress.suspend(|| {
             print!("Proceed? [Y/n]: ");
             io::stdout().flush().expect("Can flush stdout");
             io::stdin()
@@ -198,8 +200,7 @@ pub fn submit<W: Write>(
     //    stdin and stdout directly.
     project.close(multi_progress)?;
 
-    multi_progress.progress_bars.clear();
-    multi_progress.multi_progress.clear().unwrap();
+    multi_progress.clear().unwrap();
 
     // Install the Ctrl-C signal handler to gracefully kill spawned processes
     // and save the pending scheduled job cache before exiting. Allow the user
@@ -226,7 +227,7 @@ pub fn submit<W: Write>(
                 .italic()
                 .to_string();
         }
-        message += &format!(" ({}).", style(HumanDuration(instant.elapsed())).dim());
+        message += &format!(" ({:#}).", style(HumanDuration(instant.elapsed())).dim());
         println!("{message}");
 
         let result = scheduler.submit(

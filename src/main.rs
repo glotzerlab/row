@@ -1,5 +1,7 @@
+#![warn(clippy::pedantic)]
+
 use clap::Parser;
-use indicatif::{HumanDuration, MultiProgress, ProgressDrawTarget};
+use indicatif::{MultiProgress, ProgressDrawTarget};
 use indicatif_log_bridge::LogWrapper;
 use log::{error, info};
 use std::error::Error;
@@ -10,7 +12,8 @@ use std::time::Instant;
 mod cli;
 mod ui;
 
-use cli::{ColorMode, Commands, Options, ShowArgs};
+use cli::{ColorMode, Commands, Options, ShowCommands};
+use row::format::HumanDuration;
 use row::MultiProgressContainer;
 use ui::MultiProgressWriter;
 
@@ -19,7 +22,7 @@ fn main_detail() -> Result<(), Box<dyn Error>> {
     let options = Options::parse();
 
     let log_style;
-    match options.global_options.color {
+    match options.global.color {
         ColorMode::Never => {
             log_style = "never";
             console::set_colors_enabled(false);
@@ -43,7 +46,7 @@ fn main_detail() -> Result<(), Box<dyn Error>> {
         clap_verbosity_flag::LevelFilter::Trace => "trace",
     };
 
-    let multi_progress = if options.global_options.no_progress {
+    let multi_progress = if options.global.no_progress {
         MultiProgress::with_draw_target(ProgressDrawTarget::hidden())
     } else {
         MultiProgress::new()
@@ -61,39 +64,34 @@ fn main_detail() -> Result<(), Box<dyn Error>> {
 
     LogWrapper::new(multi_progress.clone(), logger).try_init()?;
 
-    let mut multi_progress_container = MultiProgressContainer {
-        progress_bars: Vec::new(),
-        multi_progress: multi_progress.clone(),
-    };
+    let mut multi_progress_container = MultiProgressContainer::new(multi_progress.clone());
 
     match options.command {
         Some(Commands::Show(show)) => match show {
-            ShowArgs::Status(args) => cli::status::status(
-                options.global_options.clone(),
+            ShowCommands::Status(args) => cli::status::status(
+                &options.global,
                 args,
                 &mut multi_progress_container,
                 &mut output,
             )?,
-            ShowArgs::Directories(args) => cli::directories::directories(
-                options.global_options.clone(),
+            ShowCommands::Directories(args) => cli::directories::directories(
+                &options.global,
                 args,
                 &mut multi_progress_container,
                 &mut output,
             )?,
-            ShowArgs::Cluster(args) => {
-                cli::cluster::cluster(options.global_options.clone(), args, &mut output)?
+            ShowCommands::Cluster(args) => {
+                cli::cluster::cluster(&options.global, &args, &mut output)?;
             }
-            ShowArgs::Launchers(args) => {
-                cli::launchers::launchers(options.global_options.clone(), args, &mut output)?
+            ShowCommands::Launchers(args) => {
+                cli::launchers::launchers(&options.global, &args, &mut output)?;
             }
         },
-        Some(Commands::Scan(args)) => cli::scan::scan(
-            options.global_options.clone(),
-            args,
-            &mut multi_progress_container,
-        )?,
+        Some(Commands::Scan(args)) => {
+            cli::scan::scan(&options.global, args, &mut multi_progress_container)?;
+        }
         Some(Commands::Submit(args)) => cli::submit::submit(
-            options.global_options.clone(),
+            &options.global,
             args,
             &mut multi_progress_container,
             &mut output,
@@ -108,7 +106,7 @@ fn main_detail() -> Result<(), Box<dyn Error>> {
 
     info!("Completed in {}.", HumanDuration(instant.elapsed()));
 
-    if options.global_options.clear_progress {
+    if options.global.clear_progress {
         multi_progress.clear().unwrap();
     }
 

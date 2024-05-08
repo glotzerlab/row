@@ -1,4 +1,4 @@
-use indicatif::{ProgressBar, ProgressDrawTarget};
+use indicatif::ProgressBar;
 use log::{debug, trace, warn};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -124,7 +124,7 @@ impl State {
             }
         }
 
-        Vec::from_iter(set.drain())
+        set.drain().collect::<Vec<_>>()
     }
 
     /// List all directories in the state.
@@ -136,6 +136,10 @@ impl State {
     }
 
     /// Read the state cache from disk.
+    ///
+    /// # Errors
+    /// Returns `Err<row::Error>` when the cache files cannot be read or parsed.
+    ///
     pub fn from_cache(workflow: &Workflow) -> Result<State, Error> {
         let mut state = State {
             values: Self::read_value_cache(workflow)?,
@@ -242,6 +246,10 @@ impl State {
     }
 
     /// Save the state cache to the filesystem.
+    ///
+    /// # Errors
+    /// Returns `Err<row::Error>` when a cache file cannot be saved.
+    ///
     pub fn save_cache(
         &mut self,
         workflow: &Workflow,
@@ -314,12 +322,10 @@ impl State {
         // Then remove the staged files.
         let mut progress = ProgressBar::new(self.completed_file_names.len() as u64)
             .with_message("Removing staged completed actions");
-        if self.completed_file_names.len() >= MIN_PROGRESS_BAR_SIZE {
-            progress = multi_progress.multi_progress.add(progress);
-            multi_progress.progress_bars.push(progress.clone());
-        } else {
-            progress.set_draw_target(ProgressDrawTarget::hidden());
-        }
+        progress = multi_progress.add_or_hide(
+            progress,
+            self.completed_file_names.len() < MIN_PROGRESS_BAR_SIZE,
+        );
         progress.set_style(progress_styles::counted_bar());
         progress.tick();
 
@@ -493,7 +499,7 @@ impl State {
             self.completed_modified = true;
         }
 
-        for (_, directories) in self.completed.iter_mut() {
+        for directories in self.completed.values_mut() {
             let directories_to_remove: Vec<PathBuf> = directories
                 .iter()
                 .filter(|d| !self.values.contains_key(*d))
@@ -526,7 +532,7 @@ impl State {
             self.submitted_modified = true;
         }
 
-        for (_, directory_map) in self.submitted.iter_mut() {
+        for directory_map in self.submitted.values_mut() {
             let directories_to_remove: Vec<PathBuf> = directory_map
                 .keys()
                 .filter(|d| !self.values.contains_key(*d))
@@ -598,12 +604,10 @@ impl State {
 
         let mut progress = ProgressBar::new(self.completed_file_names.len() as u64)
             .with_message("Reading staged completed actions");
-        if self.completed_file_names.len() >= MIN_PROGRESS_BAR_SIZE {
-            progress = multi_progress.multi_progress.add(progress);
-            multi_progress.progress_bars.push(progress.clone());
-        } else {
-            progress.set_draw_target(ProgressDrawTarget::hidden());
-        }
+        progress = multi_progress.add_or_hide(
+            progress,
+            self.completed_file_names.len() < MIN_PROGRESS_BAR_SIZE,
+        );
         progress.set_style(progress_styles::counted_bar());
         progress.tick();
 
@@ -795,7 +799,9 @@ products = ["g"]
         assert!(state.completed.contains_key("e"));
         for i in 0..n {
             let directory = PathBuf::from(format!("dir{i}"));
-            assert_eq!(state.values[&directory].as_i64().unwrap() as usize, i);
+            #[allow(clippy::cast_sign_loss)]
+            let value = state.values[&directory].as_i64().unwrap() as usize;
+            assert_eq!(value, i);
 
             if i < n / 2 {
                 assert!(state.completed["b"].contains(&directory));
@@ -877,7 +883,9 @@ products = ["g"]
 
         for i in 0..n {
             let directory = PathBuf::from(format!("dir{i}"));
-            assert_eq!(state.values[&directory].as_i64().unwrap() as usize, i);
+            #[allow(clippy::cast_sign_loss)]
+            let value = state.values[&directory].as_i64().unwrap() as usize;
+            assert_eq!(value, i);
 
             if i < n / 2 {
                 assert!(state.completed["b"].contains(&directory));
@@ -928,7 +936,7 @@ products = ["g"]
 
         assert_eq!(state.jobs_submitted_on("cluster1"), vec![11]);
         let mut jobs_on_cluster2 = state.jobs_submitted_on("cluster2");
-        jobs_on_cluster2.sort();
+        jobs_on_cluster2.sort_unstable();
         assert_eq!(jobs_on_cluster2, vec![12, 13]);
 
         state

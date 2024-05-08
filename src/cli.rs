@@ -11,13 +11,6 @@ use log::trace;
 use std::io;
 use std::path::PathBuf;
 
-use cluster::ClusterArgs;
-use directories::DirectoriesArgs;
-use launchers::LaunchersArgs;
-use scan::ScanArgs;
-use status::StatusArgs;
-use submit::SubmitArgs;
-
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None, subcommand_required = true)]
 pub struct Options {
@@ -25,7 +18,7 @@ pub struct Options {
     pub command: Option<Commands>,
 
     #[command(flatten)]
-    pub global_options: GlobalOptions,
+    pub global: GlobalOptions,
 
     #[command(flatten)]
     pub verbose: Verbosity<WarnLevel>,
@@ -67,31 +60,31 @@ pub enum ColorMode {
 }
 
 #[derive(Subcommand, Debug)]
-pub enum ShowArgs {
+pub enum ShowCommands {
     /// Show the current state of the workflow.
-    Status(StatusArgs),
+    Status(status::Arguments),
 
     /// List directories in the workspace.
-    Directories(DirectoriesArgs),
+    Directories(directories::Arguments),
 
     /// Show the cluster configuration.
-    Cluster(ClusterArgs),
+    Cluster(cluster::Arguments),
 
     /// Show launcher configurations.
-    Launchers(LaunchersArgs),
+    Launchers(launchers::Arguments),
 }
 
 #[derive(Subcommand, Debug)]
 pub enum Commands {
     /// Show properties of the workspace.
     #[command(subcommand)]
-    Show(ShowArgs),
+    Show(ShowCommands),
 
     /// Scan the workspace for completed actions.
-    Scan(ScanArgs),
+    Scan(scan::Arguments),
 
     /// Submit workflow actions to the scheduler.
-    Submit(SubmitArgs),
+    Submit(submit::Arguments),
 }
 
 /// Parse directories passed in on the command line.

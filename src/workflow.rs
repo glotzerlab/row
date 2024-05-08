@@ -219,6 +219,7 @@ impl ResourceCost {
     }
 
     /// Create a new `ResourceCost`.
+    #[allow(clippy::similar_names)]
     pub fn with_values(cpu_hours: f64, gpu_hours: f64) -> Self {
         Self {
             cpu_hours,
@@ -302,6 +303,9 @@ impl Resources {
     ///
     /// # Arguments
     /// `n_directories`: Number of directories in the submission.
+    ///
+    /// # Panics
+    /// When the resulting walltime cannot be represented.
     ///
     pub fn total_walltime(&self, n_directories: usize) -> Duration {
         match self.walltime {
@@ -412,11 +416,7 @@ impl Workflow {
 
             // Populate each action's submit_options with the global ones.
             for (name, global_options) in &self.submit_options {
-                if !action.submit_options.contains_key(name) {
-                    action
-                        .submit_options
-                        .insert(name.clone(), global_options.clone());
-                } else {
+                if action.submit_options.contains_key(name) {
                     let action_options = action
                         .submit_options
                         .get_mut(name)
@@ -433,6 +433,10 @@ impl Workflow {
                     if action_options.custom.is_empty() {
                         action_options.custom = global_options.custom.clone();
                     }
+                } else {
+                    action
+                        .submit_options
+                        .insert(name.clone(), global_options.clone());
                 }
             }
         }
@@ -532,8 +536,7 @@ mod tests {
         let result = find_and_open_workflow();
         assert!(
             result.is_err(),
-            "Expected to find no workflow file, but got {:?}",
-            result
+            "Expected to find no workflow file, but got {result:?}"
         );
 
         assert!(result
@@ -560,7 +563,7 @@ mod tests {
                 temp.path().canonicalize().unwrap()
             );
         } else {
-            panic!("Expected to find a workflow file, but got {:?}", result);
+            panic!("Expected to find a workflow file, but got {result:?}");
         }
     }
 
@@ -728,8 +731,7 @@ command = "d"
         let result = Workflow::open_str(temp.path(), workflow);
         assert!(
             result.is_err(),
-            "Expected duplicate action error, but got {:?}",
-            result
+            "Expected duplicate action error, but got {result:?}"
         );
 
         assert!(result
@@ -801,8 +803,7 @@ previous_actions = ["a"]
         let result = Workflow::open_str(temp.path(), workflow);
         assert!(
             result.is_err(),
-            "Expected previous action error, but got {:?}",
-            result
+            "Expected previous action error, but got {result:?}"
         );
 
         assert!(result
@@ -886,15 +887,13 @@ processes.per_directory = 2
         let result = Workflow::open_str(temp.path(), workflow);
         assert!(
             matches!(result, Err(Error::TOMLParse(..))),
-            "Expected duplicate processes error, but got {:?}",
-            result
+            "Expected duplicate processes error, but got {result:?}"
         );
 
         let err = result.unwrap_err().to_string();
         assert!(
             err.contains("wanted exactly 1 element"),
-            "Expected 'wanted exactly 1 element', got {:?}",
-            err
+            "Expected 'wanted exactly 1 element', got {err:?}"
         );
     }
 
@@ -913,15 +912,13 @@ walltime.per_directory = "01:00"
         let result = Workflow::open_str(temp.path(), workflow);
         assert!(
             matches!(result, Err(Error::TOMLParse(..))),
-            "Expected duplicate walltime error, but got {:?}",
-            result
+            "Expected duplicate walltime error, but got {result:?}"
         );
 
         let err = result.unwrap_err().to_string();
         assert!(
             err.contains("wanted exactly 1 element"),
-            "Expected 'wanted exactly 1 element', got {:?}",
-            err
+            "Expected 'wanted exactly 1 element', got {err:?}"
         );
     }
     #[test]

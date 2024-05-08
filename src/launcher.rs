@@ -2,6 +2,7 @@ use log::trace;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::env;
+use std::fmt::Write as _;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::{self, BufReader};
@@ -13,11 +14,11 @@ use crate::Error;
 
 /// Launcher configuration
 ///
-/// `LauncherConfiguration` stores the launcher configuration for each defined
+/// `Configuration` stores the launcher configuration for each defined
 /// launcher/cluster.
 ///
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
-pub struct LauncherConfiguration {
+pub struct Configuration {
     /// The launcher configurations.
     pub(crate) launchers: HashMap<String, HashMap<String, Launcher>>,
 }
@@ -50,10 +51,11 @@ impl Launcher {
             if need_space {
                 result.push(' ');
             }
-            result.push_str(&format!(
+            let _ = write!(
+                result,
                 "{processes}{}",
                 resources.total_processes(n_directories)
-            ));
+            );
             need_space = true;
         }
 
@@ -63,7 +65,7 @@ impl Launcher {
             if need_space {
                 result.push(' ');
             }
-            result.push_str(&format!("{self_threads}{resources_threads}"));
+            let _ = write!(result, "{self_threads}{resources_threads}");
             need_space = true;
         }
 
@@ -73,7 +75,7 @@ impl Launcher {
             if need_space {
                 result.push(' ');
             }
-            result.push_str(&format!("{self_gpus}{resources_gpus}"));
+            let _ = write!(result, "{self_gpus}{resources_gpus}");
             need_space = true;
         }
 
@@ -84,7 +86,7 @@ impl Launcher {
     }
 }
 
-impl LauncherConfiguration {
+impl Configuration {
     /// Open the launcher configuration
     ///
     /// Open `$HOME/.config/row/launchers.toml` if it exists and merge it with
@@ -133,12 +135,12 @@ impl LauncherConfiguration {
         Ok(launchers)
     }
 
-    /// Parse a `LauncherConfiguration` from a TOML string
+    /// Parse a `Configuration` from a TOML string
     ///
     /// Does *NOT* merge with the built-in configuration.
     ///
     pub(crate) fn parse_str(path: &Path, toml: &str) -> Result<Self, Error> {
-        Ok(LauncherConfiguration {
+        Ok(Configuration {
             launchers: toml::from_str(toml)
                 .map_err(|e| Error::TOMLParse(path.join("launchers.toml"), e))?,
         })
@@ -173,6 +175,10 @@ impl LauncherConfiguration {
     }
 
     /// Get all launchers for a specific cluster.
+    ///
+    /// # Panics
+    /// When a given launcher has no default.
+    ///
     pub fn by_cluster(&self, cluster_name: &str) -> HashMap<String, Launcher> {
         let mut result = HashMap::with_capacity(self.launchers.len());
 
@@ -219,7 +225,7 @@ mod tests {
     #[parallel]
     fn unset_launcher() {
         setup();
-        let launchers = LauncherConfiguration::built_in();
+        let launchers = Configuration::built_in();
         let launchers_by_cluster = launchers.by_cluster("any_cluster");
         assert!(launchers_by_cluster.get("unset_launcher").is_none());
     }
@@ -228,7 +234,7 @@ mod tests {
     #[parallel]
     fn openmp_prefix() {
         setup();
-        let launchers = LauncherConfiguration::built_in();
+        let launchers = Configuration::built_in();
         let launchers_by_cluster = launchers.by_cluster("any_cluster");
         let openmp = launchers_by_cluster
             .get("openmp")
@@ -250,7 +256,7 @@ mod tests {
     #[parallel]
     fn mpi_prefix_none() {
         setup();
-        let launchers = LauncherConfiguration::built_in();
+        let launchers = Configuration::built_in();
         let launchers_by_cluster = launchers.by_cluster("none");
         let mpi = launchers_by_cluster.get("mpi").expect("a valid Launcher");
 
@@ -279,7 +285,7 @@ mod tests {
     #[parallel]
     fn mpi_prefix_default() {
         setup();
-        let launchers = LauncherConfiguration::built_in();
+        let launchers = Configuration::built_in();
         let launchers_by_cluster = launchers.by_cluster("any_cluster");
         let mpi = launchers_by_cluster.get("mpi").expect("a valid Launcher");
 
@@ -315,9 +321,8 @@ mod tests {
     fn open_no_file() {
         setup();
         let temp = TempDir::new().unwrap().child("launchers.json");
-        let launchers =
-            LauncherConfiguration::open_from_path(temp.path().into()).expect("valid launchers");
-        assert_eq!(launchers, LauncherConfiguration::built_in());
+        let launchers = Configuration::open_from_path(temp.path().into()).expect("valid launchers");
+        assert_eq!(launchers, Configuration::built_in());
     }
 
     #[test]
@@ -326,9 +331,8 @@ mod tests {
         setup();
         let temp = TempDir::new().unwrap().child("launchers.json");
         temp.write_str("").unwrap();
-        let launchers =
-            LauncherConfiguration::open_from_path(temp.path().into()).expect("valid launchers");
-        assert_eq!(launchers, LauncherConfiguration::built_in());
+        let launchers = Configuration::open_from_path(temp.path().into()).expect("valid launchers");
+        assert_eq!(launchers, Configuration::built_in());
     }
 
     #[test]
@@ -337,12 +341,12 @@ mod tests {
         setup();
         let temp = TempDir::new().unwrap().child("launchers.json");
         temp.write_str(
-            r#"
+            r"
 [new_launcher.not_default]
-"#,
+",
         )
         .unwrap();
-        let error = LauncherConfiguration::open_from_path(temp.path().into());
+        let error = Configuration::open_from_path(temp.path().into());
         assert!(matches!(error, Err(Error::LauncherMissingDefault(_))));
     }
 
@@ -364,10 +368,9 @@ executable = "e"
 "#,
         )
         .unwrap();
-        let launchers =
-            LauncherConfiguration::open_from_path(temp.path().into()).expect("valid launcher");
+        let launchers = Configuration::open_from_path(temp.path().into()).expect("valid launcher");
 
-        let built_in = LauncherConfiguration::built_in();
+        let built_in = Configuration::built_in();
         assert_eq!(launchers.launchers.len(), 3);
         assert_eq!(launchers.launchers["openmp"], built_in.launchers["openmp"]);
         assert_eq!(launchers.launchers["mpi"], built_in.launchers["mpi"]);

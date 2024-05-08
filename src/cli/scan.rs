@@ -13,7 +13,7 @@ use row::{
 };
 
 #[derive(Args, Debug)]
-pub struct ScanArgs {
+pub struct Arguments {
     /// Select the action to scan (defaults to all).
     #[arg(short, long, display_order = 0)]
     action: Option<String>,
@@ -27,8 +27,8 @@ pub struct ScanArgs {
 /// Write the resulting list of completed directories to a completion pack file.
 ///
 pub fn scan(
-    options: GlobalOptions,
-    args: ScanArgs,
+    options: &GlobalOptions,
+    args: Arguments,
     multi_progress: &mut MultiProgressContainer,
 ) -> Result<(), Box<dyn std::error::Error>> {
     debug!("Scanning the workspace for completed actions.");

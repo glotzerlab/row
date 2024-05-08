@@ -18,6 +18,9 @@ pub trait Scheduler {
     /// # Returns
     /// A `String` containing the job script.
     ///
+    /// # Errors
+    /// Returns `Err<row::Error>` when the script cannot be created.
+    ///
     fn make_script(&self, action: &Action, directories: &[PathBuf]) -> Result<String, Error>;
 
     /// Submit a job to the scheduler.
@@ -30,14 +33,16 @@ pub trait Scheduler {
     ///
     /// # Returns
     /// `Ok(job_id_option)` on success.
-    /// `Err(row::Error)` on error, which may be due to a non-zero exit status
-    /// from the submission.
     /// Schedulers that queue jobs should set `job_id_option = Some(job_id)`.
     /// Schedulers that execute jobs immediately should set `job_id_option = None`.
     ///
     /// # Early termination.
     /// Implementations should periodically check `should_terminate` and
     /// exit early (if possible) with `Err(Error::Interrupted)` when set.
+    ///
+    /// # Errors
+    /// Returns `Err(row::Error)` on error, which may be due to a non-zero exit
+    /// status from the submission.
     ///
     fn submit(
         &self,
@@ -52,10 +57,13 @@ pub trait Scheduler {
     /// # Arguments
     /// * `jobs`: Identifiers to query
     ///
-    /// `active_jobs` returns a ActiveJobs object, which provides the final
+    /// `active_jobs` returns a `ActiveJobs` object, which provides the final
     /// result via a method. This allows implementations to be asynchronous so
     /// that long-running subprocesses can complete in the background while the
     /// collar performs other work.
+    ///
+    /// # Errors
+    /// Returns `Err<row::Error>` when the job queue query cannot be executed.
     ///
     fn active_jobs(&self, jobs: &[u32]) -> Result<Box<dyn ActiveJobs>, Error>;
 }
@@ -63,5 +71,9 @@ pub trait Scheduler {
 /// Deferred result containing jobs that are still active on the cluster.
 pub trait ActiveJobs {
     /// Complete the operation and return the currently active jobs.
+    ///
+    /// # Errors
+    /// Returns `Err<row::Error>` when the job queue query cannot be executed.
+    ///
     fn get(self: Box<Self>) -> Result<HashSet<u32>, Error>;
 }

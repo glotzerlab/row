@@ -3,6 +3,7 @@ use nix::sys::signal::{self, Signal};
 use nix::unistd::Pid;
 use std::collections::{HashMap, HashSet};
 use std::env;
+use std::fmt::Write as _;
 use std::io::Write;
 use std::os::unix::process::ExitStatusExt;
 use std::path::{Path, PathBuf};
@@ -84,7 +85,8 @@ impl<'a> BashScriptBuilder<'a> {
         }
         result.push_str(")\n");
 
-        result.push_str(&format!(
+        let _ = write!(
+            result,
             r#"
 export ACTION_CLUSTER="{}"
 export ACTION_NAME="{}"
@@ -92,27 +94,27 @@ export ACTION_PROCESSES="{}"
 export ACTION_WALLTIME_IN_MINUTES="{}"
 "#,
             self.cluster_name, self.action.name, self.total_processes, self.walltime_in_minutes,
-        ));
+        );
 
         if let Processes::PerDirectory(processes_per_directory) = self.action.resources.processes {
-            result.push_str(&format!(
-                "export ACTION_PROCESSES_PER_DIRECTORY=\"{}\"\n",
-                processes_per_directory
-            ));
+            let _ = writeln!(
+                result,
+                "export ACTION_PROCESSES_PER_DIRECTORY=\"{processes_per_directory}\"",
+            );
         }
 
         if let Some(threads_per_process) = self.action.resources.threads_per_process {
-            result.push_str(&format!(
-                "export ACTION_THREADS_PER_PROCESS=\"{}\"\n",
-                threads_per_process
-            ));
+            let _ = writeln!(
+                result,
+                "export ACTION_THREADS_PER_PROCESS=\"{threads_per_process}\"",
+            );
         }
 
         if let Some(gpus_per_process) = self.action.resources.gpus_per_process {
-            result.push_str(&format!(
-                "export ACTION_GPUS_PER_PROCESS=\"{}\"\n",
-                gpus_per_process
-            ));
+            let _ = writeln!(
+                result,
+                "export ACTION_GPUS_PER_PROCESS=\"{gpus_per_process}\"",
+            );
         }
 
         Ok(result)
@@ -139,10 +141,11 @@ export ACTION_WALLTIME_IN_MINUTES="{}"
         let action_name = &self.action.name;
         let row_executable = env::current_exe().map_err(Error::FindCurrentExecutable)?;
         let row_executable = row_executable.to_str().expect("UTF-8 path to executable.");
-        result.push_str(&format!(
+        let _ = write!(
+            result,
             r#"
 trap 'printf %s\\n "${{directories[@]}}" | {row_executable} scan --no-progress -a {action_name} - || exit 3' EXIT"#
-        ));
+        );
 
         Ok(result)
     }
@@ -150,7 +153,7 @@ trap 'printf %s\\n "${{directories[@]}}" | {row_executable} scan --no-progress -
     fn execution(&self) -> Result<String, Error> {
         let contains_directory = self.action.command.contains("{directory}");
         let contains_directories = self.action.command.contains("{directories}");
-        if contains_directory as u32 + contains_directories as u32 > 1 {
+        if contains_directory && contains_directories {
             return Err(Error::ActionContainsMultipleTemplates(
                 self.action.name.clone(),
             ));
@@ -247,7 +250,7 @@ impl Scheduler for Bash {
             .map_err(|e| Error::SpawnProcess("bash".into(), e))?;
 
         let mut stdin = child.stdin.take().expect("Piped stdin");
-        write!(stdin, "{}", script)?;
+        write!(stdin, "{script}")?;
         drop(stdin);
 
         trace!("Waiting for bash to complete.");
@@ -306,7 +309,7 @@ mod tests {
 
     use crate::builtin::BuiltIn;
     use crate::cluster::{IdentificationMethod, SchedulerType};
-    use crate::launcher::LauncherConfiguration;
+    use crate::launcher;
     use crate::workflow::Walltime;
     use crate::workflow::{Resources, SubmitOptions};
 
@@ -329,7 +332,7 @@ mod tests {
         };
 
         let directories = vec![PathBuf::from("a"), PathBuf::from("b"), PathBuf::from("c")];
-        let launchers = LauncherConfiguration::built_in();
+        let launchers = launcher::Configuration::built_in();
         (action, directories, launchers.by_cluster("cluster"))
     }
 

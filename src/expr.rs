@@ -56,6 +56,7 @@ pub(crate) fn evaluate_json_comparison(
     a: &Value,
     b: &Value,
 ) -> Option<bool> {
+    #[allow(clippy::match_same_arms)]
     match (comparison, partial_cmp_json_values(a, b)) {
         (Comparison::EqualTo, Some(Ordering::Equal)) => Some(true),
         (Comparison::GreaterThan, Some(Ordering::Greater)) => Some(true),

@@ -5,5 +5,3 @@
 
 **Row's** [pre-commit](https://pre-commit.com/) configuration applies style fixes
 with `rustfmt` checks for common errors with `clippy`.
-
-TODO: Investigate clippy configuration and see if more stringent rules can be applied.

@@ -1,4 +1,4 @@
-use indicatif::{ProgressBar, ProgressDrawTarget};
+use indicatif::ProgressBar;
 use log::{debug, trace, warn};
 use serde_json::Value;
 use std::cmp::Ordering;
@@ -6,9 +6,9 @@ use std::collections::HashMap;
 use std::path::PathBuf;
 use std::time::Duration;
 
-use crate::cluster::{ClusterConfiguration, SchedulerType};
+use crate::cluster::{self, SchedulerType};
 use crate::expr;
-use crate::launcher::LauncherConfiguration;
+use crate::launcher;
 use crate::progress_styles;
 use crate::scheduler::bash::Bash;
 use crate::scheduler::slurm::Slurm;
@@ -72,14 +72,14 @@ impl Project {
     ///
     pub fn open(
         io_threads: u16,
-        cluster_name: Option<String>,
+        cluster_name: &Option<String>,
         multi_progress: &mut MultiProgressContainer,
     ) -> Result<Project, Error> {
         trace!("Opening project.");
         let workflow = Workflow::open()?;
-        let clusters = ClusterConfiguration::open()?;
+        let clusters = cluster::Configuration::open()?;
         let cluster = clusters.identify(cluster_name.as_deref())?;
-        let launchers = LauncherConfiguration::open()?.by_cluster(&cluster.name);
+        let launchers = launcher::Configuration::open()?.by_cluster(&cluster.name);
         let cluster_name = cluster.name.clone();
 
         let scheduler: Box<dyn Scheduler> = match cluster.scheduler {
@@ -93,15 +93,9 @@ impl Project {
         let jobs = state.jobs_submitted_on(&cluster_name);
         let mut progress =
             ProgressBar::new_spinner().with_message("Checking submitted job statuses");
-        if !jobs.is_empty() {
-            progress = multi_progress.multi_progress.add(progress);
-            multi_progress.progress_bars.push(progress.clone());
-            progress.enable_steady_tick(Duration::from_millis(progress_styles::STEADY_TICK));
-        } else {
-            progress.set_draw_target(ProgressDrawTarget::hidden());
-            // TODO: Refactor these types of code blocks into the MultiProgressContainer?
-        }
+        progress = multi_progress.add_or_hide(progress, jobs.is_empty());
 
+        progress.enable_steady_tick(Duration::from_millis(progress_styles::STEADY_TICK));
         progress.set_style(progress_styles::uncounted_spinner());
         progress.tick();
 
@@ -166,6 +160,7 @@ impl Project {
     /// `Ok(Vec<PathBuf>)` listing directories from `directories` that match
     /// the action's **include** directive.
     ///
+    /// # Errors
     /// `Err(row::Error)` when any action's include pointer cannot be resolved.
     ///
     /// # Warnings
@@ -250,7 +245,7 @@ impl Project {
             let completed = self.state.completed();
 
             if completed[&action.name].contains(&directory_name) {
-                status.completed.push(directory_name)
+                status.completed.push(directory_name);
             } else if self.state.is_submitted(&action.name, &directory_name) {
                 status.submitted.push(directory_name);
             } else if action
@@ -268,6 +263,14 @@ impl Project {
     }
 
     /// Separate directories into groups based on the given parameters
+    ///
+    /// # Errors
+    /// `Err(row::Error)` when a given directory is not present or a JSON
+    /// pointer used for sorting is not present.
+    ///
+    /// # Panics
+    /// When two JSON pointers are not valid for comparison.
+    ///
     pub fn separate_into_groups(
         &self,
         action: &Action,
@@ -307,7 +310,12 @@ impl Project {
 
         // Sort by key when there are keys to sort by.
         let mut result = Vec::new();
-        if !action.group.sort_by.is_empty() {
+        if action.group.sort_by.is_empty() {
+            if action.group.reverse_sort {
+                directories.reverse();
+            }
+            result.push(directories);
+        } else {
             directories.sort_by(|a, b| {
                 expr::partial_cmp_json_values(&sort_keys[a], &sort_keys[b])
                     .expect("Valid JSON comparison")
@@ -318,6 +326,7 @@ impl Project {
             }
 
             // Split by the sort key when requested.
+            #[allow(clippy::redundant_closure_for_method_calls)]
             if action.group.split_by_sort_key {
                 result.extend(
                     directories
@@ -331,20 +340,16 @@ impl Project {
             } else {
                 result.push(directories);
             }
-        } else {
-            if action.group.reverse_sort {
-                directories.reverse();
-            }
-            result.push(directories);
         }
 
         if let Some(maximum_size) = action.group.maximum_size {
             let mut new_result = Vec::new();
             for array in result {
+                #[allow(clippy::redundant_closure_for_method_calls)]
                 new_result.extend(array.chunks(maximum_size).map(|v| v.to_vec()));
             }
 
-            result = new_result
+            result = new_result;
         }
 
         Ok(result)
@@ -429,7 +434,7 @@ previous_actions = ["two"]
 
         temp.child("workflow.toml").write_str(&workflow).unwrap();
 
-        Project::open(2, None, &mut multi_progress).unwrap()
+        Project::open(2, &None, &mut multi_progress).unwrap()
     }
 
     #[test]

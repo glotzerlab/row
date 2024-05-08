@@ -12,7 +12,7 @@ use row::project::Project;
 use row::MultiProgressContainer;
 
 #[derive(Args, Debug)]
-pub struct DirectoriesArgs {
+pub struct Arguments {
     /// Select the action to scan (defaults to all).
     action: String,
 
@@ -37,14 +37,14 @@ pub struct DirectoriesArgs {
 /// Print a human-readable list of directories, their status, job ID, and value(s).
 ///
 pub fn directories<W: Write>(
-    options: GlobalOptions,
-    args: DirectoriesArgs,
+    options: &GlobalOptions,
+    args: Arguments,
     multi_progress: &mut MultiProgressContainer,
     output: &mut W,
 ) -> Result<(), Box<dyn Error>> {
     debug!("Showing directories.");
 
-    let mut project = Project::open(options.io_threads, options.cluster, multi_progress)?;
+    let mut project = Project::open(options.io_threads, &options.cluster, multi_progress)?;
 
     let query_directories =
         cli::parse_directories(args.directories, || Ok(project.state().list_directories()))?;
@@ -111,9 +111,9 @@ pub fn directories<W: Write>(
             if let Some((cluster, job_id)) =
                 submitted.get(&action.name).and_then(|d| d.get(directory))
             {
-                row.push(Item::new(format!("{}/{}", cluster, job_id), Style::new()));
+                row.push(Item::new(format!("{cluster}/{job_id}"), Style::new()));
             } else {
-                row.push(Item::new("".into(), Style::new()));
+                row.push(Item::new(String::new(), Style::new()));
             }
             for pointer in &args.value {
                 let value = project.state().values()[directory]
@@ -131,11 +131,11 @@ pub fn directories<W: Write>(
 
         if !args.no_separate_groups && group_idx != groups.len() - 1 {
             let mut row = vec![
-                Item::new("".to_string(), Style::new()),
-                Item::new("".to_string(), Style::new()),
+                Item::new(String::new(), Style::new()),
+                Item::new(String::new(), Style::new()),
             ];
             for _ in &args.value {
-                row.push(Item::new("".to_string(), Style::new()))
+                row.push(Item::new(String::new(), Style::new()));
             }
             table.items.push(row);
         }

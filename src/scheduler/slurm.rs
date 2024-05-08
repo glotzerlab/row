@@ -162,7 +162,7 @@ impl Scheduler for Slurm {
 
         let mut stdin = child.stdin.take().expect("Piped stdin");
         let input_thread = thread::spawn(move || {
-            let _ = write!(stdin, "{}", script);
+            let _ = write!(stdin, "{script}");
         });
 
         trace!("Waiting for sbatch to complete.");
@@ -172,7 +172,14 @@ impl Scheduler for Slurm {
 
         input_thread.join().expect("The thread should not panic");
 
-        if !output.status.success() {
+        if output.status.success() {
+            let job_id_string = str::from_utf8(&output.stdout).expect("Valid UTF-8 output");
+            let job_id = job_id_string
+                .trim_end_matches(char::is_whitespace)
+                .parse::<u32>()
+                .map_err(|_| Error::UnexpectedOutput("sbatch".into(), job_id_string.into()))?;
+            Ok(Some(job_id))
+        } else {
             let message = match output.status.code() {
                 None => match output.status.signal() {
                     None => "sbatch was terminated by a unknown signal".to_string(),
@@ -181,13 +188,6 @@ impl Scheduler for Slurm {
                 Some(code) => format!("sbatch exited with code {code}"),
             };
             Err(Error::SubmitAction(action.name.clone(), message))
-        } else {
-            let job_id_string = str::from_utf8(&output.stdout).expect("Valid UTF-8 output");
-            let job_id = job_id_string
-                .trim_end_matches(char::is_whitespace)
-                .parse::<u32>()
-                .map_err(|_| Error::UnexpectedOutput("sbatch".into(), job_id_string.into()))?;
-            Ok(Some(job_id))
         }
     }
 
@@ -213,7 +213,7 @@ impl Scheduler for Slurm {
             jobs_string.push_str("1,");
         }
         for job in jobs {
-            let _ = write!(jobs_string, "{},", job);
+            let _ = write!(jobs_string, "{job},");
         }
 
         let squeue = Command::new("squeue")
@@ -278,7 +278,7 @@ mod tests {
 
     use crate::builtin::BuiltIn;
     use crate::cluster::{Cluster, IdentificationMethod, Partition, SchedulerType};
-    use crate::launcher::LauncherConfiguration;
+    use crate::launcher;
     use crate::workflow::{Processes, SubmitOptions};
 
     fn setup() -> (Action, Vec<PathBuf>, Slurm) {
@@ -290,7 +290,7 @@ mod tests {
         };
 
         let directories = vec![PathBuf::from("a"), PathBuf::from("b"), PathBuf::from("c")];
-        let launchers = LauncherConfiguration::built_in();
+        let launchers = launcher::Configuration::built_in();
         let cluster = Cluster {
             name: "cluster".into(),
             identify: IdentificationMethod::Always(false),
@@ -413,7 +413,7 @@ mod tests {
     fn mem_per_cpu() {
         let (action, directories, _) = setup();
 
-        let launchers = LauncherConfiguration::built_in();
+        let launchers = launcher::Configuration::built_in();
         let cluster = Cluster {
             name: "cluster".into(),
             identify: IdentificationMethod::Always(false),
@@ -439,7 +439,7 @@ mod tests {
     fn mem_per_gpu() {
         let (mut action, directories, _) = setup();
 
-        let launchers = LauncherConfiguration::built_in();
+        let launchers = launcher::Configuration::built_in();
         let cluster = Cluster {
             name: "cluster".into(),
             identify: IdentificationMethod::Always(false),
@@ -467,7 +467,7 @@ mod tests {
     fn cpus_per_node() {
         let (mut action, directories, _) = setup();
 
-        let launchers = LauncherConfiguration::built_in();
+        let launchers = launcher::Configuration::built_in();
         let cluster = Cluster {
             name: "cluster".into(),
             identify: IdentificationMethod::Always(false),
@@ -495,7 +495,7 @@ mod tests {
     fn gpus_per_node() {
         let (mut action, directories, _) = setup();
 
-        let launchers = LauncherConfiguration::built_in();
+        let launchers = launcher::Configuration::built_in();
         let cluster = Cluster {
             name: "cluster".into(),
             identify: IdentificationMethod::Always(false),

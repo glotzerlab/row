@@ -14,7 +14,7 @@ use row::workflow::ResourceCost;
 use row::MultiProgressContainer;
 
 #[derive(Args, Debug)]
-pub struct StatusArgs {
+pub struct Arguments {
     /// Select the actions to summarize with a wildcard pattern.
     #[arg(short, long, value_name = "pattern", default_value_t=String::from("*"), display_order=0)]
     action: String,
@@ -28,7 +28,7 @@ pub struct StatusArgs {
 }
 
 /// Format a status string for non-terminal outputs.
-fn make_row(action_name: &str, status: &Status, cost: ResourceCost) -> Vec<Item> {
+fn make_row(action_name: &str, status: &Status, cost: &ResourceCost) -> Vec<Item> {
     let mut result = Vec::with_capacity(6);
     result.push(Item::new(action_name.to_string(), Style::new().bold()));
     result.push(
@@ -62,7 +62,7 @@ fn make_row(action_name: &str, status: &Status, cost: ResourceCost) -> Vec<Item>
 
     if !cost.is_zero() {
         result.push(
-            Item::new(format!("{}", cost), Style::new().italic().dim())
+            Item::new(format!("{cost}"), Style::new().italic().dim())
                 .with_alignment(Alignment::Right),
         );
     }
@@ -75,15 +75,15 @@ fn make_row(action_name: &str, status: &Status, cost: ResourceCost) -> Vec<Item>
 /// Print a human-readable summary of the workflow.
 ///
 pub fn status<W: Write>(
-    options: GlobalOptions,
-    args: StatusArgs,
+    options: &GlobalOptions,
+    args: Arguments,
     multi_progress: &mut MultiProgressContainer,
     output: &mut W,
 ) -> Result<(), Box<dyn Error>> {
     debug!("Showing the workflow's status.");
     let action_matcher = WildMatch::new(&args.action);
 
-    let mut project = Project::open(options.io_threads, options.cluster, multi_progress)?;
+    let mut project = Project::open(options.io_threads, &options.cluster, multi_progress)?;
 
     let query_directories =
         cli::parse_directories(args.directories, || Ok(project.state().list_directories()))?;
@@ -131,7 +131,7 @@ pub fn status<W: Write>(
             cost = cost + action.resources.cost(group.len());
         }
 
-        table.items.push(make_row(&action.name, &status, cost));
+        table.items.push(make_row(&action.name, &status, &cost));
     }
 
     if matching_action_count == 0 {

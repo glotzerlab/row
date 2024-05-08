@@ -1,6 +1,7 @@
 use log::{debug, info, trace};
 use serde::{Deserialize, Serialize};
 use std::env;
+use std::fmt::Write as _;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::{self, BufReader};
@@ -12,12 +13,12 @@ use crate::Error;
 
 /// Cluster configuration
 ///
-/// `ClusterConfiguration` stores the cluster configuration for each defined
+/// `Configuration` stores the cluster configuration for each defined
 /// cluster.
 ///
 #[derive(Clone, Debug, Default, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(deny_unknown_fields)]
-pub struct ClusterConfiguration {
+pub struct Configuration {
     /// The cluster configurations.
     #[serde(default)]
     pub(crate) cluster: Vec<Cluster>,
@@ -106,10 +107,16 @@ pub struct Partition {
     pub account_suffix: Option<String>,
 }
 
-impl ClusterConfiguration {
+impl Configuration {
     /// Identify the cluster.
     ///
-    /// Identifying the current cluster consumes the `ClusterConfiguration`.
+    /// Identifying the current cluster consumes the `Configuration`.
+    ///
+    /// # Errors
+    /// * `row::Error::ClusterNameNotFound` when a cluster by the given name
+    ///   is not present in the configuration (when `name = Some(_)`).
+    /// * `row::Error::ClusterNotFound` when the automatic identification
+    ///   fails to find a cluster in the configuration.
     ///
     pub fn identify(self, name: Option<&str>) -> Result<Cluster, Error> {
         let cluster = if let Some(name) = name {
@@ -120,7 +127,7 @@ impl ClusterConfiguration {
         } else {
             self.cluster
                 .into_iter()
-                .find(|c| c.identity_matches())
+                .find(Cluster::identity_matches)
                 .ok_or_else(Error::ClusterNotFound)?
         };
 
@@ -171,16 +178,16 @@ impl ClusterConfiguration {
 
         trace!("Parsing '{}'.", &clusters_toml_path.display());
         let user_config = Self::parse_str(&clusters_toml_path, &clusters_string)?;
-        clusters.merge(user_config);
+        clusters.merge(&user_config);
         Ok(clusters)
     }
 
-    /// Parse a `ClusterConfiguration` from a TOML string
+    /// Parse a `Configuration` from a TOML string
     ///
     /// Does *NOT* merge with the built-in configuration.
     ///
     pub(crate) fn parse_str(path: &Path, toml: &str) -> Result<Self, Error> {
-        let cluster: ClusterConfiguration =
+        let cluster: Configuration =
             toml::from_str(toml).map_err(|e| Error::TOMLParse(path.join("clusters.toml"), e))?;
         Ok(cluster)
     }
@@ -190,10 +197,10 @@ impl ClusterConfiguration {
     /// Merging adds new keys from `b` into self. It also overrides any keys in
     /// both with the value in `b`.
     ///
-    fn merge(&mut self, b: Self) {
+    fn merge(&mut self, b: &Self) {
         let mut new_cluster = b.cluster.clone();
         new_cluster.extend(self.cluster.clone());
-        self.cluster = new_cluster
+        self.cluster = new_cluster;
     }
 }
 
@@ -214,6 +221,10 @@ impl Cluster {
     }
 
     /// Find the partition to use for the given job.
+    ///
+    /// # Errors
+    /// Returns `Err<row::Error>` when the partition is not found.
+    ///
     pub fn find_partition(
         &self,
         partition_name: Option<&str>,
@@ -252,6 +263,7 @@ impl Cluster {
 
 impl Partition {
     /// Check if a given job may use this partition.
+    #[allow(clippy::similar_names)]
     fn matches(&self, resources: &Resources, n_directories: usize, reason: &mut String) -> bool {
         let total_cpus = resources.total_cpus(n_directories);
         let total_gpus = resources.total_gpus(n_directories);
@@ -259,12 +271,12 @@ impl Partition {
         trace!("Checking partition '{}'.", self.name);
 
         if self.prevent_auto_select {
-            reason.push_str(&format!("{}: Must be manually selected.\n", self.name));
+            let _ = writeln!(reason, "{}: Must be manually selected.", self.name);
             return false;
         }
 
         if self.maximum_cpus_per_job.map_or(false, |x| total_cpus > x) {
-            reason.push_str(&format!("{}: Too many CPUs ({}).\n", self.name, total_cpus));
+            let _ = writeln!(reason, "{}: Too many CPUs ({}).", self.name, total_cpus);
             return false;
         }
 
@@ -272,23 +284,21 @@ impl Partition {
             .require_cpus_multiple_of
             .map_or(false, |x| total_cpus % x != 0)
         {
-            reason.push_str(&format!(
-                "{}: CPUs ({}) not a required multiple.\n",
+            let _ = writeln!(
+                reason,
+                "{}: CPUs ({}) not a required multiple.",
                 self.name, total_cpus
-            ));
+            );
             return false;
         }
 
         if self.minimum_gpus_per_job.map_or(false, |x| total_gpus < x) {
-            reason.push_str(&format!(
-                "{}: Not enough GPUs ({}).\n",
-                self.name, total_gpus
-            ));
+            let _ = writeln!(reason, "{}: Not enough GPUs ({}).", self.name, total_gpus);
             return false;
         }
 
         if self.maximum_gpus_per_job.map_or(false, |x| total_gpus > x) {
-            reason.push_str(&format!("{}: Too many GPUs ({}).\n", self.name, total_gpus));
+            let _ = writeln!(reason, "{}: Too many GPUs ({}).", self.name, total_gpus);
             return false;
         }
 
@@ -300,10 +310,11 @@ impl Partition {
             .require_gpus_multiple_of
             .map_or(false, |x| total_gpus == 0 || total_gpus % x != 0)
         {
-            reason.push_str(&format!(
-                "{}: GPUs ({}) not a required multiple.\n",
+            let _ = writeln!(
+                reason,
+                "{}: GPUs ({}) not a required multiple.",
                 self.name, total_gpus
-            ));
+            );
             return false;
         }
 
@@ -382,7 +393,7 @@ mod tests {
                 partition: Vec::new(),
             },
         ];
-        let cluster_configuration = ClusterConfiguration { cluster: clusters };
+        let cluster_configuration = Configuration { cluster: clusters };
         assert_eq!(
             cluster_configuration
                 .clone()
@@ -645,9 +656,8 @@ mod tests {
     fn open_no_file() {
         setup();
         let temp = TempDir::new().unwrap().child("clusters.json");
-        let clusters =
-            ClusterConfiguration::open_from_path(temp.path().into()).expect("valid clusters");
-        assert_eq!(clusters, ClusterConfiguration::built_in());
+        let clusters = Configuration::open_from_path(temp.path().into()).expect("valid clusters");
+        assert_eq!(clusters, Configuration::built_in());
     }
 
     #[test]
@@ -656,9 +666,8 @@ mod tests {
         setup();
         let temp = TempDir::new().unwrap().child("clusters.json");
         temp.write_str("").unwrap();
-        let clusters =
-            ClusterConfiguration::open_from_path(temp.path().into()).expect("valid clusters");
-        assert_eq!(clusters, ClusterConfiguration::built_in());
+        let clusters = Configuration::open_from_path(temp.path().into()).expect("valid clusters");
+        assert_eq!(clusters, Configuration::built_in());
     }
 
     #[test]
@@ -678,8 +687,8 @@ name = "b"
 "#,
         )
         .unwrap();
-        let clusters = ClusterConfiguration::open_from_path(temp.path().into()).unwrap();
-        let built_in_clusters = ClusterConfiguration::built_in();
+        let clusters = Configuration::open_from_path(temp.path().into()).unwrap();
+        let built_in_clusters = Configuration::built_in();
         assert_eq!(clusters.cluster.len(), 1 + built_in_clusters.cluster.len());
 
         let cluster = clusters.cluster.first().unwrap();
@@ -722,8 +731,8 @@ account_suffix = "-gpu"
 "#,
         )
         .unwrap();
-        let clusters = ClusterConfiguration::open_from_path(temp.path().into()).unwrap();
-        let built_in_clusters = ClusterConfiguration::built_in();
+        let clusters = Configuration::open_from_path(temp.path().into()).unwrap();
+        let built_in_clusters = Configuration::built_in();
         assert_eq!(clusters.cluster.len(), 1 + built_in_clusters.cluster.len());
 
         let cluster = clusters.cluster.first().unwrap();

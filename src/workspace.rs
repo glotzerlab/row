@@ -1,4 +1,4 @@
-use indicatif::{ProgressBar, ProgressDrawTarget};
+use indicatif::ProgressBar;
 use log::debug;
 use serde_json::Value;
 use std::collections::{HashMap, HashSet};
@@ -15,16 +15,16 @@ use crate::{progress_styles, Error, MultiProgressContainer, MIN_PROGRESS_BAR_SIZ
 
 /// List all directories in the workspace as found on the filesystem.
 ///
+/// # Errors
+/// Returns `Err<row::Error>` when the workspace directory cannot be accessed.
+///
 pub fn list_directories(
     workflow: &Workflow,
     multi_progress: &mut MultiProgressContainer,
 ) -> Result<Vec<PathBuf>, Error> {
     let workspace_path = workflow.root.join(&workflow.workspace.path);
 
-    let progress = multi_progress
-        .multi_progress
-        .add(ProgressBar::new_spinner().with_message("Listing workspace"));
-    multi_progress.progress_bars.push(progress.clone());
+    let progress = multi_progress.add(ProgressBar::new_spinner().with_message("Listing workspace"));
     progress.set_style(progress_styles::counted_spinner());
     progress.enable_steady_tick(Duration::from_millis(progress_styles::STEADY_TICK));
 
@@ -82,6 +82,9 @@ pub struct CompletedDirectories {
 /// * `directories` - The directories to scan. Must be present in the workspace.
 /// * `io_threads` - Number of threads to use while scanning directories.
 ///
+/// # Panics
+/// When unable to spawn threads.
+///
 pub fn find_completed_directories(
     workflow: &Workflow,
     directories: Vec<PathBuf>,
@@ -90,13 +93,7 @@ pub fn find_completed_directories(
 ) -> CompletedDirectories {
     let mut progress =
         ProgressBar::new(directories.len() as u64).with_message("Scanning directories");
-    if directories.len() >= MIN_PROGRESS_BAR_SIZE {
-        progress = multi_progress.multi_progress.add(progress);
-        multi_progress.progress_bars.push(progress.clone());
-    } else {
-        progress.set_draw_target(ProgressDrawTarget::hidden());
-    }
-
+    progress = multi_progress.add_or_hide(progress, directories.len() < MIN_PROGRESS_BAR_SIZE);
     progress.set_style(progress_styles::counted_bar());
     progress.tick();
 
@@ -186,6 +183,13 @@ pub fn find_completed_directories(
 
 impl CompletedDirectories {
     /// Get the directories that have been completed for each action.
+    ///
+    /// # Errors
+    /// Returns `Err<row::Error>` when the workspace directories cannot be accessed.
+    ///
+    /// # Panics
+    /// This method should not panic.
+    ///
     pub fn get(self) -> Result<HashMap<String, HashSet<PathBuf>>, Error> {
         let mut result = HashMap::new();
         for (directory, action) in &self.receiver {
@@ -240,12 +244,7 @@ pub(crate) fn read_values(
     let (sender, receiver) = mpsc::channel();
 
     let mut progress = ProgressBar::new(directories.len() as u64).with_message("Reading values");
-    if directories.len() >= MIN_PROGRESS_BAR_SIZE {
-        progress = multi_progress.multi_progress.add(progress);
-        multi_progress.progress_bars.push(progress.clone());
-    } else {
-        progress.set_draw_target(ProgressDrawTarget::hidden());
-    }
+    progress = multi_progress.add_or_hide(progress, directories.len() < MIN_PROGRESS_BAR_SIZE);
     progress.set_style(progress_styles::counted_bar());
     progress.tick();
 

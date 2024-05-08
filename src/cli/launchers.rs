@@ -4,11 +4,11 @@ use std::error::Error;
 use std::io::Write;
 
 use crate::cli::GlobalOptions;
-use row::cluster::ClusterConfiguration;
-use row::launcher::LauncherConfiguration;
+use row::cluster;
+use row::launcher;
 
 #[derive(Args, Debug)]
-pub struct LaunchersArgs {
+pub struct Arguments {
     /// Show all launchers.
     #[arg(long, display_order = 0)]
     all: bool,
@@ -19,13 +19,13 @@ pub struct LaunchersArgs {
 /// Print the launchers to stdout in toml format.
 ///
 pub fn launchers<W: Write>(
-    options: GlobalOptions,
-    args: LaunchersArgs,
+    options: &GlobalOptions,
+    args: &Arguments,
     output: &mut W,
 ) -> Result<(), Box<dyn Error>> {
     debug!("Showing launchers.");
 
-    let launchers = LauncherConfiguration::open()?;
+    let launchers = launcher::Configuration::open()?;
 
     if args.all {
         info!("All launcher configurations:");
@@ -35,7 +35,7 @@ pub fn launchers<W: Write>(
             &toml::to_string_pretty(launchers.full_config())?
         )?;
     } else {
-        let clusters = ClusterConfiguration::open()?;
+        let clusters = cluster::Configuration::open()?;
         let cluster = clusters.identify(options.cluster.as_deref())?;
 
         info!("Launcher configurations for cluster '{}':", cluster.name);
