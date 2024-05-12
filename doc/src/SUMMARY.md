@@ -21,7 +21,7 @@
   - [Thread parallelism](guide/concepts/thread-parallelism.md)
   - [Directory status](guide/concepts/status.md)
   - [JSON pointers](guide/concepts/json-pointers.md)
-  - [The row cache](guide/concepts/cache.md)
+  - [Cache files](guide/concepts/cache.md)
 # Reference
 
 - [row](row/index.md)
@@ -33,7 +33,7 @@
     - [show cluster](row/show/cluster.md)
     - [show launchers](row/show/launchers.md)
   - [scan](row/scan.md)
-  - [uncomplete](row/uncomplete.md)
+  - [clean](row/clean.md)
 
 - [`workflow.toml`](workflow/index.md)
   - [workspace](workflow/workspace.md)
@@ -52,14 +52,14 @@
 
 # Appendix
 
-- [Change log]()
+- [Release notes](release-notes.md)
 - [Migrating from signac-flow](signac-flow.md)
 - [For developers](developers/index.md)
-  - [Contributing]()
+  - [Contributing](developers/contributing.md)
   - [Code style](developers/style.md)
   - [Testing](developers/testing.md)
   - [Documentation](developers/documentation.md)
-- [License]()
+- [License](license.md)
 
 -----
-[Contributors]()
+[Contributors](contributors.md)

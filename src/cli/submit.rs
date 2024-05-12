@@ -1,3 +1,6 @@
+// Copyright (c) 2024 The Regents of the University of Michigan.
+// Part of row, released under the BSD 3-Clause License.
+
 use clap::Args;
 use console::style;
 use indicatif::HumanCount;
@@ -83,6 +86,17 @@ pub fn submit<W: Write>(
         let status = project.separate_by_status(action, matching_directories)?;
         let groups = project.separate_into_groups(action, status.eligible)?;
 
+        if action.group.submit_whole {
+            let whole_groups =
+                project.separate_into_groups(action, project.state().list_directories())?;
+            for group in &groups {
+                if !whole_groups.contains(group) {
+                    return Err(Box::new(row::Error::PartialGroupSubmission(
+                        action.name.clone(),
+                    )));
+                }
+            }
+        }
         action_groups.push((&action, groups));
     }
 
@@ -132,8 +146,6 @@ pub fn submit<W: Write>(
         project.close(multi_progress)?;
         return Ok(());
     }
-
-    // TODO: Validate submit_whole
 
     if args.dry_run {
         let scheduler = project.scheduler();

@@ -1,9 +1,14 @@
+// Copyright (c) 2024 The Regents of the University of Michigan.
+// Part of row, released under the BSD 3-Clause License.
+
 use assert_cmd::Command;
 use assert_fs::prelude::*;
 use assert_fs::TempDir;
 use predicates::prelude::*;
 use serial_test::parallel;
 use std::fs;
+
+use row::DATA_DIRECTORY_NAME;
 
 /// Create a sample workflow and workspace to use with the tests.
 fn setup_sample_workflow(
@@ -570,6 +575,105 @@ fn show_launchers() -> Result<(), Box<dyn std::error::Error>> {
         .assert()
         .success()
         .stdout(predicate::str::contains(r#"executable = "mpirun""#));
+
+    Ok(())
+}
+
+#[test]
+#[parallel]
+fn init_conflicting_args() -> Result<(), Box<dyn std::error::Error>> {
+    let mut cmd = Command::cargo_bin("row")?;
+    let temp = TempDir::new()?;
+
+    cmd.args(["init"])
+        .arg("--signac")
+        .args(["--workspace", "test"])
+        .current_dir(temp.path());
+    cmd.assert()
+        .failure()
+        .stderr(predicate::str::contains("cannot be used with"));
+
+    Ok(())
+}
+
+#[test]
+#[parallel]
+fn init_invalid_path() -> Result<(), Box<dyn std::error::Error>> {
+    let mut cmd = Command::cargo_bin("row")?;
+    let temp = TempDir::new()?;
+
+    cmd.args(["init"])
+        .args(["--workspace", "/test/one"])
+        .arg(".")
+        .current_dir(temp.path());
+    cmd.assert()
+        .failure()
+        .stderr(predicate::str::contains("must be a relative"));
+
+    Ok(())
+}
+
+#[test]
+#[parallel]
+fn init_workflow_exists() -> Result<(), Box<dyn std::error::Error>> {
+    let mut cmd = Command::cargo_bin("row")?;
+    let temp = TempDir::new()?;
+    temp.child("workflow.toml").touch()?;
+
+    cmd.args(["init"]).arg(".").current_dir(temp.path());
+    cmd.assert()
+        .failure()
+        .stderr(predicate::str::contains("project already exists"));
+
+    Ok(())
+}
+
+#[test]
+#[parallel]
+fn init_parent_exists() -> Result<(), Box<dyn std::error::Error>> {
+    let mut cmd = Command::cargo_bin("row")?;
+    let temp = TempDir::new()?;
+    temp.child("workflow.toml").touch()?;
+
+    let subdir = temp.child("subdir");
+    subdir.create_dir_all()?;
+
+    cmd.args(["init"]).arg(".").current_dir(subdir.path());
+    cmd.assert().failure().stderr(predicate::str::contains(
+        "project already exists in the parent",
+    ));
+
+    Ok(())
+}
+
+#[test]
+#[parallel]
+fn init_cache_exists() -> Result<(), Box<dyn std::error::Error>> {
+    let mut cmd = Command::cargo_bin("row")?;
+    let temp = TempDir::new()?;
+    temp.child(DATA_DIRECTORY_NAME).touch()?;
+
+    cmd.args(["init"]).arg(".").current_dir(temp.path());
+    cmd.assert()
+        .failure()
+        .stderr(predicate::str::contains("cache directory"))
+        .stderr(predicate::str::contains("already exists"));
+
+    Ok(())
+}
+
+#[test]
+#[parallel]
+fn init() -> Result<(), Box<dyn std::error::Error>> {
+    let mut cmd = Command::cargo_bin("row")?;
+    let temp = TempDir::new()?;
+
+    cmd.args(["init"]).arg(".").current_dir(temp.path());
+    cmd.assert().success();
+
+    temp.child("workspace").assert(predicate::path::is_dir());
+    temp.child("workflow.toml")
+        .assert(predicate::path::is_file());
 
     Ok(())
 }

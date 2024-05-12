@@ -34,5 +34,17 @@ repos:
   hooks:
   - id: ruff-format
   - id: ruff
-
-# TODO: add fix-license-header
+- repo: https://github.com/glotzerlab/fix-license-header
+  rev: v0.3.2
+  hooks:
+  - id: fix-license-header
+    name: Fix license headers (rust)
+    types_or: [rust]
+    args:
+    - --license-file=LICENSE
+    - --add=Part of row, released under the BSD 3-Clause License.
+    - --comment-prefix=//
+- repo: https://github.com/crate-ci/typos
+  rev: v1.21.0
+  hooks:
+    - id: typos

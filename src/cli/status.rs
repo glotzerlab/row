@@ -1,3 +1,6 @@
+// Copyright (c) 2024 The Regents of the University of Michigan.
+// Part of row, released under the BSD 3-Clause License.
+
 use clap::Args;
 use console::Style;
 use indicatif::HumanCount;
@@ -8,7 +11,7 @@ use std::path::PathBuf;
 use wildmatch::WildMatch;
 
 use crate::cli::{self, GlobalOptions};
-use crate::ui::{Alignment, Item, Table};
+use crate::ui::{Alignment, Item, Row, Table};
 use row::project::{Project, Status};
 use row::workflow::ResourceCost;
 use row::MultiProgressContainer;
@@ -131,7 +134,9 @@ pub fn status<W: Write>(
             cost = cost + action.resources.cost(group.len());
         }
 
-        table.items.push(make_row(&action.name, &status, &cost));
+        table
+            .rows
+            .push(Row::Items(make_row(&action.name, &status, &cost)));
     }
 
     if matching_action_count == 0 {

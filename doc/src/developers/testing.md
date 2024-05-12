@@ -14,8 +14,9 @@ with any test that is automatically run concurrently. Check for this with:
 ```bash
 rg --multiline "#\[test\]\n *fn"
 ```
-(see the [saftey discussion](https://doc.rust-lang.org/std/env/fn.set_var.html) in
-`std::env` for details.
+(see the [safety discussion][1] in `std::env` for details).
+
+[1]: https://doc.rust-lang.org/std/env/fn.set_var.html
 
 ## Cluster-specific tests
 
@@ -26,8 +27,9 @@ describes how to run the tests.
 ## Tutorial tests
 
 The tutorial scripts in `doc/src/guide/*.sh` are runnable. These are described in the
-documentation using mdBook's anchor feature to include
-[portions of files](https://rust-lang.github.io/mdBook/format/mdbook.html) in the
+documentation using mdBook's anchor feature to include [portions of files][2] in the
 documentation as needed. This way, the tutorial can be tested by executing the script.
 This type of testing validates that the script *runs*, not that it produces the correct
 output. Developers should manually check the tutorial script output as needed.
+
+[2]: https://rust-lang.github.io/mdBook/format/mdbook.html

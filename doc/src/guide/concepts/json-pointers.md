@@ -4,7 +4,7 @@
 way for you to access elements of a directory's JSON value.
 
 For example, given the JSON document:
-```
+```json
 {
   "a": 1,
   "b": {

@@ -10,7 +10,7 @@ row [OPTIONS] <COMMAND>
 * [`show`](show/index.md)
 * [`submit`](submit.md)
 * [`scan`](scan.md)
-* [`uncomplete`](uncomplete.md)
+* [`clean`](clean.md)
 
 <div class="warning">
 You should execute only <b>one</b> instance of <b>row</b> at a time for a given project.

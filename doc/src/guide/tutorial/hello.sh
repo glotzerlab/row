@@ -1,8 +1,6 @@
 # ANCHOR: init
-# $ row init hello-workflow  # TODO: Write row init
-mkdir -p hello-workflow/workspace
+row init hello-workflow
 cd hello-workflow
-touch workflow.toml
 # ANCHOR_END: init
 
 # ANCHOR: create

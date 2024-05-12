@@ -1,5 +1,8 @@
+// Copyright (c) 2024 The Regents of the University of Michigan.
+// Part of row, released under the BSD 3-Clause License.
+
 use human_format::Formatter;
-use log::{debug, trace};
+use log::{debug, trace, warn};
 use serde::{Deserialize, Deserializer};
 use serde_json;
 use speedate::Duration;
@@ -33,7 +36,7 @@ pub struct Workflow {
     /// The submission options
     #[serde(default)]
     pub submit_options: HashMap<String, SubmitOptions>,
-
+    // TODO: refactor handling of submit options into more general action defaults.
     /// The actions.
     #[serde(default)]
     pub action: Vec<Action>,
@@ -236,9 +239,6 @@ impl ResourceCost {
 impl fmt::Display for ResourceCost {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut formatter = Formatter::new();
-        // TODO: choose decimals more intelligently here.
-        // Currently: 4,499,000 will print as 4M, but 449,900 will print as 450K.
-        // It would be nice if we always kept 3 sig figs, giving 4.50M in the first case.
         formatter.with_decimals(0);
         formatter.with_separator("");
 
@@ -437,6 +437,13 @@ impl Workflow {
                     action
                         .submit_options
                         .insert(name.clone(), global_options.clone());
+                }
+            }
+
+            // Warn for apparently invalid sort_by.
+            for pointer in &action.group.sort_by {
+                if !pointer.is_empty() && !pointer.starts_with('/') {
+                    warn!("The JSON pointer '{pointer}' does not appear valid. Did you mean '/{pointer}'?");
                 }
             }
         }

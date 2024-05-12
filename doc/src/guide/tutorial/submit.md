@@ -30,9 +30,10 @@ node, GPU, etc...). Your final script must request the correct `--partition` to 
 the command and charge accounts properly. `clusters.toml` describes rules by which
 **row** automatically selects partitions when it generates job scripts.
 
-> Note: Feel free to ask on the
-> [discussion board](https://github.com/glotzerlab/row/discussions) if you need help
+> Note: Feel free to ask on the [discussion board][discussion] if you need help
 > writing configuration files for your cluster.
+
+[discussion]: https://github.com/glotzerlab/row/discussions
 
 Check that the output of `row show cluster` and `row show launchers` is what you expect
 before continuing.
@@ -54,7 +55,7 @@ Make sure that the script is requesting the correct resources and is routed to t
 correct **partition**.
 
 For example, the example workflow might generate a job script like this on Anvil:
-```
+```bash
 #!/bin/bash
 #SBATCH --job-name=hello-directory0+2
 #SBATCH --partition=shared
@@ -89,7 +90,7 @@ on the number of CPU cores quested.
 ### Submitting jobs
 
 When you are *sure* that the **job script** is correct, submit it with:
-```
+```bash
 row submit
 ```
 
@@ -122,7 +123,7 @@ Similarly,
 row show directories hello
 ```
 will show something like:
-```
+```plaintext
 Directory  Status    Job ID
 directory0 submitted anvil/5044933
 directory1 submitted anvil/5044933

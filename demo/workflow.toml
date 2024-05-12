@@ -1,0 +1,26 @@
+[workspace]
+value_file = "value.json"
+
+[[action]]
+name = "initialize"
+command = "touch workspace/{directory}/initialize.out"
+products = ["initialize.out"]
+resources.walltime.per_directory = "00:10:00"
+group.maximum_size = 10
+
+[[action]]
+name = "step1"
+command = "touch workspace/{directory}/step1.out"
+products = ["step1.out"]
+previous_actions = ["initialize"]
+resources.walltime.per_directory = "1 day, 00:00:00"
+group.maximum_size = 4
+
+[[action]]
+name = "step2"
+command = "touch workspace/{directory}/step2.out"
+previous_actions = ["step1"]
+products = ["step2.out"]
+resources.walltime.per_directory = "08:00:00"
+resources.gpus_per_process = 1
+group.maximum_size = 4

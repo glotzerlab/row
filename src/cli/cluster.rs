@@ -1,3 +1,6 @@
+// Copyright (c) 2024 The Regents of the University of Michigan.
+// Part of row, released under the BSD 3-Clause License.
+
 use clap::Args;
 use log::{debug, info};
 use std::error::Error;

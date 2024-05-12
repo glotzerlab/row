@@ -1,3 +1,6 @@
+// Copyright (c) 2024 The Regents of the University of Michigan.
+// Part of row, released under the BSD 3-Clause License.
+
 use console::Style;
 use indicatif::MultiProgress;
 use memchr::memmem;
@@ -79,13 +82,19 @@ pub(crate) struct Item {
     alignment: Alignment,
 }
 
+/// A table row is either a separator or a vector of items.
+pub(crate) enum Row {
+    Separator,
+    Items(Vec<Item>),
+}
+
 /// The table
 pub(crate) struct Table {
     // The header row.
     pub header: Vec<Item>,
 
-    // The items.
-    pub items: Vec<Vec<Item>>,
+    // The table rows.
+    pub rows: Vec<Row>,
 
     // Hide the header when true.
     hide_header: bool,
@@ -110,7 +119,7 @@ impl Table {
     pub(crate) fn new() -> Self {
         Table {
             header: Vec::new(),
-            items: Vec::new(),
+            rows: Vec::new(),
             hide_header: false,
         }
     }
@@ -144,10 +153,12 @@ impl Table {
             .iter()
             .map(|h| console::measure_text_width(&h.text))
             .collect();
-        for row in &self.items {
-            for (i, item) in row.iter().enumerate() {
-                column_width[i] =
-                    cmp::max(console::measure_text_width(&item.text), column_width[i]);
+        for row in &self.rows {
+            if let Row::Items(items) = row {
+                for (i, item) in items.iter().enumerate() {
+                    column_width[i] =
+                        cmp::max(console::measure_text_width(&item.text), column_width[i]);
+                }
             }
         }
 
@@ -155,8 +166,17 @@ impl Table {
             Self::write_row(writer, &self.header, &column_width)?;
         }
 
-        for row in &self.items {
-            Self::write_row(writer, row, &column_width)?;
+        for (row_idx, row) in self.rows.iter().enumerate() {
+            match row {
+                Row::Items(items) => {
+                    Self::write_row(writer, items, &column_width)?;
+                }
+                Row::Separator => {
+                    if row_idx != self.rows.len() - 1 {
+                        writeln!(writer)?;
+                    }
+                }
+            }
         }
 
         Ok(())

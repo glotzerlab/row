@@ -30,11 +30,10 @@ empty `workflow.toml` file that `row init` created with:
 ```toml
 {{#include hello-workflow.toml}}
 ```
-`workflow.toml` is a [TOML](https://toml.io) file. Don't be afraid to read the
-spec, it is written in clear an accessible language and includes many examples. In
-`workflow.toml`, `action` is an array of tables and each `[[action]]` line adds a
-new element. Each element **requires** the keys `name` and `command`. There are many
-optional keys you will learn about in later tutorials, or you can skip ahead and
+`workflow.toml` is a [TOML](https://toml.io) file. In `workflow.toml`, `action` is an
+array of tables and each `[[action]]` line adds a new element. Each element **requires**
+the keys `name` and `command`. There are many optional keys you will learn about in
+later tutorials, or you can skip ahead and
 [read the action reference documentation](../../workflow/action/index.md).
 
 `name` is a string that sets the name of the action. `command` is a template for a shell
@@ -60,7 +59,7 @@ Later sections in this tutorial will cover resource costs in more detail.
 `echo "Hello, {directory}!"` is certainly not going to take that long, so confirm
 with `y` and then press enter. You should then see the action execute:
 ```plaintext
-[1/1] Submitting action 'hello' on directory directory0 and 2 more (0 seconds).
+[1/1] Submitting action 'hello' on directory directory0 and 2 more.
 Hello, directory0!
 Hello, directory1!
 Hello, directory2!

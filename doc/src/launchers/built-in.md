@@ -8,6 +8,6 @@ to see the current launcher configuration.
 
 When using OpenMP/MPI hybrid applications, place `"openmp"` first in the list of
 launchers (`launchers = ["openmp", "mpi"]`) to generate the appropriate command:
-```
+```bash
 OMP_NUM_THREADS=T srun --ntasks=N --cpus-per-task=T command $directory
 ```

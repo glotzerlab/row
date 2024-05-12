@@ -8,8 +8,10 @@ This guide will show you how to structure all of your actions in a single file:
 `actions.py`. This layout is inspired by **row's** predecessor: **signac-flow**
 and its `project.py`.
 
-> Note: If you are familiar with **signac-fow**, see
-> [migrating from signac-flow](../../signac-flow.md) for many helpful tips.
+> Note: If you are familiar with **signac-fow**, see [migrating from signac-flow][1]
+> for many helpful tips.
+
+[1]: ../../signac-flow.md
 
 To demonstrate the structure of a project, let's build a workflow that computes the
 sum of squares. The focus of this guide is on structure and best practices. You need to
@@ -35,11 +37,12 @@ Execute:
 ```
 to initialize the signac workspace and populate it with directories.
 
-> Note: If you aren't familiar with **signac**, then go read the
-> [*basic* tutorial](https://docs.signac.io/en/latest/tutorial.html#basics). Come back
-> to the **row** documentation when you get to the section on *workflows*. Or, for
-> extra credit, reimplement the **signac** tutorial workflow in **row** after you finish
-> reading this guide.
+> Note: If you aren't familiar with **signac**, then go read the [*basic* tutorial][2].
+> Come back to the **row** documentation when you get to the section on *workflows*. Or,
+> for extra credit, reimplement the **signac** tutorial workflow in **row** after you
+> finish reading this guide.
+
+[2]: https://docs.signac.io/en/latest/tutorial.html#basics
 
 ## Write actions.py
 
@@ -92,7 +95,7 @@ and you should see:
 ```plaintext
 Submitting 1 job that may cost up to 0 CPU-hours.
 Proceed? [Y/n]: y
-[1/1] Submitting action 'square' on directory 04bb77c1bbbb40e55ab9eb22d4c88447 and 9 more (0 seconds).
+[1/1] Submitting action 'square' on directory 04bb77c1bbbb40e55ab9eb22d4c88447 and 9 more.
 ```
 
 Next, submit the *compute_sum* action:
@@ -103,7 +106,7 @@ and you should see:
 ```plaintext
 Submitting 1 job that may cost up to 0 CPU-hours.
 Proceed? [Y/n]: y
-[1/1] Submitting action 'compute_sum' on directory 04bb77c1bbbb40e55ab9eb22d4c88447 and 9 more (0 seconds).
+[1/1] Submitting action 'compute_sum' on directory 04bb77c1bbbb40e55ab9eb22d4c88447 and 9 more.
 285
 ```
 

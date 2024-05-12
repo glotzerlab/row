@@ -75,7 +75,7 @@ total_cpus <= maximum_cpus_per_job
 
 `cluster.partition.require_cpus_multiple_of`: **integer** - All jobs submitted to this
 partition **must** use an integer multiple of the given number of cpus:
-```
+```plaintext
 total_cpus % require_cpus_multiple_of == 0
 ```
 
@@ -118,7 +118,7 @@ total_gpus <= maximum_gpus_per_job
 
 `cluster.partition.require_gpus_multiple_of`: **integer** - All jobs submitted to this
 partition **must** use an integer multiple of the given number of gpus:
-```
+```plaintext
 total_gpus % require_gpus_multiple_of == 0
 ```
 

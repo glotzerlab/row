@@ -1,11 +1,8 @@
 
 # ANCHOR: init
-# $ row init group-workflow  # TODO: Write row init
-mkdir -p group-workflow/workspace
-cd group-workflow
-touch workflow.toml
+row init group-workflow
+cd group-workflow/workspace
 
-cd workspace
 mkdir directory1 && echo '{"type": "point", "x": 0, "y": 10}' > directory1/value.json
 mkdir directory2 && echo '{"type": "point", "x": 3, "y": 8}' > directory2/value.json
 mkdir directory3 && echo '{"type": "point", "x": 0, "y": 4}' > directory3/value.json

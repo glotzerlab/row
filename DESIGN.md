@@ -52,11 +52,6 @@ Row is yet another workflow engine that automates the process of executing **act
 Ideas:
 * List scheduler jobs and show useful information.
 * Cancel scheduler jobs specific to actions and/or directories.
-* Command to uncomplete an action for a set of directories. This would remove the product files and
-  update the cache.
-* Some method to clear any cache (maybe this instead of uncomplete?). This would allow
-  users to discover changed action names, changed products, manually uncompleted
-  actions, and deal with corrupt cache files.
 
 ## Overview
 
@@ -138,7 +133,8 @@ completed **directories** is read.
 ### The cache files
 
 Row maintains the state of the workflow in several files:
-* `values.json`
+* `directories.json`
+  * Last time the workspace was modified.
   * Cached copies of the user-provided static value file.
 * `completed.postcard`
   * Completion status for each **action**.
@@ -263,13 +259,14 @@ status may take a long time, so it should display a progress bar.
 
 ## Subcommands
 
-* `init` - create `workflow.toml` and `workspace` if they do not yet exist. (TODO: write init)
+* `init` - create `workflow.toml` and `workspace` if they do not yet exist.
 * `scan` - scan the workspace for directories that have completed actions.
 * `show` - show properties of the workflow:
   * `status` - summarize the status of the workflow.
   * `directories` - list directories in the workflow.
-
-Ideas for other commands, `uncomplete`
+  * `clsuter` - show the currently selected cluster configuration.
+  * `launchers` - list the launchers for the current cluster.
+* `clean` - delete row cache files.
 
 ## Definitions
 
@@ -296,3 +293,9 @@ Ideas for other commands, `uncomplete`
 - **whole group**: A **submission group** that is identical to the **group** found
   without applying the additional submission filters.
 - **workspace**: The location on the file system that contains **directories**.
+
+# TODO: Pull request template
+# TODO: Issue templates?
+# TODO: Dependabot configuration
+# TODO: readthedocs builds
+# TODO: logo

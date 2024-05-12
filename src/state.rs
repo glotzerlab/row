@@ -1,3 +1,6 @@
+// Copyright (c) 2024 The Regents of the University of Michigan.
+// Part of row, released under the BSD 3-Clause License.
+
 use indicatif::ProgressBar;
 use log::{debug, trace, warn};
 use serde::{Deserialize, Serialize};
@@ -6,16 +9,30 @@ use std::collections::{HashMap, HashSet};
 use std::fs::{self, File};
 use std::io;
 use std::io::prelude::*;
+use std::os::unix::fs::MetadataExt;
 use std::path::PathBuf;
 
 use crate::workflow::Workflow;
 use crate::{
     progress_styles, workspace, Error, MultiProgressContainer, COMPLETED_CACHE_FILE_NAME,
-    COMPLETED_DIRECTORY_NAME, DATA_DIRECTORY_NAME, MIN_PROGRESS_BAR_SIZE,
-    SUBMITTED_CACHE_FILE_NAME, VALUE_CACHE_FILE_NAME,
+    COMPLETED_DIRECTORY_NAME, DATA_DIRECTORY_NAME, DIRECTORY_CACHE_FILE_NAME,
+    MIN_PROGRESS_BAR_SIZE, SUBMITTED_CACHE_FILE_NAME,
 };
 
 type SubmittedJobs = HashMap<String, HashMap<PathBuf, (String, u32)>>;
+
+/// Directory cache
+///
+/// Cache the directory values and store the last modified time.
+///
+#[derive(Debug, Default, Deserialize, PartialEq, Serialize)]
+pub struct DirectoryCache {
+    /// File system modification time of the workspace.
+    modified_time: (i64, i64),
+
+    /// Directory values.
+    values: HashMap<PathBuf, Value>,
+}
 
 /// The state of the project.
 ///
@@ -30,8 +47,8 @@ type SubmittedJobs = HashMap<String, HashMap<PathBuf, (String, u32)>>;
 ///
 #[derive(Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct State {
-    /// The cached value of each directory.
-    values: HashMap<PathBuf, Value>,
+    /// The directory cache.
+    directory_cache: DirectoryCache,
 
     /// Completed directories for each action.
     completed: HashMap<String, HashSet<PathBuf>>,
@@ -43,7 +60,7 @@ pub struct State {
     completed_file_names: Vec<PathBuf>,
 
     /// Set to true when `values` is modified from the on-disk cache.
-    values_modified: bool,
+    directories_modified: bool,
 
     /// Set to true when `completed` is modified from the on-disk cache.
     completed_modified: bool,
@@ -55,7 +72,7 @@ pub struct State {
 impl State {
     /// Get the directory values.
     pub fn values(&self) -> &HashMap<PathBuf, Value> {
-        &self.values
+        &self.directory_cache.values
     }
 
     /// Get the set of directories completed for a given action.
@@ -66,6 +83,16 @@ impl State {
     /// Get the mapping of actions -> directories -> (cluster, submitted job ID)
     pub fn submitted(&self) -> &SubmittedJobs {
         &self.submitted
+    }
+
+    /// Get the number of submitted jobs.
+    pub fn num_submitted(&self) -> usize {
+        let mut result = 0;
+
+        for v in self.submitted.values() {
+            result += v.len();
+        }
+        result
     }
 
     /// Test whether a given directory has a submitted job for the given action.
@@ -130,8 +157,8 @@ impl State {
     /// List all directories in the state.
     pub fn list_directories(&self) -> Vec<PathBuf> {
         trace!("Listing all directories in project.");
-        let mut result = Vec::with_capacity(self.values.len());
-        result.extend(self.values.keys().cloned());
+        let mut result = Vec::with_capacity(self.values().len());
+        result.extend(self.values().keys().cloned());
         result
     }
 
@@ -142,11 +169,11 @@ impl State {
     ///
     pub fn from_cache(workflow: &Workflow) -> Result<State, Error> {
         let mut state = State {
-            values: Self::read_value_cache(workflow)?,
+            directory_cache: Self::read_directory_cache(workflow)?,
             completed: Self::read_completed_cache(workflow)?,
             submitted: Self::read_submitted_cache(workflow)?,
             completed_file_names: Vec::new(),
-            values_modified: false,
+            directories_modified: false,
             completed_modified: false,
             submitted_modified: false,
         };
@@ -161,17 +188,17 @@ impl State {
         Ok(state)
     }
 
-    /// Read the value cache from disk.
-    fn read_value_cache(workflow: &Workflow) -> Result<HashMap<PathBuf, Value>, Error> {
+    /// Read the directory cache from disk.
+    fn read_directory_cache(workflow: &Workflow) -> Result<DirectoryCache, Error> {
         let data_directory = workflow.root.join(DATA_DIRECTORY_NAME);
-        let value_file = data_directory.join(VALUE_CACHE_FILE_NAME);
+        let directory_file = data_directory.join(DIRECTORY_CACHE_FILE_NAME);
 
-        match fs::read(&value_file) {
+        match fs::read(&directory_file) {
             Ok(bytes) => {
-                debug!("Reading cache '{}'.", value_file.display().to_string());
+                debug!("Reading cache '{}'.", directory_file.display().to_string());
 
-                let result =
-                    serde_json::from_slice(&bytes).map_err(|e| Error::JSONParse(value_file, e))?;
+                let result = serde_json::from_slice(&bytes)
+                    .map_err(|e| Error::JSONParse(directory_file, e))?;
 
                 Ok(result)
             }
@@ -179,12 +206,15 @@ impl State {
                 io::ErrorKind::NotFound => {
                     trace!(
                         "'{}' not found, initializing default values.",
-                        value_file.display().to_string()
+                        directory_file.display().to_string()
                     );
-                    Ok(HashMap::new())
+                    Ok(DirectoryCache {
+                        modified_time: (0, 0),
+                        values: HashMap::new(),
+                    })
                 }
 
-                _ => Err(Error::FileRead(value_file, error)),
+                _ => Err(Error::FileRead(directory_file, error)),
             },
         }
     }
@@ -255,9 +285,9 @@ impl State {
         workflow: &Workflow,
         multi_progress: &mut MultiProgressContainer,
     ) -> Result<(), Error> {
-        if self.values_modified {
-            self.save_value_cache(workflow)?;
-            self.values_modified = false;
+        if self.directories_modified {
+            self.save_directory_cache(workflow)?;
+            self.directories_modified = false;
         }
 
         if self.completed_modified {
@@ -273,22 +303,23 @@ impl State {
         Ok(())
     }
 
-    /// Save the value cache to the filesystem.
-    fn save_value_cache(&self, workflow: &Workflow) -> Result<(), Error> {
+    /// Save the directory cache to the filesystem.
+    fn save_directory_cache(&self, workflow: &Workflow) -> Result<(), Error> {
         let data_directory = workflow.root.join(DATA_DIRECTORY_NAME);
-        let value_file = data_directory.join(VALUE_CACHE_FILE_NAME);
+        let directory_cache_file = data_directory.join(DIRECTORY_CACHE_FILE_NAME);
 
         debug!(
-            "Saving value cache: '{}'.",
-            value_file.display().to_string()
+            "Saving directory cache: '{}'.",
+            directory_cache_file.display().to_string()
         );
 
-        let out_bytes: Vec<u8> = serde_json::to_vec(&self.values)
-            .map_err(|e| Error::JSONSerialize(value_file.clone(), e))?;
+        let out_bytes: Vec<u8> = serde_json::to_vec(&self.directory_cache)
+            .map_err(|e| Error::JSONSerialize(directory_cache_file.clone(), e))?;
 
         fs::create_dir_all(&data_directory)
             .map_err(|e| Error::DirectoryCreate(data_directory, e))?;
-        fs::write(&value_file, out_bytes).map_err(|e| Error::FileWrite(value_file.clone(), e))?;
+        fs::write(&directory_cache_file, out_bytes)
+            .map_err(|e| Error::FileWrite(directory_cache_file.clone(), e))?;
 
         Ok(())
     }
@@ -388,48 +419,60 @@ impl State {
 
         debug!("Synchronizing workspace '{}'.", workspace_path.display());
 
-        // TODO: get workspace metadata. Store mtime in the cache. Then call `list_directories`
-        // only when the current mtime is different from the value in the cache.
-        let filesystem_directories: HashSet<PathBuf> =
-            HashSet::from_iter(workspace::list_directories(workflow, multi_progress)?);
+        let mut directories_to_add = Vec::new();
 
-        ////////////////////////////////////////////////
-        // First, synchronize the values.
-        // Make a copy of the directories to remove.
-        let directories_to_remove: Vec<PathBuf> = self
-            .values
-            .keys()
-            .filter(|&x| !filesystem_directories.contains(x))
-            .cloned()
-            .collect();
-
-        if directories_to_remove.is_empty() {
-            trace!("No directories to remove from the value cache.");
+        // Check if the workspace directory has been modified since we last updated the cache.
+        let metadata = fs::metadata(workspace_path.clone())
+            .map_err(|e| Error::DirectoryRead(workspace_path.clone(), e))?;
+        let current_modified_time = (metadata.mtime(), metadata.mtime_nsec());
+        if current_modified_time == self.directory_cache.modified_time {
+            trace!("The workspace has not been modified.");
         } else {
-            self.values_modified = true;
-        }
+            trace!("The workspace has been modified, updating the cache.");
+            self.directories_modified = true;
+            self.directory_cache.modified_time = current_modified_time;
 
-        // Then remove them.
-        for directory in directories_to_remove {
-            trace!("Removing '{}' from the value cache", directory.display());
-            self.values.remove(&directory);
-        }
+            let filesystem_directories: HashSet<PathBuf> =
+                HashSet::from_iter(workspace::list_directories(workflow, multi_progress)?);
 
-        // Make a copy of the directories to be added.
-        let directories_to_add: Vec<PathBuf> = filesystem_directories
-            .iter()
-            .filter(|&x| !self.values.contains_key(x))
-            .cloned()
-            .collect();
+            ////////////////////////////////////////////////
+            // First, synchronize the values.
+            // Make a copy of the directories to remove.
+            let directories_to_remove: Vec<PathBuf> = self
+                .directory_cache
+                .values
+                .keys()
+                .filter(|&x| !filesystem_directories.contains(x))
+                .cloned()
+                .collect();
 
-        if directories_to_add.is_empty() {
-            trace!("No directories to add to the value cache.");
-        } else {
-            trace!(
-                "Adding {} directories to the workspace.",
-                directories_to_add.len()
-            );
-            self.values_modified = true;
+            if directories_to_remove.is_empty() {
+                trace!("No directories to remove from the directory cache.");
+            }
+            // Then remove them.
+            for directory in directories_to_remove {
+                trace!(
+                    "Removing '{}' from the directory cache",
+                    directory.display()
+                );
+                self.directory_cache.values.remove(&directory);
+            }
+
+            // Make a copy of the directories to be added.
+            directories_to_add = filesystem_directories
+                .iter()
+                .filter(|&x| !self.directory_cache.values.contains_key(x))
+                .cloned()
+                .collect();
+
+            if directories_to_add.is_empty() {
+                trace!("No directories to add to the directory cache.");
+            } else {
+                trace!(
+                    "Adding {} directories to the workspace.",
+                    directories_to_add.len()
+                );
+            }
         }
 
         // Read value files from the directories.
@@ -455,7 +498,7 @@ impl State {
 
         ///////////////////////////////////////////
         // Wait for launched threads to finish and merge results.
-        self.values.extend(directory_values.get()?);
+        self.directory_cache.values.extend(directory_values.get()?);
 
         let new_complete = new_complete.get()?;
         if !new_complete.is_empty() {
@@ -502,7 +545,7 @@ impl State {
         for directories in self.completed.values_mut() {
             let directories_to_remove: Vec<PathBuf> = directories
                 .iter()
-                .filter(|d| !self.values.contains_key(*d))
+                .filter(|d| !self.directory_cache.values.contains_key(*d))
                 .cloned()
                 .collect();
 
@@ -535,7 +578,7 @@ impl State {
         for directory_map in self.submitted.values_mut() {
             let directories_to_remove: Vec<PathBuf> = directory_map
                 .keys()
-                .filter(|d| !self.values.contains_key(*d))
+                .filter(|d| !self.directory_cache.values.contains_key(*d))
                 .cloned()
                 .collect();
 
@@ -688,7 +731,7 @@ mod tests {
         let mut state = State::default();
         let result = state.synchronize_workspace(&workflow, 2, &mut multi_progress);
         assert!(result.is_ok());
-        assert_eq!(state.values.len(), 0);
+        assert_eq!(state.values().len(), 0);
     }
 
     #[test]
@@ -713,15 +756,18 @@ mod tests {
         let workflow = Workflow::open_str(temp.path(), workflow).unwrap();
 
         let mut state = State::default();
-        state.values.insert(PathBuf::from("dir4"), Value::Null);
+        state
+            .directory_cache
+            .values
+            .insert(PathBuf::from("dir4"), Value::Null);
 
         let result = state.synchronize_workspace(&workflow, 2, &mut multi_progress);
         assert!(result.is_ok());
 
-        assert_eq!(state.values.len(), 3);
-        assert!(state.values.contains_key(&PathBuf::from("dir1")));
-        assert!(state.values.contains_key(&PathBuf::from("dir2")));
-        assert!(state.values.contains_key(&PathBuf::from("dir3")));
+        assert_eq!(state.values().len(), 3);
+        assert!(state.values().contains_key(&PathBuf::from("dir1")));
+        assert!(state.values().contains_key(&PathBuf::from("dir2")));
+        assert!(state.values().contains_key(&PathBuf::from("dir3")));
     }
 
     #[test]
@@ -744,9 +790,9 @@ mod tests {
 
         let result = state.synchronize_workspace(&workflow, 2, &mut multi_progress);
         assert!(result.is_ok());
-        assert_eq!(state.values.len(), 1);
-        assert!(state.values.contains_key(&PathBuf::from("dir1")));
-        assert_eq!(state.values[&PathBuf::from("dir1")].as_i64(), Some(10));
+        assert_eq!(state.values().len(), 1);
+        assert!(state.values().contains_key(&PathBuf::from("dir1")));
+        assert_eq!(state.values()[&PathBuf::from("dir1")].as_i64(), Some(10));
     }
 
     fn setup_completion_directories(temp: &TempDir, n: usize) -> String {
@@ -794,13 +840,13 @@ products = ["g"]
         let result = state.synchronize_workspace(&workflow, 2, &mut multi_progress);
         assert!(result.is_ok());
 
-        assert_eq!(state.values.len(), n);
+        assert_eq!(state.values().len(), n);
         assert!(state.completed.contains_key("b"));
         assert!(state.completed.contains_key("e"));
         for i in 0..n {
             let directory = PathBuf::from(format!("dir{i}"));
             #[allow(clippy::cast_sign_loss)]
-            let value = state.values[&directory].as_i64().unwrap() as usize;
+            let value = state.values()[&directory].as_i64().unwrap() as usize;
             assert_eq!(value, i);
 
             if i < n / 2 {
@@ -831,6 +877,7 @@ products = ["g"]
         let mut state = State::default();
         for i in 0..n {
             state
+                .directory_cache
                 .values
                 .insert(PathBuf::from(format!("dir{i}")), Value::Null);
         }
@@ -840,7 +887,7 @@ products = ["g"]
         let result = state.synchronize_workspace(&workflow, 2, &mut multi_progress);
         assert!(result.is_ok());
 
-        assert_eq!(state.values.len(), n);
+        assert_eq!(state.values().len(), n);
         assert!(!state.completed.contains_key("b"));
         assert!(!state.completed.contains_key("e"));
     }
@@ -873,7 +920,7 @@ products = ["g"]
         let result = state.synchronize_workspace(&workflow, 2, &mut multi_progress);
         assert!(result.is_ok());
 
-        assert_eq!(state.values.len(), n);
+        assert_eq!(state.values().len(), n);
         assert!(state.completed.contains_key("b"));
         assert!(state.completed.contains_key("e"));
         assert!(!state.completed.contains_key("z"));
@@ -884,7 +931,7 @@ products = ["g"]
         for i in 0..n {
             let directory = PathBuf::from(format!("dir{i}"));
             #[allow(clippy::cast_sign_loss)]
-            let value = state.values[&directory].as_i64().unwrap() as usize;
+            let value = state.values()[&directory].as_i64().unwrap() as usize;
             assert_eq!(value, i);
 
             if i < n / 2 {
@@ -917,6 +964,8 @@ products = ["g"]
         state.add_submitted("b", &["dir1".into(), "dir5".into()], "cluster1", 11);
         state.add_submitted("b", &["dir3".into(), "dir4".into()], "cluster2", 12);
         state.add_submitted("e", &["dir6".into(), "dir7".into()], "cluster2", 13);
+
+        assert_eq!(state.num_submitted(), 6);
 
         assert!(state.is_submitted("b", &"dir1".into()));
         assert!(!state.is_submitted("b", &"dir2".into()));
@@ -968,6 +1017,8 @@ products = ["g"]
         state.add_submitted("b", &["dir1".into(), "dir2".into()], "cluster1", 19);
         state.add_submitted("f", &["dir3".into(), "dir4".into()], "cluster2", 27);
 
+        assert_eq!(state.num_submitted(), 6);
+
         assert!(state.is_submitted("b", &"dir1".into()));
         assert!(state.is_submitted("b", &"dir2".into()));
         assert!(state.is_submitted("b", &"dir25".into()));
@@ -1016,6 +1067,8 @@ products = ["g"]
         state.add_submitted("b", &["dir1".into(), "dir5".into()], "cluster1", 11);
         state.add_submitted("b", &["dir3".into(), "dir4".into()], "cluster2", 12);
         state.add_submitted("e", &["dir6".into(), "dir7".into()], "cluster2", 13);
+
+        assert_eq!(state.num_submitted(), 6);
 
         assert!(state.is_submitted("b", &"dir1".into()));
         assert!(!state.is_submitted("b", &"dir2".into()));

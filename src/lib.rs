@@ -1,3 +1,6 @@
+// Copyright (c) 2024 The Regents of the University of Michigan.
+// Part of row, released under the BSD 3-Clause License.
+
 #![warn(clippy::pedantic)]
 #![allow(clippy::cast_precision_loss)]
 #![allow(clippy::cast_possible_wrap)]
@@ -27,9 +30,9 @@ pub const DATA_DIRECTORY_NAME: &str = ".row";
 pub const COMPLETED_DIRECTORY_NAME: &str = "completed";
 pub const MIN_PROGRESS_BAR_SIZE: usize = 1;
 
-const VALUE_CACHE_FILE_NAME: &str = "values.json";
-const COMPLETED_CACHE_FILE_NAME: &str = "completed.postcard";
-const SUBMITTED_CACHE_FILE_NAME: &str = "submitted.postcard";
+pub const DIRECTORY_CACHE_FILE_NAME: &str = "directories.json";
+pub const COMPLETED_CACHE_FILE_NAME: &str = "completed.postcard";
+pub const SUBMITTED_CACHE_FILE_NAME: &str = "submitted.postcard";
 
 /// Hold a `MultiProgress` and all of its progress bars.
 ///
@@ -174,18 +177,30 @@ pub enum Error {
     #[error("Action '{0}' not found in the workflow.")]
     ActionNotFound(String),
 
+    #[error("A row project already exists in '{0}'.")]
+    ProjectExists(PathBuf),
+
+    #[error("A row project already exists in the parent directory '{0}'.")]
+    ParentProjectExists(PathBuf),
+
+    #[error("The cache directory '.row' already exists in '{0}'.")]
+    ProjectCacheExists(PathBuf),
+
+    #[error("workspace must be a relative path name, got '{0}'.")]
+    WorkspacePathNotRelative(String),
+
+    #[error("There are submitted jobs. Rerun with --force to bypass this check.")]
+    ForceCleanNeeded,
+
+    #[error("Attempting partial submission of action '{0}' when `submit_whole=true`.")]
+    PartialGroupSubmission(String),
+
     // thread errors
     #[error("Unexpected error communicating between threads in 'find_completed_directories'.")]
     CompletedDirectoriesSend(#[from] mpsc::SendError<(PathBuf, String)>),
 
     #[error("Unexpected error communicating between threads in 'read_values'.")]
     ReadValuesSend(#[from] mpsc::SendError<(PathBuf, Value)>),
-    // evalexpr errors
-    // #[error("Invalid number {0}")]
-    // InvalidNumber(String),
-
-    // #[error("Evalexpr error: {0}")]
-    // Evalexpr(#[from] EvalexprError),
 }
 
 impl MultiProgressContainer {

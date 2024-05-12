@@ -10,12 +10,12 @@ To test a built-in cluster, run:
 * `cat <cluster-name>/output/*.out`
 
 The submitted jobs check serial, threaded, MPI, MPI+threads, GPU, and
-MPI+GPU jobs to ensure that they run sucessfully and are scheduled to the
+MPI+GPU jobs to ensure that they run successfully and are scheduled to the
 selected resources. Check `*.out` for any error messages. Then check
 `<cluster-name>/output/*.out` for `ERROR`, `WARN`, and `PASSED` lines.
 `validate.py` prints: `ERROR` when the launched job has a more restrictive
 binding than requested; `WARN` when the binding is less restrictive; and
-'PASSED' when there are at least enough  avaialble resources to execute.
+'PASSED' when there are at least enough  available resources to execute.
 
 To test a non-built-in cluster:
 * Configure your cluster in `cluster.toml`.

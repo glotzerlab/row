@@ -200,13 +200,13 @@ you will see that `row submit` launches 3 jobs:
 ```plaintext
 Submitting 3 jobs that may cost up to 6 CPU-hours.
 Proceed? [Y/n]:
-[1/3] Submitting action 'process_point' on directory directory1 and 2 more (0 seconds).
+[1/3] Submitting action 'process_point' on directory directory1 and 2 more.
 directory1
 directory3
 directory5
-[2/3] Submitting action 'process_point' on directory directory6 (0 seconds).
+[2/3] Submitting action 'process_point' on directory directory6.
 directory6
-[3/3] Submitting action 'process_point' on directory directory2 and 1 more (0 seconds).
+[3/3] Submitting action 'process_point' on directory directory2 and 1 more.
 directory2
 directory4
 ```

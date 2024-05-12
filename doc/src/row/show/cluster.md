@@ -5,21 +5,7 @@ Usage:
 row show cluster [OPTIONS]
 ```
 
-Print the [current cluster configuration](../../clusters/index.md) (or for the cluster
-given in `--cluster`).
-
-Example output:
-```
-name = "none"
-scheduler = "bash"
-
-[identify]
-always = true
-
-[[partition]]
-name = "none"
-prevent_auto_select = false
-```
+Print the [current cluster configuration](../../clusters/index.md) in TOML format.
 
 ## `[OPTIONS]`
 
@@ -30,3 +16,18 @@ Show the configuration of all clusters: both user-defined and built-in.
 ### `--name`
 
 Show only the cluster's name.
+
+## Examples
+
+* Show the autodetected cluster:
+  ```bash
+  row show cluster
+  ```
+* Show the configuration of a specific cluster:
+  ```bash
+  row show cluster --cluster=anvil
+  ```
+* Show all clusters:
+  ```bash
+  row show cluster --all
+  ```

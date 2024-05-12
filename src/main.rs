@@ -1,3 +1,6 @@
+// Copyright (c) 2024 The Regents of the University of Michigan.
+// Part of row, released under the BSD 3-Clause License.
+
 #![warn(clippy::pedantic)]
 
 use clap::Parser;
@@ -67,6 +70,9 @@ fn main_detail() -> Result<(), Box<dyn Error>> {
     let mut multi_progress_container = MultiProgressContainer::new(multi_progress.clone());
 
     match options.command {
+        Some(Commands::Init(args)) => {
+            cli::init::init(&options.global, &args, &mut output)?;
+        }
         Some(Commands::Show(show)) => match show {
             ShowCommands::Status(args) => cli::status::status(
                 &options.global,
@@ -96,6 +102,9 @@ fn main_detail() -> Result<(), Box<dyn Error>> {
             &mut multi_progress_container,
             &mut output,
         )?,
+        Some(Commands::Clean(args)) => {
+            cli::clean::clean(&options.global, &args, &mut multi_progress_container)?;
+        }
         None => (),
     }
 
