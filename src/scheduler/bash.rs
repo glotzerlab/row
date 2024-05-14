@@ -96,10 +96,14 @@ export ACTION_NAME="{}"
 export ACTION_PROCESSES="{}"
 export ACTION_WALLTIME_IN_MINUTES="{}"
 "#,
-            self.cluster_name, self.action.name, self.total_processes, self.walltime_in_minutes,
+            self.cluster_name,
+            self.action.name(),
+            self.total_processes,
+            self.walltime_in_minutes,
         );
 
-        if let Processes::PerDirectory(processes_per_directory) = self.action.resources.processes {
+        if let Processes::PerDirectory(processes_per_directory) = self.action.resources.processes()
+        {
             let _ = writeln!(
                 result,
                 "export ACTION_PROCESSES_PER_DIRECTORY=\"{processes_per_directory}\"",
@@ -141,7 +145,7 @@ export ACTION_WALLTIME_IN_MINUTES="{}"
             );
         }
 
-        let action_name = &self.action.name;
+        let action_name = self.action.name();
         let row_executable = env::current_exe().map_err(Error::FindCurrentExecutable)?;
         let row_executable = row_executable.to_str().expect("UTF-8 path to executable.");
         let _ = write!(
@@ -154,20 +158,20 @@ trap 'printf %s\\n "${{directories[@]}}" | {row_executable} scan --no-progress -
     }
 
     fn execution(&self) -> Result<String, Error> {
-        let contains_directory = self.action.command.contains("{directory}");
-        let contains_directories = self.action.command.contains("{directories}");
+        let contains_directory = self.action.command().contains("{directory}");
+        let contains_directories = self.action.command().contains("{directories}");
         if contains_directory && contains_directories {
             return Err(Error::ActionContainsMultipleTemplates(
-                self.action.name.clone(),
+                self.action.name().into(),
             ));
         }
 
         // Build up launcher prefix
         let mut launcher_prefix = String::new();
         let mut process_launchers = 0;
-        for launcher in &self.action.launchers {
+        for launcher in self.action.launchers() {
             let launcher = self.launchers.get(launcher).ok_or_else(|| {
-                Error::LauncherNotFound(launcher.clone(), self.action.name.clone())
+                Error::LauncherNotFound(launcher.clone(), self.action.name().into())
             })?;
             launcher_prefix
                 .push_str(&launcher.prefix(&self.action.resources, self.directories.len()));
@@ -178,16 +182,16 @@ trap 'printf %s\\n "${{directories[@]}}" | {row_executable} scan --no-progress -
 
         if self.total_processes > 1 && process_launchers == 0 {
             return Err(Error::NoProcessLauncher(
-                self.action.name.clone(),
+                self.action.name().into(),
                 self.total_processes,
             ));
         }
         if process_launchers > 1 {
-            return Err(Error::TooManyProcessLaunchers(self.action.name.clone()));
+            return Err(Error::TooManyProcessLaunchers(self.action.name().into()));
         }
 
         if contains_directory {
-            let command = self.action.command.replace("{directory}", "$directory");
+            let command = self.action.command().replace("{directory}", "$directory");
             Ok(format!(
                 r#"
 for directory in "${{directories[@]}}"
@@ -199,7 +203,7 @@ done
         } else if contains_directories {
             let command = self
                 .action
-                .command
+                .command()
                 .replace("{directories}", r#""${directories[@]}""#);
             Ok(format!(
                 r#"
@@ -207,7 +211,7 @@ done
 "#
             ))
         } else {
-            Err(Error::ActionContainsNoTemplate(self.action.name.clone()))
+            Err(Error::ActionContainsNoTemplate(self.action.name().into()))
         }
     }
 
@@ -243,7 +247,7 @@ impl Scheduler for Bash {
         directories: &[PathBuf],
         should_terminate: Arc<AtomicBool>,
     ) -> Result<Option<u32>, Error> {
-        debug!("Executing '{}' in bash.", action.name);
+        debug!("Executing '{}' in bash.", action.name());
         let script = self.make_script(action, directories)?;
 
         let mut child = Command::new("bash")
@@ -283,7 +287,7 @@ impl Scheduler for Bash {
                 },
                 Some(code) => format!("exited with code {code}"),
             };
-            return Err(Error::ExecuteAction(action.name.clone(), message));
+            return Err(Error::ExecuteAction(action.name().into(), message));
         }
 
         Ok(None)
@@ -318,18 +322,18 @@ mod tests {
 
     fn setup() -> (Action, Vec<PathBuf>, HashMap<String, Launcher>) {
         let resources = Resources {
-            processes: Processes::PerDirectory(2),
+            processes: Some(Processes::PerDirectory(2)),
             threads_per_process: Some(4),
             gpus_per_process: Some(1),
-            walltime: Walltime::PerSubmission(
+            walltime: Some(Walltime::PerSubmission(
                 Duration::new(true, 0, 240, 0).expect("Valid duration."),
-            ),
+            )),
         };
 
         let action = Action {
-            name: "action".to_string(),
-            command: "command {directory}".to_string(),
-            launchers: vec!["mpi".into()],
+            name: Some("action".to_string()),
+            command: Some("command {directory}".to_string()),
+            launchers: Some(vec!["mpi".into()]),
             resources,
             ..Action::default()
         };
@@ -415,7 +419,7 @@ mod tests {
     #[parallel]
     fn execution_directories() {
         let (mut action, directories, launchers) = setup();
-        action.command = "command {directories}".to_string();
+        action.command = Some("command {directories}".to_string());
 
         let script = BashScriptBuilder::new("cluster", &action, &directories, &launchers)
             .build()
@@ -429,9 +433,9 @@ mod tests {
     #[parallel]
     fn execution_openmp() {
         let (mut action, directories, launchers) = setup();
-        action.resources.processes = Processes::PerSubmission(1);
-        action.launchers = vec!["openmp".into()];
-        action.command = "command {directories}".to_string();
+        action.resources.processes = Some(Processes::PerSubmission(1));
+        action.launchers = Some(vec!["openmp".into()]);
+        action.command = Some("command {directories}".to_string());
 
         let script = BashScriptBuilder::new("cluster", &action, &directories, &launchers)
             .build()
@@ -445,8 +449,8 @@ mod tests {
     #[parallel]
     fn execution_mpi() {
         let (mut action, directories, launchers) = setup();
-        action.launchers = vec!["mpi".into()];
-        action.command = "command {directories}".to_string();
+        action.launchers = Some(vec!["mpi".into()]);
+        action.command = Some("command {directories}".to_string());
 
         let script = BashScriptBuilder::new("cluster", &action, &directories, &launchers)
             .build()
@@ -462,7 +466,7 @@ mod tests {
     #[parallel]
     fn command_errors() {
         let (mut action, directories, launchers) = setup();
-        action.command = "command {directory} {directories}".to_string();
+        action.command = Some("command {directory} {directories}".to_string());
 
         let result = BashScriptBuilder::new("cluster", &action, &directories, &launchers).build();
 
@@ -471,7 +475,7 @@ mod tests {
             Err(Error::ActionContainsMultipleTemplates { .. })
         ));
 
-        action.command = "command".to_string();
+        action.command = Some("command".to_string());
 
         let result = BashScriptBuilder::new("cluster", &action, &directories, &launchers).build();
 
@@ -504,9 +508,10 @@ mod tests {
     #[parallel]
     fn more_variables() {
         let (mut action, directories, launchers) = setup();
-        action.resources.processes = Processes::PerSubmission(10);
-        action.resources.walltime =
-            Walltime::PerDirectory(Duration::new(true, 0, 60, 0).expect("Valid duration."));
+        action.resources.processes = Some(Processes::PerSubmission(10));
+        action.resources.walltime = Some(Walltime::PerDirectory(
+            Duration::new(true, 0, 60, 0).expect("Valid duration."),
+        ));
         action.resources.threads_per_process = None;
         action.resources.gpus_per_process = None;
 
@@ -547,8 +552,8 @@ mod tests {
     #[parallel]
     fn launcher_required() {
         let (mut action, directories, launchers) = setup();
-        action.launchers = vec![];
-        action.command = "command {directories}".to_string();
+        action.launchers = Some(vec![]);
+        action.command = Some("command {directories}".to_string());
 
         let result = BashScriptBuilder::new("cluster", &action, &directories, &launchers).build();
 
@@ -559,9 +564,9 @@ mod tests {
     #[parallel]
     fn too_many_launchers() {
         let (mut action, directories, launchers) = setup();
-        action.resources.processes = Processes::PerSubmission(1);
-        action.launchers = vec!["mpi".into(), "mpi".into()];
-        action.command = "command {directories}".to_string();
+        action.resources.processes = Some(Processes::PerSubmission(1));
+        action.launchers = Some(vec!["mpi".into(), "mpi".into()]);
+        action.command = Some("command {directories}".to_string());
 
         let result = BashScriptBuilder::new("cluster", &action, &directories, &launchers).build();
 

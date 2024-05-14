@@ -61,9 +61,11 @@ pub(crate) fn evaluate_json_comparison(
 ) -> Option<bool> {
     #[allow(clippy::match_same_arms)]
     match (comparison, partial_cmp_json_values(a, b)) {
-        (Comparison::EqualTo, Some(Ordering::Equal)) => Some(true),
-        (Comparison::GreaterThan, Some(Ordering::Greater)) => Some(true),
         (Comparison::LessThan, Some(Ordering::Less)) => Some(true),
+        (Comparison::LessThanOrEqualTo, Some(Ordering::Less | Ordering::Equal)) => Some(true),
+        (Comparison::EqualTo, Some(Ordering::Equal)) => Some(true),
+        (Comparison::GreaterThanOrEqualTo, Some(Ordering::Greater | Ordering::Equal)) => Some(true),
+        (Comparison::GreaterThan, Some(Ordering::Greater)) => Some(true),
         (_, None) => None,
         (_, _) => Some(false),
     }
@@ -164,6 +166,22 @@ mod tests {
             Some(true)
         );
         assert_eq!(
+            evaluate_json_comparison(
+                &Comparison::GreaterThanOrEqualTo,
+                &Value::from(5),
+                &Value::from(5)
+            ),
+            Some(true)
+        );
+        assert_eq!(
+            evaluate_json_comparison(
+                &Comparison::LessThanOrEqualTo,
+                &Value::from(5),
+                &Value::from(5)
+            ),
+            Some(true)
+        );
+        assert_eq!(
             evaluate_json_comparison(&Comparison::EqualTo, &Value::from(5), &Value::from(10)),
             Some(false)
         );
@@ -172,8 +190,40 @@ mod tests {
             Some(false)
         );
         assert_eq!(
+            evaluate_json_comparison(
+                &Comparison::GreaterThanOrEqualTo,
+                &Value::from(5),
+                &Value::from(10)
+            ),
+            Some(false)
+        );
+        assert_eq!(
+            evaluate_json_comparison(
+                &Comparison::GreaterThanOrEqualTo,
+                &Value::from(6),
+                &Value::from(5)
+            ),
+            Some(true)
+        );
+        assert_eq!(
             evaluate_json_comparison(&Comparison::LessThan, &Value::from(5), &Value::from(10)),
             Some(true)
+        );
+        assert_eq!(
+            evaluate_json_comparison(
+                &Comparison::LessThanOrEqualTo,
+                &Value::from(5),
+                &Value::from(10)
+            ),
+            Some(true)
+        );
+        assert_eq!(
+            evaluate_json_comparison(
+                &Comparison::LessThanOrEqualTo,
+                &Value::from(5),
+                &Value::from(4)
+            ),
+            Some(false)
         );
     }
 }

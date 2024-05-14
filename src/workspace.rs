@@ -110,8 +110,8 @@ pub fn find_completed_directories(
 
     let mut action_products: Vec<(String, Vec<String>)> = Vec::new();
     for action in &workflow.action {
-        if !action.products.is_empty() {
-            action_products.push((action.name.clone(), action.products.clone()));
+        if !action.products().is_empty() {
+            action_products.push((action.name().into(), action.products().into()));
         }
     }
 

@@ -65,7 +65,7 @@ walltime.per_directory = "00:10:00"
 
 # Execute MPI parallel calculations
 
-To launch MPI enabled applications, request more than one *process* and request the
+To launch MPI enabled applications, request more than one *process* and the
 `"mpi"` launcher. `launchers = ["mpi"]` will add the appropriate MPI launcher prefix
 before your command (e.g. `srun --ntasks 16 parallel_application $directory`).
 

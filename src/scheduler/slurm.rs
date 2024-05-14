@@ -45,7 +45,7 @@ impl Scheduler for Slurm {
         let mut preamble = String::with_capacity(512);
         let mut user_partition = &None;
 
-        write!(preamble, "#SBATCH --job-name={}", action.name).expect("valid format");
+        write!(preamble, "#SBATCH --job-name={}", action.name()).expect("valid format");
         let _ = match directories.first() {
             Some(directory) => match directories.len() {
                 0..=1 => writeln!(preamble, "-{}", directory.display()),
@@ -59,7 +59,7 @@ impl Scheduler for Slurm {
             None => writeln!(preamble),
         };
 
-        let _ = writeln!(preamble, "#SBATCH --output={}-%j.out", action.name);
+        let _ = writeln!(preamble, "#SBATCH --output={}-%j.out", action.name());
 
         if let Some(submit_options) = action.submit_options.get(&self.cluster.name) {
             user_partition = &submit_options.partition;
@@ -141,7 +141,7 @@ impl Scheduler for Slurm {
         directories: &[PathBuf],
         should_terminate: Arc<AtomicBool>,
     ) -> Result<Option<u32>, Error> {
-        debug!("Submtitting '{}' with sbatch.", action.name);
+        debug!("Submtitting '{}' with sbatch.", action.name());
 
         // output() below is blocking with no convenient way to interrupt it.
         // If the user pressed ctrl-C, let the current call to submit() finish
@@ -190,7 +190,7 @@ impl Scheduler for Slurm {
                 },
                 Some(code) => format!("sbatch exited with code {code}"),
             };
-            Err(Error::SubmitAction(action.name.clone(), message))
+            Err(Error::SubmitAction(action.name().into(), message))
         }
     }
 
@@ -286,9 +286,9 @@ mod tests {
 
     fn setup() -> (Action, Vec<PathBuf>, Slurm) {
         let action = Action {
-            name: "action".to_string(),
-            command: "command {directory}".to_string(),
-            launchers: vec!["mpi".into()],
+            name: Some("action".to_string()),
+            command: Some("command {directory}".to_string()),
+            launchers: Some(vec!["mpi".into()]),
             ..Action::default()
         };
 
@@ -328,7 +328,7 @@ mod tests {
     fn ntasks() {
         let (mut action, directories, slurm) = setup();
 
-        action.resources.processes = Processes::PerDirectory(3);
+        action.resources.processes = Some(Processes::PerDirectory(3));
 
         let script = slurm
             .make_script(&action, &directories)
@@ -483,7 +483,7 @@ mod tests {
 
         let slurm = Slurm::new(cluster, launchers.by_cluster("cluster"));
 
-        action.resources.processes = Processes::PerSubmission(81);
+        action.resources.processes = Some(Processes::PerSubmission(81));
 
         let script = slurm
             .make_script(&action, &directories)
@@ -511,7 +511,7 @@ mod tests {
 
         let slurm = Slurm::new(cluster, launchers.by_cluster("cluster"));
 
-        action.resources.processes = Processes::PerSubmission(81);
+        action.resources.processes = Some(Processes::PerSubmission(81));
         action.resources.gpus_per_process = Some(1);
 
         let script = slurm

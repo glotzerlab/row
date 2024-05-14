@@ -105,10 +105,10 @@ pub fn status<W: Write>(
 
     let mut matching_action_count = 0;
     for action in &project.workflow().action {
-        if !action_matcher.matches(&action.name) {
+        if !action_matcher.matches(action.name()) {
             trace!(
                 "Skipping action '{}'. It does not match the pattern '{}'.",
-                action.name,
+                action.name(),
                 args.action
             );
             continue;
@@ -136,7 +136,7 @@ pub fn status<W: Write>(
 
         table
             .rows
-            .push(Row::Items(make_row(&action.name, &status, &cost)));
+            .push(Row::Items(make_row(action.name(), &status, &cost)));
     }
 
     if matching_action_count == 0 {

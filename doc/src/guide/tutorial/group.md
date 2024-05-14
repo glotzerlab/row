@@ -11,7 +11,7 @@ on a **group** of directories.
 So far, this tutorial has demonstrated small toy examples. In practice, any workflow
 that you need to execute on a cluster likely has hundreds or thousands of directories -
 each with different parameters. You could try to encode these parameters into the
-directory names, but *please don't*. This quickly becomes unmanageable. Instead, you
+directory names, but *please don't* - it quickly becomes unmanageable. Instead, you
 should include a [JSON](https://www.json.org) file in each directory that identifies
 its **value**.
 
@@ -56,9 +56,9 @@ This workflow will apply the `process_point` action to the directories where
 `include` is an array. Each element is a length 3 array with the contents: `[JSON
 pointer, operator, operand]`. Think of each element as an expression. The [*JSON
 pointer*](../concepts/json-pointers.md) is a string that reads a particular value
-from the directory's **value**. The *operator* is a comparison operator: `"equal_to",
-"greater_than", or "less_than"`. The *operand* is the value to compare to. Together,
-these 3 elements make a *condition*.
+from the directory's **value**. The *operator* is a comparison operator: `"<"`, `"<="`,
+`"=="`, `">="`, or `">"`. The *operand* is the value to compare to. Together, these 3
+elements make a *condition*.
 
 **Row** applies these *conditions* to all directories in the workspace. When all
 *conditions* are true, the directory is included in the action's **groups**.

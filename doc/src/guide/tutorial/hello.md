@@ -54,8 +54,8 @@ Submitting 1 job that may cost up to 3 CPU-hours.
 Proceed? [Y/n]:
 ```
 
-The cost is 3 CPU-hours because **action** defaults to 1 CPU-hour per directory.
-Later sections in this tutorial will cover resource costs in more detail.
+The cost is 3 CPU-hours because **action** defaults to 1 CPU-hour per directory
+(later sections in this tutorial will cover resource costs in more detail).
 `echo "Hello, {directory}!"` is certainly not going to take that long, so confirm
 with `y` and then press enter. You should then see the action execute:
 ```plaintext

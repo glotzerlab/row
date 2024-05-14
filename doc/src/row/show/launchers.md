@@ -9,7 +9,7 @@ Print the [launchers](../../launchers/index.md) defined for the current cluster 
 cluster given in `--cluster`). The output is TOML formatted.
 
 This includes the user-provided launchers in [`launchers.toml`](../../launchers/index.md)
-and the built-in launchers (or the user-provided overrides).
+and the built-in launchers.
 
 ## `[OPTIONS]`
 

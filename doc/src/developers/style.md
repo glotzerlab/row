@@ -3,7 +3,8 @@
 ## Rust
 
 **Row's** rust code follows the [Rust style guide][1]. **Row's** [pre-commit][2]
-configuration applies style fixes with `rustfmt` checks for common errors with `clippy`.
+configuration applies style fixes with `rustfmt` and checks for common errors with
+`clippy`.
 
 [1]: https://doc.rust-lang.org/style-guide/index.html
 [2]: https://pre-commit.com/
@@ -16,7 +17,7 @@ configuration applies style fixes with `rustfmt` checks for common errors with `
 
 Wrap **Markdown** files at 88 characters wide, except when not possible (e.g. when
 formatting a table). Follow layout and design patterns established in existing markdown
-files.
+files. Use reference-style links for long URLs.
 
 ## Spelling/grammar
 

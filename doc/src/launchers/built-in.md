@@ -6,6 +6,8 @@ You may need to add new configurations for your specific cluster or adjust the `
 launcher to match your system. Execute [`row show launchers`](../row/show/launchers.md)
 to see the current launcher configuration.
 
+## Hybrid OpenMP/MPI
+
 When using OpenMP/MPI hybrid applications, place `"openmp"` first in the list of
 launchers (`launchers = ["openmp", "mpi"]`) to generate the appropriate command:
 ```bash

@@ -177,14 +177,14 @@ impl Project {
     ) -> Result<Vec<PathBuf>, Error> {
         trace!(
             "Finding directories that action '{}' includes.",
-            &action.name
+            action.name()
         );
 
         let mut matching_directories = Vec::with_capacity(directories.len());
 
         'outer: for name in directories {
             if let Some(value) = self.state.values().get(&name) {
-                for (include, comparison, expected) in &action.group.include {
+                for (include, comparison, expected) in action.group.include() {
                     let actual = value
                         .pointer(include)
                         .ok_or_else(|| Error::JSONPointerNotFound(name.clone(), include.clone()))?;
@@ -230,7 +230,7 @@ impl Project {
         trace!(
             "Separating {} directories by status for '{}'.",
             directories.len(),
-            action.name
+            action.name()
         );
         let capacity = directories.capacity();
         let mut status = Status {
@@ -247,12 +247,12 @@ impl Project {
 
             let completed = self.state.completed();
 
-            if completed[&action.name].contains(&directory_name) {
+            if completed[action.name()].contains(&directory_name) {
                 status.completed.push(directory_name);
-            } else if self.state.is_submitted(&action.name, &directory_name) {
+            } else if self.state.is_submitted(action.name(), &directory_name) {
                 status.submitted.push(directory_name);
             } else if action
-                .previous_actions
+                .previous_actions()
                 .iter()
                 .all(|a| completed[a].contains(&directory_name))
             {
@@ -282,7 +282,7 @@ impl Project {
         trace!(
             "Separating {} directories into groups for '{}'.",
             directories.len(),
-            action.name
+            action.name()
         );
 
         if directories.is_empty() {
@@ -302,7 +302,7 @@ impl Project {
                 .ok_or_else(|| Error::DirectoryNotFound(directory_name.clone()))?;
 
             let mut sort_key = Vec::new();
-            for pointer in &action.group.sort_by {
+            for pointer in action.group.sort_by() {
                 let element = value.pointer(pointer).ok_or_else(|| {
                     Error::JSONPointerNotFound(directory_name.clone(), pointer.clone())
                 })?;
@@ -313,8 +313,8 @@ impl Project {
 
         // Sort by key when there are keys to sort by.
         let mut result = Vec::new();
-        if action.group.sort_by.is_empty() {
-            if action.group.reverse_sort {
+        if action.group.sort_by().is_empty() {
+            if action.group.reverse_sort() {
                 directories.reverse();
             }
             result.push(directories);
@@ -324,13 +324,13 @@ impl Project {
                     .expect("Valid JSON comparison")
             });
 
-            if action.group.reverse_sort {
+            if action.group.reverse_sort() {
                 directories.reverse();
             }
 
             // Split by the sort key when requested.
             #[allow(clippy::redundant_closure_for_method_calls)]
-            if action.group.split_by_sort_key {
+            if action.group.split_by_sort_key() {
                 result.extend(
                     directories
                         .chunk_by(|a, b| {
@@ -424,7 +424,7 @@ products = ["one"]
 name = "two"
 command = "c"
 products = ["two"]
-group.include = [["/i", "less_than", {}]]
+group.include = [["/i", "<", {}]]
 
 [[action]]
 name = "three"
@@ -465,10 +465,8 @@ previous_actions = ["two"]
         );
 
         let mut action = project.workflow.action[1].clone();
-        action
-            .group
-            .include
-            .push(("/i".into(), Comparison::GreaterThan, Value::from(4)));
+        let include = action.group.include.as_mut().unwrap();
+        include.push(("/i".into(), Comparison::GreaterThan, Value::from(4)));
         assert_eq!(
             project
                 .find_matching_directories(&action, all_directories.clone())
@@ -539,7 +537,7 @@ previous_actions = ["two"]
         reversed.reverse();
 
         let mut action = project.workflow.action[0].clone();
-        action.group.reverse_sort = true;
+        action.group.reverse_sort = Some(true);
         let groups = project
             .separate_into_groups(&action, all_directories.clone())
             .unwrap();
@@ -578,7 +576,7 @@ previous_actions = ["two"]
         all_directories.sort_unstable();
 
         let mut action = project.workflow.action[0].clone();
-        action.group.sort_by = vec!["/j".to_string()];
+        action.group.sort_by = Some(vec!["/j".to_string()]);
         let groups = project
             .separate_into_groups(&action, all_directories.clone())
             .unwrap();
@@ -606,8 +604,8 @@ previous_actions = ["two"]
         all_directories.sort_unstable();
 
         let mut action = project.workflow.action[0].clone();
-        action.group.sort_by = vec!["/j".to_string()];
-        action.group.split_by_sort_key = true;
+        action.group.sort_by = Some(vec!["/j".to_string()]);
+        action.group.split_by_sort_key = Some(true);
         let groups = project
             .separate_into_groups(&action, all_directories.clone())
             .unwrap();

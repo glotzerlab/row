@@ -268,14 +268,14 @@ mod tests {
         assert_eq!(mpi.prefix(&one_proc, 1), "mpirun -n 1 ");
 
         let procs_per_directory = Resources {
-            processes: Processes::PerDirectory(2),
+            processes: Some(Processes::PerDirectory(2)),
             ..Resources::default()
         };
         assert_eq!(mpi.prefix(&procs_per_directory, 11), "mpirun -n 22 ");
         assert_eq!(mpi.prefix(&procs_per_directory, 1), "mpirun -n 2 ");
 
         let all = Resources {
-            processes: Processes::PerDirectory(6),
+            processes: Some(Processes::PerDirectory(6)),
             threads_per_process: Some(3),
             gpus_per_process: Some(8),
             ..Resources::default()
@@ -297,14 +297,14 @@ mod tests {
         assert_eq!(mpi.prefix(&one_proc, 1), "srun --ntasks=1 ");
 
         let procs_per_directory = Resources {
-            processes: Processes::PerDirectory(2),
+            processes: Some(Processes::PerDirectory(2)),
             ..Resources::default()
         };
         assert_eq!(mpi.prefix(&procs_per_directory, 11), "srun --ntasks=22 ");
         assert_eq!(mpi.prefix(&procs_per_directory, 1), "srun --ntasks=2 ");
 
         let all = Resources {
-            processes: Processes::PerDirectory(6),
+            processes: Some(Processes::PerDirectory(6)),
             threads_per_process: Some(3),
             gpus_per_process: Some(8),
             ..Resources::default()

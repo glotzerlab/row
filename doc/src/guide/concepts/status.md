@@ -1,7 +1,8 @@
 # Directory status
 
-For each action, each directory in the workspace that matches the action's
-[include condition](../../workflow/action/group.md#include) has a single status:
+Each directory in the workspace that matches the action's
+[include condition](../../workflow/action/group.md#include) has a *single* status for
+that action:
 
 | Status | Description |
 |--------|-------------|

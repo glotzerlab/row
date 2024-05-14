@@ -7,6 +7,7 @@ use indicatif::HumanCount;
 use log::{debug, info, trace, warn};
 use signal_hook::consts::{SIGINT, SIGTERM};
 use signal_hook::flag;
+use std::collections::HashSet;
 use std::error::Error;
 use std::io::prelude::*;
 use std::io::{self, IsTerminal};
@@ -65,14 +66,15 @@ pub fn submit<W: Write>(
     };
 
     let mut matching_action_count = 0;
+    let mut action_directory_set = HashSet::new();
     let mut action_groups: Vec<(&Action, Vec<Vec<PathBuf>>)> =
         Vec::with_capacity(project.workflow().action.len());
 
     for action in &project.workflow().action {
-        if !action_matcher.matches(&action.name) {
+        if !action_matcher.matches(action.name()) {
             trace!(
                 "Skipping action '{}'. It does not match the pattern '{}'.",
-                action.name,
+                action.name(),
                 args.action
             );
             continue;
@@ -86,17 +88,29 @@ pub fn submit<W: Write>(
         let status = project.separate_by_status(action, matching_directories)?;
         let groups = project.separate_into_groups(action, status.eligible)?;
 
-        if action.group.submit_whole {
+        if action.group.submit_whole() {
             let whole_groups =
                 project.separate_into_groups(action, project.state().list_directories())?;
             for group in &groups {
                 if !whole_groups.contains(group) {
                     return Err(Box::new(row::Error::PartialGroupSubmission(
-                        action.name.clone(),
+                        action.name().into(),
                     )));
                 }
             }
         }
+
+        for group in &groups {
+            for directory in group {
+                if !action_directory_set.insert((action.name.clone(), directory.clone())) {
+                    return Err(Box::new(row::Error::WouldSubmitMultipleTimes(
+                        directory.clone(),
+                        action.name().into(),
+                    )));
+                }
+            }
+        }
+
         action_groups.push((&action, groups));
     }
 
@@ -129,7 +143,7 @@ pub fn submit<W: Write>(
                 job_count,
                 if job_count == 1 { "job" } else { "jobs" },
                 cost,
-                action.name
+                action.name()
             );
         }
         total_cost = total_cost + cost;
@@ -231,7 +245,7 @@ pub fn submit<W: Write>(
             "[{}/{}] Submitting action '{}' on directory {}",
             HumanCount((index + 1) as u64),
             HumanCount(action_directories.len() as u64),
-            style(action.name.clone()).blue(),
+            style(action.name().to_string()).blue(),
             style(directories[0].display().to_string()).bold()
         );
         if directories.len() > 1 {
@@ -257,7 +271,7 @@ pub fn submit<W: Write>(
             }
             Ok(Some(job_id)) => {
                 println!("Row submitted job {job_id}.");
-                project.add_submitted(&action.name, directories, job_id);
+                project.add_submitted(action.name(), directories, job_id);
                 continue;
             }
             Ok(None) => continue,

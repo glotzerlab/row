@@ -4,47 +4,50 @@
 
 ## Anvil (Purdue)
 
-[Anvil documentation](https://www.rcac.purdue.edu/knowledge/anvil).
-
-**Row** automatically selects from the following partitions:
+**Row** automatically selects from the following partitions on [Anvil]:
 * `shared`
 * `wholenode`
 * `gpu`
 
 Other partitions may be selected manually.
 
-There is no need to set `--mem-per-*` options on Anvil as the cluster automatically
+There is no need to set `--mem-per-*` options on [Anvil] as the cluster automatically
 chooses the largest amount of memory available per core by default.
+
+> Note: The whole node partitions **require** that each job submitted request an
+> integer multiple of 128 CPU cores.
+
+[Anvil]: https://www.rcac.purdue.edu/knowledge/anvil
 
 ## Delta (NCSA)
 
-[Delta documentation](https://docs.ncsa.illinois.edu/systems/delta).
-
-**Row** automatically selects from the following partitions:
+**Row** automatically selects from the following partitions on [Delta]:
 * `cpu`
 * `gpuA100x4`
 
 Other partitions may be selected manually.
 
-Delta jobs default to a small amount of memory per core. **Row** inserts `--mem-per-cpu`
-or `--mem-per-gpu` to select the maximum amount of memory possible that allows full-node
-jobs and does not incur extra charges.
+[Delta] jobs default to a small amount of memory per core. **Row** inserts
+`--mem-per-cpu` or `--mem-per-gpu` to select the maximum amount of memory possible that
+allows full-node jobs and does not incur extra charges.
+
+[Delta]: https://docs.ncsa.illinois.edu/systems/delta
 
 ## Great Lakes (University of Michigan)
 
-[Great Lakes documentation](https://arc.umich.edu/greatlakes/).
-
-**Row** automatically selects from the following partitions:
+**Row** automatically selects from the following partitions on [Great Lakes]:
 * `standard`
 * `gpu_mig40,gpu`
 * `gpu`
 
 Other partitions may be selected manually.
 
-Great Lakes jobs default to a small amount of memory per core. **Row** inserts
+[Great Lakes] jobs default to a small amount of memory per core. **Row** inserts
 `--mem-per-cpu` or `--mem-per-gpu` to select the maximum amount of memory possible that
 allows full-node jobs and does not incur extra charges.
 
 > Note: The `gpu_mig40,gpu` partition is selected only when there is one GPU per job.
 > This is a combination of 2 partitions which decreases queue wait time due to the
 > larger number of nodes that can run your job.
+
+[Great Lakes]: https://arc.umich.edu/greatlakes/

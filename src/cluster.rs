@@ -446,7 +446,7 @@ mod tests {
         let partition = Partition::default();
 
         let resources = Resources {
-            processes: Processes::PerDirectory(1),
+            processes: Some(Processes::PerDirectory(1)),
             threads_per_process: Some(2),
             gpus_per_process: Some(3),
             ..Resources::default()
@@ -461,7 +461,7 @@ mod tests {
         setup();
 
         let resources = Resources {
-            processes: Processes::PerDirectory(1),
+            processes: Some(Processes::PerDirectory(1)),
             threads_per_process: Some(2),
             gpus_per_process: Some(3),
             ..Resources::default()
@@ -564,12 +564,12 @@ mod tests {
         };
 
         let cpu_resources = Resources {
-            processes: Processes::PerDirectory(1),
+            processes: Some(Processes::PerDirectory(1)),
             ..Resources::default()
         };
 
         let gpu_resources = Resources {
-            processes: Processes::PerDirectory(1),
+            processes: Some(Processes::PerDirectory(1)),
             gpus_per_process: Some(1),
             ..Resources::default()
         };

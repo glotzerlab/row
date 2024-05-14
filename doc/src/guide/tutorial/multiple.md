@@ -63,7 +63,7 @@ Execute:
 {{#include hello.sh:submit2}}
 ```
 
-Go ahead, run `row show status` and see if the output is what you expect.
+Run `row show status` and see if the output is what you expect.
 
 ## Getting more detailed information
 

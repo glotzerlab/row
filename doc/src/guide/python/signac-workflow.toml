@@ -1,14 +1,16 @@
 [workspace]
 value_file = "signac_statepoint.json"
 
+[default.action]
+command = "python actions.py --action $ACTION_NAME {directories}"
+
 [[action]]
 name = "square"
-command = "python actions.py --action $ACTION_NAME {directories}"
 products = ["square.out"]
 resources.walltime.per_directory = "00:00:01"
 
 [[action]]
 name = "compute_sum"
-command = "python actions.py --action $ACTION_NAME {directories}"
 previous_actions = ["square"]
 resources.walltime.per_directory = "00:00:01"
+group.submit_whole = true

@@ -6,7 +6,7 @@ that it submits.
 Example:
 ```toml
 [action.group]
-include = [["/subproject", "equal_to", "project_one"]]
+include = [["/subproject", "==", "project_one"]]
 sort_by = ["/value"]
 split_by_sort_key = true
 maximum_size = 16
@@ -25,24 +25,23 @@ groups of directories included in a given action.
 all be true for a directory to be included in this group. Each condition is an **array**
 of three elements: The *JSON pointer*, *the operator*, and the *operand*. The [JSON
 pointer](../../guide/concepts/json-pointers.md) points to a specific element
-from the directory's value. The operator may be `"less_than"`, `"greater_than"`, or
-`"equal_to"`.
+from the directory's value. The operator may be `"<"`, `"<="`, `"=="`, `">="`, or `">"`.
 
 For example, select all directories where a value is in the given range:
 ```toml
-include = [["/value, "less_than", 0.9], ["/value", "greater_than", 0.2]]
+include = [["/value", ">", 0.2], ["/value", "<", 0.9]]
 ```
 Choose directories where an array element is equal to a specific value:
 ```toml
-include = [["/array/1", "equal_to", 12]]
+include = [["/array/1", "==", 12]]
 ```
 Match against strings:
 ```toml
-include = [["/map/name", "equal_to", "string"]]
+include = [["/map/name", "==", "string"]]
 ```
 Compare by array:
 ```toml
-include = [["/array", "eqal_to", [1, "string", 14.0]]]
+include = [["/array", "==", [1, "string", 14.0]]]
 ```
 
 Both operands **must** have the same data type. The JSON pointer must be present in the
@@ -61,8 +60,8 @@ pointers to specific keys in objects.
 
 `action.group.sort_by`: **array** of **strings** - An array of
 [JSON pointers](../../guide/concepts/json-pointers.md) to elements of each directory's
-value. **Row** will sort directories matched by `include` by these quantities
-*lexicographically*. For example,
+value. **Row** will sort directories by these quantities *lexicographically*. For
+example,
 ```toml
 action.group.sort_by = ["/a", "/b"]
 ```
@@ -100,10 +99,9 @@ by `include` are placed in a single group.
 
 `action.group.maximum_size`: **integer** - Maximum size of a group.
 
-**Row** further splits the groups into smaller groups up to the given `maximum_size`.
-When the number of directories is not evenly divisible by `maximum_size`, **row**
-creates the first **n** groups with `maximum_size` elements and places one remainder
-group at the end.
+Split included directories into groups up to the given `maximum_size`. When the number
+of directories is not evenly divisible by `maximum_size`, **row** creates the first
+**n** groups with `maximum_size` elements and places one remainder group at the end.
 
 For example, with `maximum_size = 2` the directories: `[dir1, dir2, dir3, dir4, dir5]`
 

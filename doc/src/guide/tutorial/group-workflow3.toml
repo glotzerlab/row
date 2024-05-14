@@ -5,11 +5,11 @@ value_file = "value.json"
 name = "process_point"
 command = "echo {directory}"
 [action.group]
-include = [["/type", "equal_to", "point"]]
+include = [["/type", "==", "point"]]
 sort_by = ["/x"]
 
 [[action]]
 name = "process_letter"
 command = "echo {directory}"
 [action.group]
-include = [["/type", "equal_to", "letter"]]
+include = [["/type", "==", "letter"]]

@@ -23,3 +23,5 @@ For all other cases, refer to the documentation of your application or library. 
 provide some way to set the number of threads/processes. Use the environment variable
 `ACTION_THREADS_PER_PROCESS` to ensure that the number of executed threads matches that
 requested.
+
+TODO: Provide a concrete example using the Python multiprocessing library

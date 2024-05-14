@@ -7,14 +7,14 @@ row [OPTIONS] <COMMAND>
 
 `<COMMAND>` must be one of:
 * [`init`](init.md)
-* [`show`](show/index.md)
 * [`submit`](submit.md)
+* [`show`](show/index.md)
 * [`scan`](scan.md)
 * [`clean`](clean.md)
 
 <div class="warning">
-You should execute only <b>one</b> instance of <b>row</b> at a time for a given project.
-<b>Row</b> maintains a cache and concurrent invocations may corrupt it. The
+You should execute at most <b>one</b> instance of <b>row</b> at a time for a given
+project. <b>Row</b> maintains a cache and concurrent invocations may corrupt it. The
 <code>scan</code> command is excepted from this rule.
 </div>
 

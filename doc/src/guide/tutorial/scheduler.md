@@ -112,7 +112,7 @@ pid 830675's current affinity list: 99
 > your **cluster's** documentation to see specific details on how jobs are allocated
 > to nodes and charged for resource usage. Remember, it is **YOUR RESPONSIBILITY** (not
 > **row's**) to understand whether `--ntasks=1` costs 1 CPU-hour per hour or more (e.g.
-> 128) CPU-hours per hour. If your cluster lacks a *shared* partition, then you need to
+> 128 CPU-hours per hour). If your cluster lacks a *shared* partition, then you need to
 > structure your **actions** and **groups** in such a way to use all the cores you are
 > given or else the resources are wasted.
 
@@ -142,7 +142,7 @@ Submit this script and see if the output is what you expect.
 You can also request GPUs, memory, licenses, and others. In the next section, you will
 learn how to use **row** to automatically generate job scripts that request **CPUs**,
 **GPUs**, and **time**. You can set
-[`custom` submit options](../../workflow/submit-options.md) to request others.
+[`custom` submit options](../../workflow/action/submit-options.md) to request others.
 
 Most **clusters** also have separate **partitions** (requested with
 `--partition=<partition>` for certain resources (e.g. GPU). See your **cluster's**

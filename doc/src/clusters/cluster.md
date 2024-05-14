@@ -38,10 +38,10 @@ on this cluster. The table **must** have one of the following keys:
 * `by_environment`: **array** of two strings - Identify the cluster when the environment
   variable `by_environment[0]` is set and equal to `by_environment[1]`.
 * `always`: **bool** - Set to `true` to always identify this cluster. When `false`,
-  this cluster can only be chosen by an explicit `--cluster` option.
+  this cluster may only be chosen by an explicit `--cluster` option.
 
 > Note: The *first* cluster in the list that sets `identify.always = true` will prevent
-> any later cluster from being identified.
+> any later cluster from being identified (except by explicit `--cluster=name`).
 
 ## scheduler
 
@@ -87,16 +87,18 @@ will pass this option to the scheduler. For example SLURM schedulers will set
 
 ### cpus_per_node
 
-`cluster.partition.cpus_per_node`: **string** - Number of CPUs per node. When
-`cpus_per_node` is not set, **row** will ask the scheduler to schedule only a given
-number of tasks. In this case, some schedulers are free to spread tasks among any
-number of nodes (for example, shared partitions on Slurm schedulers).
+`cluster.partition.cpus_per_node`: **string** - Number of CPUs per node.
 
-When `cpus_per_node` is set, **row** will request the minimal number of nodes needed
-to satisfy `n_nodes * cpus_per_node >= total_cpus`. This may result in longer queue
-times, but will lead to more stable performance for users.
+When `cpus_per_node` is not set, **row** will request `n_processes` tasks. In this case,
+some schedulers are free to spread tasks among any number of nodes (for example, shared
+partitions on Slurm schedulers).
 
-Set `cpus_per_node` only when all nodes in the partition have the same number of CPUs.
+When `cpus_per_node` is set, **row** will **also** request the minimal number of nodes
+needed to satisfy `n_nodes * cpus_per_node >= total_cpus`. This may result in longer
+queue times, but will lead to more stable performance for users.
+
+> Note: Set `cpus_per_node` only when all nodes in the partition have the same number
+> of CPUs.
 
 ### minimum_gpus_per_job
 
@@ -131,7 +133,7 @@ will pass this option to the scheduler. For example SLURM schedulers will set
 ### gpus_per_node
 
 `cluster.partition.gpus_per_node`: **string** - Number of GPUs per node. Like
-`cpus_per_node` but used on jobs that request GPUs.
+`cpus_per_node` but used when jobs request GPUs.
 
 ### prevent_auto_select
 
@@ -140,6 +142,6 @@ automatically selecting this partition.
 
 ### account_suffix
 
-`cluster.partition.account_suffix`: **string** - Set to provide an account suffix
-when submitting jobs to this partition. Useful when clusters define separate
-`aacount-cpu` and `account-gpu` accounts.
+`cluster.partition.account_suffix`: **string** - An account suffix when submitting jobs
+to this partition. Useful when clusters define separate `account-cpu` and `account-gpu`
+accounts.

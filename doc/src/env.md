@@ -1,7 +1,6 @@
 # Environment variables
 
-> Note: Environment variables that influence the execution of **row** are documented in
-> [the command line options](row/index.md).
+## In job scripts
 
 **Row** sets the following environment variables in generated job scripts:
 
@@ -14,3 +13,18 @@
 | `ACTION_PROCESSES_PER_DIRECTORY` | Set to the value of `action.resources.processes_per_directory`. Unset when `processes_per_submission`.|
 | `ACTION_THREADS_PER_PROCESS` | Set to the value of `action.resources.threads_per_process`. Unset when `threads_per_process` is omitted. |
 | `ACTION_GPUS_PER_PROCESS` | Set to the value of `action.resources.gpus_per_process`. Unset when `gpus_per_process` is omitted. |
+
+# Set row options
+
+Set any of these environment variables to provide default values for
+[command line options].
+
+| Environment variable | Option |
+|----------------------|-------------|
+| `ROW_CLEAR_PROGRESS`| --clear-progress |
+| `ROW_CLUSTER` | --cluster |
+| `ROW_COLOR` | --color |
+| `ROW_IO_THREADS` | --io-threads |
+| `ROW_NO_PROGRESS` | --no-progress |
+
+[command line options]: row/index.md

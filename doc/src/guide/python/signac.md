@@ -12,7 +12,7 @@ project and add the lines:
 value_file = "signac_statepoint.json"
 ```
 
-That is all. Now you can use any values in your state points to form **groups**.
+Now you can use any values in your state points to form **groups**.
 
 > Note: **signac** has a rich command line interface as well. You should consider using
 > **signac** even if you are not a Python user.

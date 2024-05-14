@@ -8,7 +8,11 @@ row submit [OPTIONS] [DIRECTORIES]
 `row submit` submits jobs to the scheduler. First it determines the
 [status](../guide/concepts/status.md) of all the given directories for the selected
 actions. Then it forms [groups](../workflow/action/group.md) and submits one job for
-each group. Pass `--dry-run` to see the script(s) that will be submitted.
+each group. Pass `--dry-run` to see the script(s) that will be submitted. Execute
+```
+row show directories action --eligible
+```
+to see the specific directory groups that will be submitted.
 
 ## `[DIRECTORIES]`
 

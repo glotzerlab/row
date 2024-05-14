@@ -16,8 +16,7 @@ walltime.per_submission = "04:00:00"
 
 `action.resources.processes`: **table** - Set the number of processes this action
 will execute on (launched by `mpi` or similarly capable launcher). The table **must**
-have one of two keys: `per_submission` or `per_directory` which both have **integer**
-values.
+have one of two keys: `per_submission` or `per_directory`.
 
 Examples:
 ```toml
@@ -27,7 +26,7 @@ processes.per_submission = 16
 processes.per_directory = 8
 ```
 
-When set to `per_submission`, **row** always asks the scheduler to allocate the given
+When set to `per_submission`, **row** asks the scheduler to allocate the given
 number of processes for each job. When set to `per_directory`, **row** requests the
 given value multiplied by the number of directories in the submission group. Use
 `per_submission` when your action loops over directories and reuses the same processes
@@ -53,10 +52,9 @@ from the scheduler. Most schedulers default to 0 GPUs per process in this case.
 ## walltime
 
 `action.resources.walltime`: **table** - Set the walltime that this action takes to
-execute. The table **must** have one of two keys: `per_submission` or `per_directory`
-which both have **string** values. Valid walltime strings include `"HH:MM:SS"`, `"D
-days, HH:MM:SS"`, and all other valid `Duration` formats parsed by
-[speedate](https://docs.rs/speedate/latest/speedate/).
+execute. The table **must** have one of two keys: `per_submission` or `per_directory`.
+Valid walltime strings include `"HH:MM:SS"`, `"D days, HH:MM:SS"`, and all other valid
+`Duration` formats parsed by [speedate](https://docs.rs/speedate/latest/speedate/).
 
 Examples:
 ```toml
@@ -66,12 +64,11 @@ walltime.per_submission = "4 days, 12:00:00"
 walltime.per_directory = "00:10:00"
 ```
 
-When set to `per_submission`, **row** always asks the scheduler to allocate the given
-walltime for each job. When set to `per_directory`, **row** requests the given value
-multiplied by the number of directories in the submission group. Use `per_submission`
-when your action parallelizes over directories and therefore takes the same amount of
-time independent of the submission group size. Use `per_directory` when your action
-loops over the directories and therefore the walltime scales with the number of
-directories.
+When set to `per_submission`, **row** asks the scheduler to allocate the given walltime
+for each job. When set to `per_directory`, **row** requests the given value multiplied
+by the number of directories in the submission group. Use `per_submission` when your
+action parallelizes over directories and therefore takes the same amount of time
+independent of the submission group size. Use `per_directory` when your action loops
+over the directories and therefore the walltime scales with the number of directories.
 
 When omitted, `walltime` defaults to `per_directories = 01:00:00`.

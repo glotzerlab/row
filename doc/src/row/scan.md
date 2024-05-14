@@ -9,7 +9,7 @@ row scan [OPTIONS] [DIRECTORIES]
 [products](../workflow/action/index.md#products) and updates the cache
 of completed directories accordingly.
 
-Under normal usage, you should not need to execute `row scan` manually.
+Under normal usage, you should not need to execute `row scan`.
 [`row submit`](submit.md) automatically scans the submitted directories after it
 executes the action's command.
 

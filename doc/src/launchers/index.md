@@ -2,9 +2,11 @@
 
 **Row** includes [built-in launchers](built-in.md) to enable OpenMP and MPI on the
 [built-in clusters](../clusters/built-in.md). You can override these configurations
-and add new launchers in the file `$HOME/.config/row/launchers.toml`. It defines how
-each **launcher** expands into a **command prefix**, with the possibility for specific
-settings on each [**cluster**](../clusters/index.md). For example, an
+and add new launchers in the file `$HOME/.config/row/launchers.toml`.
+
+The launcher configuration defines how each **launcher** expands into a **command
+prefix**, with the possibility for specific settings on each
+[**cluster**](../clusters/index.md). For example, an
 [**action**](../workflow/action/index.md) with the configuration:
 ```toml
 [[action]]

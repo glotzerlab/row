@@ -3,7 +3,7 @@
 **Row** stores cache files in `<project root>/.row` to improve performance. In most
 usage environments **row** will automatically update the cache and keep it synchronized
 with the state of the workflow and workspace. The rest of this document describes
-some scenarios where they cache may not be updated and how you fix the problem.
+some scenarios where they cache may not be updated and how you can fix the problem.
 
 ## Directory values
 
@@ -19,13 +19,13 @@ invalid when:
 
 ## Submitted jobs
 
-**Row** caches the job ID, directory, and cluster name for every job it submits
+**Row** caches the *job ID*, *directory*, and *cluster name* for every job it submits
 to a cluster via `row submit`. **Row** will be unaware of any jobs that you manually
 submit with `sbatch`.
 
 > You should submit all jobs via:
 > ```bash
-> `row submit`
+> row submit
 > ```
 
 Copying a project directory (including `.row/`) from one cluster to another (or from
@@ -34,11 +34,11 @@ access the job queue of the first, so all jobs will remain in the cache. *Submit
 jobs on the 2nd cluster will inevitably lead to changes in the submitted cache on both
 clusters that cannot be merged.
 
-> Before you copy your project directory, wait for all jobs to finish, then execute
+> Wait for all jobs to finish, then execute
 > ```bash
 > row show status
 > ```
-> to update the cache.
+> to update the cache. Now the submitted cache is empty and safe to copy.
 
 ## Completed directories
 
@@ -50,7 +50,7 @@ if:
 * *You change products* in `workflow.toml`.
 * *You change the name of an action* in `workflow.toml`.
 
-> To discover new completed directories, execute
+> To discover all completed directories, execute
 > ```bash
 > row scan
 > ```

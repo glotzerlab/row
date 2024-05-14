@@ -105,9 +105,6 @@ pub enum Error {
     PostcardSerialize(PathBuf, #[source] postcard::Error),
 
     // workflow errors
-    #[error("Found duplicate action definition '{0}'.")]
-    DuplicateAction(String),
-
     #[error("Previous action '{0}' not found in action '{1}'.")]
     PreviousActionNotFound(String, String),
 
@@ -129,6 +126,27 @@ pub enum Error {
     #[error("Cannot compare {0} and {1} while checking directory '{2}'.")]
     CannotCompareInclude(Value, Value, PathBuf),
 
+    #[error("Action at index {0} is missing `name`.")]
+    ActionMissingName(usize),
+
+    #[error("Action '{0}' is missing `command`.")]
+    ActionMissingCommand(String),
+
+    #[error("Default action must not set `from`.")]
+    DefaultActionSetsFrom(),
+
+    #[error("Action '{0}' set in `from` not found.")]
+    FromActionNotFound(String),
+
+    #[error("Cannot resolve recursive `from={0}`.")]
+    RecursiveFrom(String),
+
+    #[error("Duplicate actions '{0}' must have the same `products`.")]
+    DuplicateActionsDifferentProducts(String),
+
+    #[error("Duplicate actions '{0}' must have the same `previous_actions`.")]
+    DuplicateActionsDifferentPreviousActions(String),
+
     // submission errors
     #[error("Error encountered while executing action '{0}': {1}.")]
     ExecuteAction(String, String),
@@ -144,6 +162,9 @@ pub enum Error {
 
     #[error("Interrupted")]
     Interrupted,
+
+    #[error("'{0}' would be submitted multiple times in action '{1}'.\nCheck that duplicate actions include non-overlapping groups.")]
+    WouldSubmitMultipleTimes(PathBuf, String),
 
     // launcher errors
     #[error("Launcher '{0}' does not contain a default configuration")]

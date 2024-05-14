@@ -18,13 +18,15 @@ name = "cluster2"
 ```
 
 User-provided clusters in `$HOME/.config/row/clusters.toml` are placed first in the
-array.
+array. Execute [`row show cluster --all`](../row/show/cluster.md) to see the complete
+cluster configuration.
 
 ## Cluster identification
 
 On startup, **row** iterates over the array of clusters in order. If `--cluster` is not
 set, **row** checks the `identify` condition in the configuration. If `--cluster` is
-set, **row** checks to see if the name matches.
+set, **row** checks to see if the name matches. **Row** selects the *first* cluster
+that matches.
 
-> Note: **Row** uses the *first* such match. To override a built-in, your configuration
-> should include a cluster by the same name and `identify` condition.
+> To override a built-in, your configuration should include a cluster by the same name
+> and `identify` condition.

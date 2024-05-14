@@ -2,7 +2,7 @@
 
 Contributions are welcomed via [pull requests on GitHub][github]. Contact the **row**
 developers before starting work to ensure it meshes well with the planned development
-direction and standards set for the project.
+direction and follows standards set for the project.
 
 [github]: https://github.com/glotzerlab/gsd/row
 
@@ -17,27 +17,31 @@ assist you in designing flexible interfaces.
 
 Expensive code paths should only execute when requested.
 
+### Maintain compatibility
+
+New features should be opt-in and *preserve the behavior* of all existing user scripts.
+
 ## Version control
 
 ### Base your work off the correct branch
 
-- Base all new work on `trunk`.
+Base all bug fixes and new features on `trunk`.
 
 ### Propose a minimal set of related changes
 
-All changes in a pull request should be closely related. Multiple change sets that are
-loosely coupled should be proposed in separate pull requests.
+All changes in a pull request should be *closely related*. Multiple change sets that are
+loosely coupled should be proposed in *separate pull requests*.
 
 ### Agree to the Contributor Agreement
 
-All contributors must agree to the Contributor Agreement before their pull request can
-be merged.
+All contributors must agree to the **Contributor Agreement** before their pull request
+can be merged.
 
 ### Set your git identity
 
 Git identifies every commit you make with your name and e-mail. [Set your identity][id]
-to correctly identify your work and set it identically on all systems and accounts where
-you make commits.
+to correctly identify your work and set it *identically on all systems* and accounts
+where you make commits.
 
 [id]: http://www.git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup
 
@@ -45,12 +49,12 @@ you make commits.
 
 ### Use a consistent style
 
-The **Code style** section of the documentation sets the style guidelines for **row**
-code.
+Follow all guidelines outlined in the [Code style](style.md) section of the
+documentation.
 
 ### Document code with comments
 
-Use **Rust** documentation comments for classes, functions, etc. Also comment complex
+Write Rust documentation comments for traits, functions, etc. Also comment complex
 sections of code so that other developers can understand them.
 
 ### Compile without warnings
@@ -61,12 +65,12 @@ Your changes should compile without warnings.
 
 ### Write unit tests
 
-Add unit tests for all new functionality.
+Add unit tests for all new functionality and bug fixes.
 
-### Validity tests
+### Test validity
 
-The developer should run research-scale simulations using the new functionality and
-ensure that it behaves as intended. When appropriate, add a new test to `validate.py`.
+Run research-scale simulations using new functionality and ensure that it behaves as
+intended.
 
 ## User documentation
 
@@ -77,8 +81,7 @@ and any important user-facing change in the mdBook documentation.
 
 ### Tutorial
 
-When applicable, update or write a new tutorial.
-
+When applicable, update or write a new tutorial or how-to guide.
 
 ### Add developer to the credits
 

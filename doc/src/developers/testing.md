@@ -8,9 +8,12 @@ cargo test
 ```
 in the source directory to execute the unit and integration tests.
 
-All tests must be marked either `#[serial]` or `#[parallel]` explicitly. Some serial
-tests set environment variables and/or the current working directory, which may conflict
-with any test that is automatically run concurrently. Check for this with:
+## Writing unit tests
+
+Write tests using standard Rust conventions. All tests must be marked either `#[serial]`
+or `#[parallel]` explicitly. Some serial tests set environment variables and/or the
+current working directory, which may conflict with any test that is automatically run
+concurrently. Check for this with:
 ```bash
 rg --multiline "#\[test\]\n *fn"
 ```

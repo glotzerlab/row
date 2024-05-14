@@ -1,6 +1,6 @@
 # action
 
-`action` is an **array** where each element defines one action in your workflow.
+Each element in the `action` **array** defines one action in your workflow.
 
 Examples:
 ```toml
@@ -15,7 +15,8 @@ command = "python action_two.py {directories}"
 previous_actions = ["action_one"]
 products = ["two.data", "log.txt"]
 launchers = ["openmp", "mpi"]
-action.group.maximum_size = 8
+[action.group]
+maximum_size = 8
 [action.resources]
 processes.per_directory = 16
 threads_per_process = 4
@@ -25,7 +26,13 @@ walltime.per_submission = "04:00:00"
 ## name
 
 `action.name`: **string** - The action's name. You must set a name for each
-action.
+action. The name may be set by [from](#from).
+
+> Note: Two or more conceptually identical elements in the actions array *may* have
+> the same name. All elements with the same name **must** have identical
+> [`products`](#products) and [`previous_actions`](#previous_actions). All elements
+> with the same name **must also** select non-intersecting subsets of directories with
+> [`group.include`](group.md#include).
 
 ## command
 
@@ -62,7 +69,7 @@ command = "echo Message && python action.py {directory}"
 
 `action.launchers`: **array** of **strings** - The launchers to apply when executing a
 command. A launcher is a prefix placed before the command in the submission script. The
-cluster configuration [`clusters.toml`](../../clusters/index.md) defines what launchers
+launcher configuration [`lauchers.toml`](../../launchers/index.md) defines what launchers
 are available on each cluster and how they are invoked. The example for `action_two`
 above (`launchers = ["openmp", "mpi"]`) would expand into something like:
 ```bash
@@ -82,3 +89,37 @@ must *all* be completed before this action may be executed. When omitted,
 action produces in the directory. When *all* products are present, that
 directory has *completed* the action. When omitted, `products` defaults
 to an empty array.
+
+## `[group]`
+
+See [group](group.md).
+
+## `[resources]`
+
+See [resources](resources.md).
+
+## `[submit_options]`
+
+See [submit_options](submit-options.md).
+
+## from
+
+`action.from`: **string** - Name of the **action** to copy settings from.
+
+Every key in an `[[action]]` table (including sub-keys in `[action.group]`,
+`[action.resources]`, and `[action.submit_options]`) may be set in one of 3 locations:
+
+1. This action: `action.key[.sub_key]`.
+2. The action named by `from`: `action_from.key[.sub_key]` (when `action.from` is set).
+3. The default action: `default.action.key[.sub_key]`.
+
+The action will take on the value set in the **first** location that does not omit
+the key. When all 3 locations omit the key, the "when omitted" behavior takes effect
+(documented separately for each key).
+
+`from` is a convenient way to [submit the same action to different groups/resources].
+
+> Note: `name` and `command` may be provided by `from` or `action.default` but may not
+> be omitted entirely.
+
+[submit the same action to different groups/resources]: ../../guide/howto/same.md

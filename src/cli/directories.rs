@@ -69,25 +69,6 @@ pub fn directories<W: Write>(
 ) -> Result<(), Box<dyn Error>> {
     debug!("Showing directories.");
 
-    let mut project = Project::open(options.io_threads, &options.cluster, multi_progress)?;
-
-    let query_directories =
-        cli::parse_directories(args.directories, || Ok(project.state().list_directories()))?;
-
-    let action = project
-        .workflow()
-        .action_by_name(&args.action)
-        .ok_or_else(|| row::Error::ActionNotFound(args.action))?;
-
-    let matching_directories =
-        project.find_matching_directories(action, query_directories.clone())?;
-
-    let status = project.separate_by_status(action, matching_directories.clone())?;
-    let completed = HashSet::<PathBuf>::from_iter(status.completed.clone());
-    let submitted = HashSet::<PathBuf>::from_iter(status.submitted.clone());
-    let eligible = HashSet::<PathBuf>::from_iter(status.eligible.clone());
-    let waiting = HashSet::<PathBuf>::from_iter(status.waiting.clone());
-
     // Show directories with selected statuses.
     let mut show_completed = args.completed;
     let mut show_submitted = args.submitted;
@@ -100,21 +81,15 @@ pub fn directories<W: Write>(
         show_waiting = true;
     }
 
-    let mut selected_directories = Vec::with_capacity(matching_directories.len());
-    if show_completed {
-        selected_directories.extend(status.completed);
-    }
-    if show_submitted {
-        selected_directories.extend(status.submitted);
-    }
-    if show_eligible {
-        selected_directories.extend(status.eligible);
-    }
-    if show_waiting {
-        selected_directories.extend(status.waiting);
-    }
+    let mut project = Project::open(options.io_threads, &options.cluster, multi_progress)?;
 
-    let groups = project.separate_into_groups(action, selected_directories)?;
+    let query_directories =
+        cli::parse_directories(args.directories, || Ok(project.state().list_directories()))?;
+
+    project
+        .workflow()
+        .action_by_name(&args.action)
+        .ok_or_else(|| row::Error::ActionNotFound(args.action.clone()))?;
 
     let mut table = Table::new().with_hide_header(args.no_header);
     table.header = vec![
@@ -132,73 +107,106 @@ pub fn directories<W: Write>(
             .push(Item::new(pointer.clone(), Style::new().underlined()));
     }
 
-    for (group_idx, group) in groups.iter().enumerate() {
-        if let Some(n) = args.n_groups {
-            if group_idx >= n {
-                break;
-            }
+    for action in &project.workflow().action {
+        if action.name() != args.action {
+            continue;
         }
 
-        for directory in group {
-            // Format the directory status.
-            let status = if completed.contains(directory) {
-                Item::new("completed".to_string(), Style::new().green().italic())
-            } else if submitted.contains(directory) {
-                Item::new("submitted".to_string(), Style::new().yellow().italic())
-            } else if eligible.contains(directory) {
-                Item::new("eligible".to_string(), Style::new().blue().italic())
-            } else if waiting.contains(directory) {
-                Item::new("waiting".to_string(), Style::new().cyan().dim().italic())
-            } else {
-                panic!("Directory not found in status.")
-            };
+        let matching_directories =
+            project.find_matching_directories(action, query_directories.clone())?;
 
-            let mut row = Vec::new();
+        let status = project.separate_by_status(action, matching_directories.clone())?;
+        let completed = HashSet::<PathBuf>::from_iter(status.completed.clone());
+        let submitted = HashSet::<PathBuf>::from_iter(status.submitted.clone());
+        let eligible = HashSet::<PathBuf>::from_iter(status.eligible.clone());
+        let waiting = HashSet::<PathBuf>::from_iter(status.waiting.clone());
 
-            // The directory name
-            row.push(Item::new(
-                directory.display().to_string(),
-                Style::new().bold(),
-            ));
+        let mut selected_directories = Vec::with_capacity(matching_directories.len());
+        if show_completed {
+            selected_directories.extend(status.completed);
+        }
+        if show_submitted {
+            selected_directories.extend(status.submitted);
+        }
+        if show_eligible {
+            selected_directories.extend(status.eligible);
+        }
+        if show_waiting {
+            selected_directories.extend(status.waiting);
+        }
 
-            // Status
-            row.push(status);
+        let groups = project.separate_into_groups(action, selected_directories)?;
 
-            // Job ID
-            if show_submitted || show_completed {
-                let submitted = project.state().submitted();
+        for (group_idx, group) in groups.iter().enumerate() {
+            if let Some(n) = args.n_groups {
+                if group_idx >= n {
+                    break;
+                }
+            }
 
-                // Values
-                if let Some((cluster, job_id)) =
-                    submitted.get(&action.name).and_then(|d| d.get(directory))
-                {
-                    row.push(Item::new(format!("{cluster}/{job_id}"), Style::new()));
+            for directory in group {
+                // Format the directory status.
+                let status = if completed.contains(directory) {
+                    Item::new("completed".to_string(), Style::new().green().italic())
+                } else if submitted.contains(directory) {
+                    Item::new("submitted".to_string(), Style::new().yellow().italic())
+                } else if eligible.contains(directory) {
+                    Item::new("eligible".to_string(), Style::new().blue().italic())
+                } else if waiting.contains(directory) {
+                    Item::new("waiting".to_string(), Style::new().cyan().dim().italic())
                 } else {
-                    row.push(Item::new(String::new(), Style::new()));
+                    panic!("Directory not found in status.")
+                };
+
+                let mut row = Vec::new();
+
+                // The directory name
+                row.push(Item::new(
+                    directory.display().to_string(),
+                    Style::new().bold(),
+                ));
+
+                // Status
+                row.push(status);
+
+                // Job ID
+                if show_submitted || show_completed {
+                    let submitted = project.state().submitted();
+
+                    // Values
+                    if let Some((cluster, job_id)) =
+                        submitted.get(action.name()).and_then(|d| d.get(directory))
+                    {
+                        row.push(Item::new(format!("{cluster}/{job_id}"), Style::new()));
+                    } else {
+                        row.push(Item::new(String::new(), Style::new()));
+                    }
                 }
+
+                for pointer in &args.value {
+                    if !pointer.is_empty() && !pointer.starts_with('/') {
+                        warn!("The JSON pointer '{pointer}' does not appear valid. Did you mean '/{pointer}'?");
+                    }
+
+                    let value = project.state().values()[directory]
+                        .pointer(pointer)
+                        .ok_or_else(|| {
+                            row::Error::JSONPointerNotFound(directory.clone(), pointer.clone())
+                        })?;
+                    row.push(
+                        Item::new(value.to_string(), Style::new()).with_alignment(Alignment::Right),
+                    );
+                }
+
+                table.rows.push(Row::Items(row));
             }
 
-            for pointer in &args.value {
-                if !pointer.is_empty() && !pointer.starts_with('/') {
-                    warn!("The JSON pointer '{pointer}' does not appear valid. Did you mean '/{pointer}'?");
-                }
-
-                let value = project.state().values()[directory]
-                    .pointer(pointer)
-                    .ok_or_else(|| {
-                        row::Error::JSONPointerNotFound(directory.clone(), pointer.clone())
-                    })?;
-                row.push(
-                    Item::new(value.to_string(), Style::new()).with_alignment(Alignment::Right),
-                );
+            if !args.no_separate_groups && group_idx != groups.len() - 1 {
+                table.rows.push(Row::Separator);
             }
-
-            table.rows.push(Row::Items(row));
         }
 
-        if !args.no_separate_groups && group_idx != groups.len() - 1 {
-            table.rows.push(Row::Separator);
-        }
+        table.rows.push(Row::Separator);
     }
 
     table.write(output)?;

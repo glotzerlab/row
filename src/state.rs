@@ -180,8 +180,8 @@ impl State {
 
         // Ensure that completed has keys for all actions in the workflow.
         for action in &workflow.action {
-            if !state.completed.contains_key(&action.name) {
-                state.completed.insert(action.name.clone(), HashSet::new());
+            if !state.completed.contains_key(action.name()) {
+                state.completed.insert(action.name().into(), HashSet::new());
             }
         }
 
@@ -527,7 +527,7 @@ impl State {
     /// Remove missing completed actions and directories.
     fn remove_missing_completed(&mut self, workflow: &Workflow) {
         let current_actions: HashSet<String> =
-            workflow.action.iter().map(|a| a.name.clone()).collect();
+            workflow.action.iter().map(|a| a.name().into()).collect();
 
         let actions_to_remove: Vec<String> = self
             .completed
@@ -560,7 +560,7 @@ impl State {
     /// Remove missing submitted actions and directories.
     fn remove_missing_submitted(&mut self, workflow: &Workflow) {
         let current_actions: HashSet<String> =
-            workflow.action.iter().map(|a| a.name.clone()).collect();
+            workflow.action.iter().map(|a| a.name().into()).collect();
 
         let actions_to_remove: Vec<String> = self
             .submitted

@@ -5,7 +5,7 @@ In **row**, actions execute arbitrary **shell commands**. When your action is
 that takes directories as arguments. There are many ways you can achieve this goal.
 
 This guide will show you how to structure all of your actions in a single file:
-`actions.py`. This layout is inspired by **row's** predecessor: **signac-flow**
+`actions.py`. This layout is inspired by **row's** predecessor **signac-flow**
 and its `project.py`.
 
 > Note: If you are familiar with **signac-fow**, see [migrating from signac-flow][1]
@@ -37,12 +37,12 @@ Execute:
 ```
 to initialize the signac workspace and populate it with directories.
 
-> Note: If you aren't familiar with **signac**, then go read the [*basic* tutorial][2].
-> Come back to the **row** documentation when you get to the section on *workflows*. Or,
-> for extra credit, reimplement the **signac** tutorial workflow in **row** after you
+> Note: If you are not familiar with **signac**, then go read the [*basic* tutorial].
+> Come back to the **row** documentation when you get to the section on *workflows*.
+> For extra credit, reimplement the **signac** tutorial workflow in **row** after you
 > finish reading this guide.
 
-[2]: https://docs.signac.io/en/latest/tutorial.html#basics
+[*basic* tutorial]: https://docs.signac.io/en/latest/tutorial.html#basics
 
 ## Write actions.py
 
@@ -68,22 +68,21 @@ Next, replace the contents of `workflow.toml` with the corresponding workflow:
 {{#include signac-workflow.toml}}
 ```
 
-You should be familiar with all of these options from previous tutorials. The main point
-of interest here is that *both* actions have the same **command**:
+*Both* actions have the same **command**, set once by the
+[**default action**](../../workflow/default.md):
 ```toml
-{{#include signac-workflow.toml:6}}
+{{#include signac-workflow.toml:5}}
 ```
 
 `python actions.py` executes the `actions.py` file above. It is given the argument
 `--action $ACTION_NAME` which selects the Python function to call. Here `$ACTION_NAME`
-is an [environment variable](../../env.md) that **row** sets in job scripts. You could
-type the action name explicitly here, but then you should take extra care when copying
-and pasting commands to avoid executing the wrong action! The last arguments are given
-by `{directories}`. Unlike `{directory}` shown in previous tutorials, `{directories}`
-expands to *ALL* directories in the submitted **group**. In this way, `action.py` is
-executed only once and is free to process the list of directories in any way it chooses
-(e.g. in serial, with multiprocessing parallelism, using MPI parallelism, multiple
-threads, ...).
+is an [environment variable](../../env.md) that **row** sets in job scripts. The
+last arguments are given by `{directories}`. Unlike `{directory}` shown in previous
+tutorials, `{directories}` expands to *ALL* directories in the submitted **group**. In
+this way, `action.py` is executed once and is free to process the list of directories in
+any way it chooses (e.g. in serial, with
+[multiprocessing parallelism, multiple threads](../concepts/thread-parallelism.md),
+using [MPI parallelism](../concepts/process-parallelism.md), ...).
 
 ## Execute the workflow
 
@@ -112,19 +111,21 @@ Proceed? [Y/n]: y
 
 It worked! `sum` printed the result `285`.
 
+> Note: If you are on a cluster, use `--cluster=none` or wait for jobs to complete
+> after submitting.
+
 ## Applying this structure to your workflows
 
 With this structure in place, you can add new **actions** to your workflow following
 these steps:
-First, write a function `def action(*jobs)` in `actions.py`.
-Then add:
-```toml
-[[action]]
-name = "action"
-command = "python actions.py --action $ACTION_NAME {directories}"
-# And other relevant options
-```
-to your `workflow.toml` file.
+1) Write a function `def action(*jobs)` in `actions.py`.
+2) Add:
+    ```toml
+    [[action]]
+    name = "action"
+    # And other relevant options
+    ```
+    to your `workflow.toml` file.
 
 > Note: You may write functions that take only one job `def action(job)` without
 > modifying the given implementation of `__main__`. However, you will need to set

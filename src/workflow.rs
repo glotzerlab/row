@@ -33,10 +33,10 @@ pub struct Workflow {
     #[serde(default)]
     pub workspace: Workspace,
 
-    /// The submission options
+    /// Default tables
     #[serde(default)]
-    pub submit_options: HashMap<String, SubmitOptions>,
-    // TODO: refactor handling of submit options into more general action defaults.
+    pub default: DefaultTables,
+
     /// The actions.
     #[serde(default)]
     pub action: Vec<Action>,
@@ -87,22 +87,22 @@ pub struct SubmitOptions {
 #[serde(deny_unknown_fields)]
 pub struct Action {
     /// Unique name defining the action.
-    pub name: String,
+    pub name: Option<String>,
 
     /// The command to execute for this action.
-    pub command: String,
+    pub command: Option<String>,
 
     /// Names of the launchers to use when executing the action.
     #[serde(default)]
-    pub launchers: Vec<String>,
+    pub launchers: Option<Vec<String>>,
 
     /// The names of the previous actions that must be completed before this action.
     #[serde(default)]
-    pub previous_actions: Vec<String>,
+    pub previous_actions: Option<Vec<String>>,
 
     /// The product files this action creates.
     #[serde(default)]
-    pub products: Vec<String>,
+    pub products: Option<Vec<String>>,
 
     /// Resources used by this action.
     #[serde(default)]
@@ -115,6 +115,20 @@ pub struct Action {
     /// The group of jobs to submit.
     #[serde(default)]
     pub group: Group,
+
+    // Name of the group to copy defaults from.
+    pub from: Option<String>,
+}
+
+/// Default tables
+///
+/// Store default options for other tables in the file.
+///
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Eq)]
+#[serde(deny_unknown_fields)]
+pub struct DefaultTables {
+    #[serde(default)]
+    pub action: Action,
 }
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Eq)]
@@ -138,8 +152,7 @@ pub enum Processes {
 #[serde(deny_unknown_fields)]
 pub struct Resources {
     /// Number of processes.
-    #[serde(default)]
-    pub processes: Processes,
+    pub processes: Option<Processes>,
 
     /// Threads per process.
     pub threads_per_process: Option<usize>,
@@ -148,16 +161,22 @@ pub struct Resources {
     pub gpus_per_process: Option<usize>,
 
     // Walltime.
-    #[serde(default)]
-    pub walltime: Walltime,
+    pub walltime: Option<Walltime>,
 }
 
 /// Comparison operations
 #[derive(Clone, Debug, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
 pub enum Comparison {
+    #[serde(rename(deserialize = "<"))]
     LessThan,
+    #[serde(rename(deserialize = "<="))]
+    LessThanOrEqualTo,
+    #[serde(rename(deserialize = "=="))]
     EqualTo,
+    #[serde(rename(deserialize = ">="))]
+    GreaterThanOrEqualTo,
+    #[serde(rename(deserialize = ">"))]
     GreaterThan,
 }
 
@@ -167,26 +186,26 @@ pub enum Comparison {
 pub struct Group {
     /// Include members of the group where all JSON elements match the given values.
     #[serde(default)]
-    pub include: Vec<(String, Comparison, serde_json::Value)>,
+    pub include: Option<Vec<(String, Comparison, serde_json::Value)>>,
 
     /// Sort by the given set of JSON elements.
     #[serde(default)]
-    pub sort_by: Vec<String>,
+    pub sort_by: Option<Vec<String>>,
 
     /// Split into groups by the sort keys.
     #[serde(default)]
-    pub split_by_sort_key: bool,
+    pub split_by_sort_key: Option<bool>,
 
     /// Reverse the sort.
     #[serde(default)]
-    pub reverse_sort: bool,
+    pub reverse_sort: Option<bool>,
 
     /// Maximum size of the submitted group.
     pub maximum_size: Option<usize>,
 
     /// Submit only whole groups when true.
     #[serde(default)]
-    pub submit_whole: bool,
+    pub submit_whole: Option<bool>,
 }
 
 /// Resource cost to execute an action.
@@ -275,7 +294,7 @@ impl Resources {
     /// `n_directories`: Number of directories in the submission.
     ///
     pub fn total_processes(&self, n_directories: usize) -> usize {
-        match self.processes {
+        match self.processes() {
             Processes::PerDirectory(p) => p * n_directories,
             Processes::PerSubmission(p) => p,
         }
@@ -308,7 +327,7 @@ impl Resources {
     /// When the resulting walltime cannot be represented.
     ///
     pub fn total_walltime(&self, n_directories: usize) -> Duration {
-        match self.walltime {
+        match self.walltime() {
             Walltime::PerDirectory(ref w) => Duration::new(
                 true,
                 0,
@@ -348,6 +367,200 @@ impl Resources {
         ResourceCost {
             cpu_hours: process_hours,
             gpu_hours: 0.0,
+        }
+    }
+
+    /// Resolve omitted keys from the given template.
+    fn resolve(&mut self, template: &Resources) {
+        if self.processes.is_none() {
+            self.processes = template.processes.clone();
+        }
+        if self.threads_per_process.is_none() {
+            self.threads_per_process = template.threads_per_process;
+        }
+        if self.gpus_per_process.is_none() {
+            self.gpus_per_process = template.gpus_per_process;
+        }
+        if self.walltime.is_none() {
+            self.walltime = template.walltime.clone();
+        }
+    }
+
+    pub fn processes(&self) -> Processes {
+        if let Some(processes) = self.processes.as_ref() {
+            processes.clone()
+        } else {
+            Processes::default()
+        }
+    }
+    pub fn walltime(&self) -> Walltime {
+        if let Some(walltime) = self.walltime.as_ref() {
+            walltime.clone()
+        } else {
+            Walltime::default()
+        }
+    }
+}
+
+impl Action {
+    /// Get the action's `name`.
+    pub fn name(&self) -> &str {
+        if let Some(name) = self.name.as_ref() {
+            name
+        } else {
+            ""
+        }
+    }
+
+    /// Get the action's `command`.
+    pub fn command(&self) -> &str {
+        if let Some(command) = self.command.as_ref() {
+            command
+        } else {
+            ""
+        }
+    }
+
+    /// Get the action's `launchers`.
+    pub fn launchers(&self) -> &[String] {
+        if let Some(launchers) = self.launchers.as_ref() {
+            launchers
+        } else {
+            &[]
+        }
+    }
+
+    /// Get the action's `previous_actions`.
+    pub fn previous_actions(&self) -> &[String] {
+        if let Some(previous_actions) = self.previous_actions.as_ref() {
+            previous_actions
+        } else {
+            &[]
+        }
+    }
+
+    /// Get the action's products
+    pub fn products(&self) -> &[String] {
+        if let Some(products) = self.products.as_ref() {
+            products
+        } else {
+            &[]
+        }
+    }
+
+    /// Resolve the action's omitted keys with defaults
+    fn resolve(&mut self, template: &Action) {
+        if self.name.is_none() {
+            self.name = template.name.clone();
+        }
+        if self.command.is_none() {
+            self.command = template.command.clone();
+        }
+        if self.launchers.is_none() {
+            self.launchers = template.launchers.clone();
+        }
+        if self.previous_actions.is_none() {
+            self.previous_actions = template.previous_actions.clone();
+        }
+        if self.products.is_none() {
+            self.products = template.products.clone();
+        }
+
+        self.resources.resolve(&template.resources);
+        self.group.resolve(&template.group);
+
+        // Populate each action's submit_options with the global ones.
+        for (name, template_options) in &template.submit_options {
+            if self.submit_options.contains_key(name) {
+                let action_options = self
+                    .submit_options
+                    .get_mut(name)
+                    .expect("Key should be present");
+                if action_options.account.is_none() {
+                    action_options.account = template_options.account.clone();
+                }
+                if action_options.setup.is_none() {
+                    action_options.setup = template_options.setup.clone();
+                }
+                if action_options.partition.is_none() {
+                    action_options.partition = template_options.partition.clone();
+                }
+                if action_options.custom.is_empty() {
+                    action_options.custom = template_options.custom.clone();
+                }
+            } else {
+                self.submit_options
+                    .insert(name.clone(), template_options.clone());
+            }
+        }
+    }
+}
+
+impl Group {
+    /// Get the group's `include`.
+    pub fn include(&self) -> &[(String, Comparison, serde_json::Value)] {
+        if let Some(include) = self.include.as_ref() {
+            include
+        } else {
+            &[]
+        }
+    }
+
+    /// Get the group's `sort_by`.
+    pub fn sort_by(&self) -> &[String] {
+        if let Some(sort_by) = self.sort_by.as_ref() {
+            sort_by
+        } else {
+            &[]
+        }
+    }
+
+    /// Get the group's `split_by_sort_key`.
+    pub fn split_by_sort_key(&self) -> bool {
+        if let Some(split_by_sort_key) = self.split_by_sort_key {
+            split_by_sort_key
+        } else {
+            false
+        }
+    }
+
+    /// Get the group's `reverse_sort`.
+    pub fn reverse_sort(&self) -> bool {
+        if let Some(reverse_sort) = self.reverse_sort {
+            reverse_sort
+        } else {
+            false
+        }
+    }
+
+    /// Get the group's `submit_whole`.
+    pub fn submit_whole(&self) -> bool {
+        if let Some(submit_whole) = self.submit_whole {
+            submit_whole
+        } else {
+            false
+        }
+    }
+
+    /// Resolve omitted keys from the given template.
+    fn resolve(&mut self, template: &Group) {
+        if self.include.is_none() {
+            self.include = template.include.clone();
+        }
+        if self.sort_by.is_none() {
+            self.sort_by = template.sort_by.clone();
+        }
+        if self.split_by_sort_key.is_none() {
+            self.split_by_sort_key = template.split_by_sort_key;
+        }
+        if self.reverse_sort.is_none() {
+            self.reverse_sort = template.reverse_sort;
+        }
+        if self.maximum_size.is_none() {
+            self.maximum_size = template.maximum_size;
+        }
+        if self.submit_whole.is_none() {
+            self.submit_whole = template.submit_whole;
         }
     }
 }
@@ -391,7 +604,7 @@ impl Workflow {
 
     /// Find the action that matches the given name.
     pub fn action_by_name(&self, name: &str) -> Option<&Action> {
-        if let Some(action_index) = self.action.iter().position(|a| a.name == name) {
+        if let Some(action_index) = self.action.iter().position(|a| a.name() == name) {
             Some(&self.action[action_index])
         } else {
             None
@@ -400,48 +613,46 @@ impl Workflow {
 
     /// Validate a `Workflow` and populate defaults.
     ///
-    /// Most defaults are populated by the serde configuration. This method handles cases where
-    /// users provide no walltime and/or no processes.
+    /// Resolve each action to a fully defined struct with defaults populated
+    /// from: The current action, the action named by "from", and the default
+    /// action (in that order).
     ///
     fn validate_and_set_defaults(mut self) -> Result<Self, Error> {
         let mut action_names = HashSet::with_capacity(self.action.len());
 
-        for action in &mut self.action {
-            trace!("Validating action '{}'.", action.name);
+        if self.default.action.from.is_some() {
+            return Err(Error::DefaultActionSetsFrom());
+        }
 
-            // Verify action names are unique.
-            if !action_names.insert(action.name.clone()) {
-                return Err(Error::DuplicateAction(action.name.clone()));
-            }
+        let source_actions = self.action.clone();
 
-            // Populate each action's submit_options with the global ones.
-            for (name, global_options) in &self.submit_options {
-                if action.submit_options.contains_key(name) {
-                    let action_options = action
-                        .submit_options
-                        .get_mut(name)
-                        .expect("Key should be present");
-                    if action_options.account.is_none() {
-                        action_options.account = global_options.account.clone();
+        for (action_idx, action) in self.action.iter_mut().enumerate() {
+            if let Some(from) = &action.from {
+                if let Some(action_index) = source_actions.iter().position(|a| a.name() == from) {
+                    if let Some(recursive_from) = &source_actions[action_index].from {
+                        return Err(Error::RecursiveFrom(recursive_from.clone()));
                     }
-                    if action_options.setup.is_none() {
-                        action_options.setup = global_options.setup.clone();
-                    }
-                    if action_options.partition.is_none() {
-                        action_options.partition = global_options.partition.clone();
-                    }
-                    if action_options.custom.is_empty() {
-                        action_options.custom = global_options.custom.clone();
-                    }
+
+                    action.resolve(&source_actions[action_index]);
                 } else {
-                    action
-                        .submit_options
-                        .insert(name.clone(), global_options.clone());
+                    return Err(Error::FromActionNotFound(from.clone()));
                 }
             }
 
+            action.resolve(&self.default.action);
+
+            action_names.insert(action.name().to_string());
+            trace!("Validating action '{}'.", action.name());
+
+            if action.name.is_none() {
+                return Err(Error::ActionMissingName(action_idx));
+            }
+            if action.command.is_none() {
+                return Err(Error::ActionMissingCommand(action.name().into()));
+            }
+
             // Warn for apparently invalid sort_by.
-            for pointer in &action.group.sort_by {
+            for pointer in action.group.sort_by() {
                 if !pointer.is_empty() && !pointer.starts_with('/') {
                     warn!("The JSON pointer '{pointer}' does not appear valid. Did you mean '/{pointer}'?");
                 }
@@ -449,11 +660,24 @@ impl Workflow {
         }
 
         for action in &self.action {
-            for previous_action in &action.previous_actions {
+            for previous_action in action.previous_actions() {
                 if !action_names.contains(previous_action) {
                     return Err(Error::PreviousActionNotFound(
                         previous_action.clone(),
-                        action.name.clone(),
+                        action.name().into(),
+                    ));
+                }
+            }
+
+            if let Some(first_action) = self.action_by_name(action.name()) {
+                if action.previous_actions != first_action.previous_actions {
+                    return Err(Error::DuplicateActionsDifferentPreviousActions(
+                        action.name().to_string(),
+                    ));
+                }
+                if action.products != first_action.products {
+                    return Err(Error::DuplicateActionsDifferentProducts(
+                        action.name().to_string(),
                     ));
                 }
             }
@@ -584,7 +808,7 @@ mod tests {
         assert_eq!(workflow.root, temp.path().canonicalize().unwrap());
         assert_eq!(workflow.workspace.path, PathBuf::from("workspace"));
         assert!(workflow.workspace.value_file.is_none());
-        assert!(workflow.submit_options.is_empty());
+        assert_eq!(workflow.default.action, Action::default());
         assert!(workflow.action.is_empty());
     }
 
@@ -607,7 +831,7 @@ value_file = "s"
     #[parallel]
     fn submit_options_defaults() {
         let temp = TempDir::new().unwrap();
-        let workflow = "[submit_options.a]";
+        let workflow = "[default.action.submit_options.a]";
         let workflow = Workflow::open_str(temp.path(), workflow).unwrap();
 
         assert_eq!(
@@ -615,10 +839,10 @@ value_file = "s"
             temp.path().canonicalize().unwrap()
         );
 
-        assert_eq!(workflow.submit_options.len(), 1);
-        assert!(workflow.submit_options.contains_key("a"));
+        assert_eq!(workflow.default.action.submit_options.len(), 1);
+        assert!(workflow.default.action.submit_options.contains_key("a"));
 
-        let submit_options = workflow.submit_options.get("a").unwrap();
+        let submit_options = workflow.default.action.submit_options.get("a").unwrap();
         assert_eq!(submit_options.account, None);
         assert_eq!(submit_options.setup, None);
         assert!(submit_options.custom.is_empty());
@@ -630,7 +854,7 @@ value_file = "s"
     fn submit_options_nondefault() {
         let temp = TempDir::new().unwrap();
         let workflow = r#"
-[submit_options.a]
+[default.action.submit_options.a]
 account = "my_account"
 setup = "module load openmpi"
 custom = ["--option1", "--option2"]
@@ -643,10 +867,10 @@ partition = "gpu"
             temp.path().canonicalize().unwrap()
         );
 
-        assert_eq!(workflow.submit_options.len(), 1);
-        assert!(workflow.submit_options.contains_key("a"));
+        assert_eq!(workflow.default.action.submit_options.len(), 1);
+        assert!(workflow.default.action.submit_options.contains_key("a"));
 
-        let submit_options = workflow.submit_options.get("a").unwrap();
+        let submit_options = workflow.default.action.submit_options.get("a").unwrap();
         assert_eq!(submit_options.account, Some(String::from("my_account")));
         assert_eq!(
             submit_options.setup,
@@ -670,27 +894,65 @@ command = "c"
         assert_eq!(workflow.action.len(), 1);
 
         let action = workflow.action.first().unwrap();
-        assert_eq!(action.name, "b");
-        assert_eq!(action.command, "c");
-        assert!(action.previous_actions.is_empty());
-        assert!(action.products.is_empty());
-        assert!(action.launchers.is_empty());
+        assert_eq!(action.name(), "b");
+        assert_eq!(action.command(), "c");
+        assert!(action.previous_actions.is_none());
+        assert!(action.products.is_none());
+        assert!(action.launchers.is_none());
 
-        assert_eq!(action.resources.processes, Processes::PerSubmission(1));
+        assert_eq!(action.resources.processes, None);
+        assert_eq!(action.resources.processes(), Processes::PerSubmission(1));
         assert_eq!(action.resources.threads_per_process, None);
         assert_eq!(action.resources.gpus_per_process, None);
+        assert_eq!(action.resources.walltime, None,);
         assert_eq!(
-            action.resources.walltime,
+            action.resources.walltime(),
             Walltime::PerDirectory(Duration::new(true, 0, 3600, 0).unwrap())
         );
 
         assert!(action.submit_options.is_empty());
-        assert!(action.group.include.is_empty());
-        assert!(action.group.sort_by.is_empty());
-        assert!(!action.group.split_by_sort_key);
+        assert_eq!(action.group.include, None);
+        assert!(action.group.include().is_empty());
+        assert_eq!(action.group.sort_by, None);
+        assert!(action.group.sort_by().is_empty());
+        assert_eq!(action.group.split_by_sort_key, None);
+        assert!(!action.group.split_by_sort_key());
         assert_eq!(action.group.maximum_size, None);
-        assert!(!action.group.submit_whole);
-        assert!(!action.group.reverse_sort);
+        assert_eq!(action.group.submit_whole, None);
+        assert!(!action.group.submit_whole());
+        assert_eq!(action.group.reverse_sort, None);
+        assert!(!action.group.reverse_sort());
+    }
+
+    #[test]
+    #[parallel]
+    fn action_no_name() {
+        let temp = TempDir::new().unwrap();
+        let workflow = r#"
+[[action]]
+command = "c"
+"#;
+        let result = Workflow::open_str(temp.path(), workflow);
+        assert!(result.is_err());
+
+        assert!(result.unwrap_err().to_string().contains("missing `name`"));
+    }
+
+    #[test]
+    #[parallel]
+    fn action_no_command() {
+        let temp = TempDir::new().unwrap();
+        let workflow = r#"
+[[action]]
+name = "a"
+"#;
+        let result = Workflow::open_str(temp.path(), workflow);
+        assert!(result.is_err());
+
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("missing `command`"));
     }
 
     #[test]
@@ -708,18 +970,14 @@ command = "c"
         assert_eq!(workflow.action.len(), 1);
 
         let action = workflow.action.first().unwrap();
-        assert_eq!(
-            action.resources.walltime,
-            Walltime::PerDirectory(Duration::new(true, 0, 3600, 0).unwrap())
-        );
 
         assert!(action.submit_options.is_empty());
-        assert!(action.group.include.is_empty());
-        assert!(action.group.sort_by.is_empty());
-        assert!(!action.group.split_by_sort_key);
+        assert!(action.group.include().is_empty());
+        assert!(action.group.sort_by().is_empty());
+        assert!(!action.group.split_by_sort_key());
         assert_eq!(action.group.maximum_size, None);
-        assert!(!action.group.submit_whole);
-        assert!(!action.group.reverse_sort);
+        assert!(!action.group.submit_whole());
+        assert!(!action.group.reverse_sort());
     }
 
     #[test]
@@ -736,15 +994,64 @@ name = "b"
 command = "d"
 "#;
         let result = Workflow::open_str(temp.path(), workflow);
-        assert!(
-            result.is_err(),
-            "Expected duplicate action error, but got {result:?}"
-        );
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    #[parallel]
+    fn action_duplicate_different_products() {
+        let temp = TempDir::new().unwrap();
+        let workflow = r#"
+[[action]]
+name = "b"
+command = "c"
+products = ["e"]
+
+[[action]]
+name = "b"
+command = "d"
+products = ["b"]
+"#;
+        let result = Workflow::open_str(temp.path(), workflow);
+        assert!(matches!(
+            result,
+            Err(Error::DuplicateActionsDifferentProducts(_))
+        ));
 
         assert!(result
             .unwrap_err()
             .to_string()
-            .starts_with("Found duplicate action"));
+            .contains("must have the same `products`"));
+    }
+
+    #[test]
+    #[parallel]
+    fn action_duplicate_different_previous_actions() {
+        let temp = TempDir::new().unwrap();
+        let workflow = r#"
+[[action]]
+name = "b"
+command = "c"
+
+[[action]]
+name = "b"
+command = "d"
+previous_actions = ["a"]
+
+[[action]]
+name = "a"
+command = "e"
+"#;
+        let result = Workflow::open_str(temp.path(), workflow);
+        assert!(matches!(
+            result,
+            Err(Error::DuplicateActionsDifferentPreviousActions(_))
+        ));
+
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("must have the same `previous_actions`"));
     }
 
     #[test]
@@ -763,7 +1070,10 @@ launchers = ["openmp", "mpi"]
         assert_eq!(workflow.action.len(), 1);
 
         let action = workflow.action.first().unwrap();
-        assert_eq!(action.launchers, vec!["openmp", "mpi"]);
+        assert_eq!(
+            action.launchers(),
+            vec!["openmp".to_string(), "mpi".to_string()]
+        );
     }
 
     #[test]
@@ -786,13 +1096,13 @@ previous_actions = ["b"]
         assert_eq!(workflow.action.len(), 2);
 
         let action = workflow.action.get(1).unwrap();
-        assert_eq!(action.previous_actions, vec!["b"]);
+        assert_eq!(action.previous_actions(), vec!["b".to_string()]);
 
         let action_a = workflow.action_by_name("b");
-        assert_eq!(action_a.unwrap().command, "c");
+        assert_eq!(action_a.unwrap().command(), "c");
 
         let action_d = workflow.action_by_name("d");
-        assert_eq!(action_d.unwrap().command, "e");
+        assert_eq!(action_d.unwrap().command(), "e");
 
         assert!(workflow.action_by_name("f").is_none());
     }
@@ -839,11 +1149,11 @@ walltime.per_submission = "4d, 05:32:11"
         assert_eq!(workflow.action.len(), 1);
 
         let action = workflow.action.first().unwrap();
-        assert_eq!(action.resources.processes, Processes::PerSubmission(12));
+        assert_eq!(action.resources.processes(), Processes::PerSubmission(12));
         assert_eq!(action.resources.threads_per_process, Some(8));
         assert_eq!(action.resources.gpus_per_process, Some(1));
         assert_eq!(
-            action.resources.walltime,
+            action.resources.walltime(),
             Walltime::PerSubmission(
                 Duration::new(true, 4, 5 * 3600 + 32 * 60 + 11, 0)
                     .expect("this should be a valid Duration"),
@@ -869,10 +1179,10 @@ walltime.per_directory = "00:01"
         assert_eq!(workflow.action.len(), 1);
 
         let action = workflow.action.first().unwrap();
-        assert_eq!(action.resources.processes, Processes::PerDirectory(1));
+        assert_eq!(action.resources.processes(), Processes::PerDirectory(1));
 
         assert_eq!(
-            action.resources.walltime,
+            action.resources.walltime(),
             Walltime::PerDirectory(
                 Duration::new(true, 0, 60, 0).expect("this should be a valid Duration")
             )
@@ -944,7 +1254,7 @@ products = ["d", "e"]
         assert_eq!(workflow.action.len(), 1);
 
         let action = workflow.action.first().unwrap();
-        assert_eq!(action.products, vec!["d".to_string(), "e".to_string()]);
+        assert_eq!(action.products(), vec!["d".to_string(), "e".to_string()]);
     }
 
     #[test]
@@ -956,7 +1266,7 @@ products = ["d", "e"]
 name = "b"
 command = "c"
 [action.group]
-include = [["/d", "equal_to", 5], ["/float", "greater_than", 6.5], ["/string", "less_than", "str"], ["/array", "equal_to", [1,2,3]], ["/bool", "equal_to", false]]
+include = [["/d", "==", 5], ["/float", ">", 6.5], ["/string", "<", "str"], ["/array", "==", [1,2,3]], ["/bool", "==", false]]
 sort_by = ["/sort"]
 split_by_sort_key = true
 maximum_size = 10
@@ -970,7 +1280,7 @@ reverse_sort = true
 
         let action = workflow.action.first().unwrap();
         assert_eq!(
-            action.group.include,
+            action.group.include(),
             vec![
                 (
                     "/d".to_string(),
@@ -999,11 +1309,11 @@ reverse_sort = true
                 )
             ]
         );
-        assert_eq!(action.group.sort_by, vec![String::from("/sort")]);
-        assert!(action.group.split_by_sort_key);
+        assert_eq!(action.group.sort_by(), vec![String::from("/sort")]);
+        assert!(action.group.split_by_sort_key());
         assert_eq!(action.group.maximum_size, Some(10));
-        assert!(action.group.submit_whole);
-        assert!(action.group.reverse_sort);
+        assert!(action.group.submit_whole());
+        assert!(action.group.reverse_sort());
     }
 
     #[test]
@@ -1087,7 +1397,7 @@ partition = "i"
     fn action_submit_options_global() {
         let temp = TempDir::new().unwrap();
         let workflow = r#"
-[submit_options.d]
+[default.action.submit_options.d]
 account = "e"
 setup = "f"
 custom = ["g", "h"]
@@ -1118,7 +1428,7 @@ command = "c"
     fn action_submit_options_no_override() {
         let temp = TempDir::new().unwrap();
         let workflow = r#"
-[submit_options.d]
+[default.action.submit_options.d]
 account = "e"
 setup = "f"
 custom = ["g", "h"]
@@ -1155,7 +1465,7 @@ partition = "n"
     fn action_submit_options_override() {
         let temp = TempDir::new().unwrap();
         let workflow = r#"
-[submit_options.d]
+[default.action.submit_options.d]
 account = "e"
 setup = "f"
 custom = ["g", "h"]
@@ -1185,9 +1495,402 @@ command = "c"
 
     #[test]
     #[parallel]
+    fn default_action_from() {
+        let temp = TempDir::new().unwrap();
+        let workflow = r#"
+[default.action]
+from = "a"
+"#;
+        let result = Workflow::open_str(temp.path(), workflow);
+        assert!(result.is_err());
+
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("must not set `from`"));
+    }
+
+    #[test]
+    #[parallel]
+    fn empty_action_default() {
+        let temp = TempDir::new().unwrap();
+        let workflow = "
+[default.action]
+";
+
+        let workflow = Workflow::open_str(temp.path(), workflow).unwrap();
+
+        assert_eq!(workflow.action.len(), 0);
+
+        let action = workflow.default.action;
+        assert_eq!(action.name, None);
+        assert_eq!(action.command, None);
+        assert_eq!(action.launchers, None);
+        assert_eq!(action.previous_actions, None);
+        assert_eq!(action.products, None);
+        assert_eq!(action.resources.processes, None);
+        assert_eq!(action.resources.threads_per_process, None);
+        assert_eq!(action.resources.gpus_per_process, None);
+        assert_eq!(action.resources.walltime, None);
+        assert!(action.submit_options.is_empty());
+        assert_eq!(action.group.include, None);
+        assert_eq!(action.group.sort_by, None);
+        assert_eq!(action.group.split_by_sort_key, None);
+        assert_eq!(action.group.reverse_sort, None);
+        assert_eq!(action.group.maximum_size, None);
+        assert_eq!(action.group.submit_whole, None);
+        assert_eq!(action.from, None);
+    }
+
+    #[test]
+    #[parallel]
+    fn action_default() {
+        let temp = TempDir::new().unwrap();
+        let workflow = r#"
+[default.action]
+name = "a"
+command = "b"
+launchers = ["c"]
+previous_actions = ["d"]
+products = ["e"]
+
+[default.action.resources]
+processes.per_directory = 2
+threads_per_process = 3
+gpus_per_process = 4
+walltime.per_submission = "00:00:01"
+
+# submit_options is tested above
+
+[default.action.group]
+include = [["/f", "==", 5]]
+sort_by = ["/g"]
+split_by_sort_key = true
+reverse_sort = true
+maximum_size = 6
+submit_whole = true
+
+[[action]]
+
+[[action]]
+name = "d"
+"#;
+
+        let workflow = Workflow::open_str(temp.path(), workflow).unwrap();
+
+        assert_eq!(workflow.action.len(), 2);
+
+        let action = workflow.action.first().unwrap();
+        assert_eq!(action.name(), "a");
+        assert_eq!(action.command(), "b");
+        assert_eq!(action.launchers(), vec!["c"]);
+        assert_eq!(action.previous_actions(), vec!["d"]);
+        assert_eq!(action.products(), vec!["e"]);
+        assert_eq!(action.resources.processes(), Processes::PerDirectory(2));
+        assert_eq!(action.resources.threads_per_process, Some(3));
+        assert_eq!(action.resources.gpus_per_process, Some(4));
+        assert_eq!(
+            action.resources.walltime(),
+            Walltime::PerSubmission(Duration::new(true, 0, 1, 0).unwrap())
+        );
+        assert!(action.submit_options.is_empty());
+        assert_eq!(
+            action.group.include(),
+            vec![("/f".into(), Comparison::EqualTo, serde_json::Value::from(5))]
+        );
+        assert_eq!(action.group.sort_by(), vec!["/g"]);
+        assert!(action.group.split_by_sort_key());
+        assert!(action.group.reverse_sort());
+        assert_eq!(action.group.maximum_size, Some(6));
+        assert!(action.group.submit_whole());
+        assert_eq!(action.from, None);
+    }
+
+    #[test]
+    #[parallel]
+    fn action_override_default() {
+        let temp = TempDir::new().unwrap();
+        let workflow = r#"
+[default.action]
+name = "a"
+command = "b"
+launchers = ["c"]
+products = ["e"]
+
+[default.action.resources]
+processes.per_directory = 2
+threads_per_process = 3
+gpus_per_process = 4
+walltime.per_submission = "00:00:01"
+
+# submit_options is tested above
+
+[default.action.group]
+include = [["/f", "==", 5]]
+sort_by = ["/g"]
+split_by_sort_key = true
+reverse_sort = true
+maximum_size = 6
+submit_whole = true
+
+[[action]]
+name = "aa"
+command = "bb"
+launchers = ["cc"]
+previous_actions = ["dd"]
+products = ["ee"]
+
+[action.resources]
+processes.per_directory = 4
+threads_per_process = 6
+gpus_per_process = 8
+walltime.per_submission = "00:00:02"
+
+# submit_options is tested above
+
+[action.group]
+include = [["/ff", "==", 10]]
+sort_by = ["/gg"]
+split_by_sort_key = false
+reverse_sort = false
+maximum_size = 12
+submit_whole = false
+
+[[action]]
+name = "dd"
+"#;
+
+        let workflow = Workflow::open_str(temp.path(), workflow).unwrap();
+
+        assert_eq!(workflow.action.len(), 2);
+
+        let action = workflow.action.first().unwrap();
+        assert_eq!(action.name(), "aa");
+        assert_eq!(action.command(), "bb");
+        assert_eq!(action.launchers(), vec!["cc"]);
+        assert_eq!(action.previous_actions(), vec!["dd"]);
+        assert_eq!(action.products(), vec!["ee"]);
+        assert_eq!(action.resources.processes(), Processes::PerDirectory(4));
+        assert_eq!(action.resources.threads_per_process, Some(6));
+        assert_eq!(action.resources.gpus_per_process, Some(8));
+        assert_eq!(
+            action.resources.walltime(),
+            Walltime::PerSubmission(Duration::new(true, 0, 2, 0).unwrap())
+        );
+        assert!(action.submit_options.is_empty());
+        assert_eq!(
+            action.group.include(),
+            vec![(
+                "/ff".into(),
+                Comparison::EqualTo,
+                serde_json::Value::from(10)
+            )]
+        );
+        assert_eq!(action.group.sort_by(), vec!["/gg"]);
+        assert!(!action.group.split_by_sort_key());
+        assert!(!action.group.reverse_sort());
+        assert_eq!(action.group.maximum_size, Some(12));
+        assert!(!action.group.submit_whole());
+        assert_eq!(action.from, None);
+    }
+
+    #[test]
+    #[parallel]
+    fn action_from() {
+        let temp = TempDir::new().unwrap();
+        let workflow = r#"
+[[action]]
+name = "a"
+command = "b"
+launchers = ["c"]
+previous_actions = ["d"]
+products = ["e"]
+
+[default.action.resources]
+processes.per_directory = 2
+threads_per_process = 3
+gpus_per_process = 4
+walltime.per_submission = "00:00:01"
+
+# submit_options is tested above
+
+[default.action.group]
+include = [["/f", "==", 5]]
+sort_by = ["/g"]
+split_by_sort_key = true
+reverse_sort = true
+maximum_size = 6
+submit_whole = true
+
+[[action]]
+from = "a"
+
+[[action]]
+name = "d"
+command = "e"
+"#;
+
+        let workflow = Workflow::open_str(temp.path(), workflow).unwrap();
+
+        assert_eq!(workflow.action.len(), 3);
+
+        let action = &workflow.action[1];
+        assert_eq!(action.name(), "a");
+        assert_eq!(action.command(), "b");
+        assert_eq!(action.launchers(), vec!["c"]);
+        assert_eq!(action.previous_actions(), vec!["d"]);
+        assert_eq!(action.products(), vec!["e"]);
+        assert_eq!(action.resources.processes(), Processes::PerDirectory(2));
+        assert_eq!(action.resources.threads_per_process, Some(3));
+        assert_eq!(action.resources.gpus_per_process, Some(4));
+        assert_eq!(
+            action.resources.walltime(),
+            Walltime::PerSubmission(Duration::new(true, 0, 1, 0).unwrap())
+        );
+        assert!(action.submit_options.is_empty());
+        assert_eq!(
+            action.group.include(),
+            vec![("/f".into(), Comparison::EqualTo, serde_json::Value::from(5))]
+        );
+        assert_eq!(action.group.sort_by(), vec!["/g"]);
+        assert!(action.group.split_by_sort_key());
+        assert!(action.group.reverse_sort());
+        assert_eq!(action.group.maximum_size, Some(6));
+        assert!(action.group.submit_whole());
+        assert_eq!(action.from, Some("a".into()));
+    }
+
+    #[test]
+    #[parallel]
+    fn action_override_from() {
+        let temp = TempDir::new().unwrap();
+        let workflow = r#"
+[[action]]
+name = "a"
+command = "b"
+launchers = ["c"]
+previous_actions = ["d"]
+products = ["e"]
+
+[default.action.resources]
+processes.per_directory = 2
+threads_per_process = 3
+gpus_per_process = 4
+walltime.per_submission = "00:00:01"
+
+# submit_options is tested above
+
+[default.action.group]
+include = [["/f", "==", 5]]
+sort_by = ["/g"]
+split_by_sort_key = true
+reverse_sort = true
+maximum_size = 6
+submit_whole = true
+
+[[action]]
+from = "a"
+
+name = "aa"
+command = "bb"
+launchers = ["cc"]
+previous_actions = ["dd"]
+products = ["ee"]
+
+[action.resources]
+processes.per_directory = 4
+threads_per_process = 6
+gpus_per_process = 8
+walltime.per_submission = "00:00:02"
+
+# submit_options is tested above
+
+[action.group]
+include = [["/ff", "==", 10]]
+sort_by = ["/gg"]
+split_by_sort_key = false
+reverse_sort = false
+maximum_size = 12
+submit_whole = false
+
+[[action]]
+name = "dd"
+command = "ee"
+
+[[action]]
+name = "d"
+command = "e"
+"#;
+
+        let workflow = Workflow::open_str(temp.path(), workflow).unwrap();
+
+        assert_eq!(workflow.action.len(), 4);
+
+        let action = &workflow.action[1];
+        assert_eq!(action.name(), "aa");
+        assert_eq!(action.command(), "bb");
+        assert_eq!(action.launchers(), vec!["cc"]);
+        assert_eq!(action.previous_actions(), vec!["dd"]);
+        assert_eq!(action.products(), vec!["ee"]);
+        assert_eq!(action.resources.processes(), Processes::PerDirectory(4));
+        assert_eq!(action.resources.threads_per_process, Some(6));
+        assert_eq!(action.resources.gpus_per_process, Some(8));
+        assert_eq!(
+            action.resources.walltime(),
+            Walltime::PerSubmission(Duration::new(true, 0, 2, 0).unwrap())
+        );
+        assert!(action.submit_options.is_empty());
+        assert_eq!(
+            action.group.include(),
+            vec![(
+                "/ff".into(),
+                Comparison::EqualTo,
+                serde_json::Value::from(10)
+            )]
+        );
+        assert_eq!(action.group.sort_by(), vec!["/gg"]);
+        assert!(!action.group.split_by_sort_key());
+        assert!(!action.group.reverse_sort());
+        assert_eq!(action.group.maximum_size, Some(12));
+        assert!(!action.group.submit_whole());
+        assert_eq!(action.from, Some("a".into()));
+    }
+
+    #[test]
+    #[parallel]
+    fn action_override_mixed() {
+        let temp = TempDir::new().unwrap();
+        let workflow = r#"
+[default.action]
+resources.threads_per_process = 2
+
+[[action]]
+name = "a"
+command = "b"
+resources.gpus_per_process = 4
+
+[[action]]
+from = "a"
+resources.processes.per_directory = 8
+"#;
+
+        let workflow = Workflow::open_str(temp.path(), workflow).unwrap();
+
+        assert_eq!(workflow.action.len(), 2);
+
+        let action = &workflow.action[1];
+        assert_eq!(action.name(), "a");
+        assert_eq!(action.command(), "b");
+        assert_eq!(action.resources.processes(), Processes::PerDirectory(8));
+        assert_eq!(action.resources.threads_per_process, Some(2));
+        assert_eq!(action.resources.gpus_per_process, Some(4));
+    }
+
+    #[test]
+    #[parallel]
     fn total_processes() {
         let r = Resources {
-            processes: Processes::PerSubmission(10),
+            processes: Some(Processes::PerSubmission(10)),
             ..Resources::default()
         };
 
@@ -1196,7 +1899,7 @@ command = "c"
         assert_eq!(r.total_processes(1000), 10);
 
         let r = Resources {
-            processes: Processes::PerDirectory(10),
+            processes: Some(Processes::PerDirectory(10)),
             ..Resources::default()
         };
 
@@ -1209,7 +1912,7 @@ command = "c"
     #[parallel]
     fn total_cpus() {
         let r = Resources {
-            processes: Processes::PerSubmission(10),
+            processes: Some(Processes::PerSubmission(10)),
             threads_per_process: Some(2),
             ..Resources::default()
         };
@@ -1219,7 +1922,7 @@ command = "c"
         assert_eq!(r.total_cpus(1000), 20);
 
         let r = Resources {
-            processes: Processes::PerDirectory(10),
+            processes: Some(Processes::PerDirectory(10)),
             threads_per_process: None,
             ..Resources::default()
         };
@@ -1233,7 +1936,7 @@ command = "c"
     #[parallel]
     fn total_gpus() {
         let r = Resources {
-            processes: Processes::PerSubmission(10),
+            processes: Some(Processes::PerSubmission(10)),
             gpus_per_process: Some(2),
             ..Resources::default()
         };
@@ -1243,7 +1946,7 @@ command = "c"
         assert_eq!(r.total_gpus(1000), 20);
 
         let r = Resources {
-            processes: Processes::PerDirectory(10),
+            processes: Some(Processes::PerDirectory(10)),
             gpus_per_process: None,
             ..Resources::default()
         };
@@ -1257,7 +1960,9 @@ command = "c"
     #[parallel]
     fn total_walltime() {
         let r = Resources {
-            walltime: Walltime::PerDirectory(Duration::new(true, 1, 3600, 0).unwrap()),
+            walltime: Some(Walltime::PerDirectory(
+                Duration::new(true, 1, 3600, 0).unwrap(),
+            )),
             ..Resources::default()
         };
 
@@ -1275,7 +1980,9 @@ command = "c"
         );
 
         let r = Resources {
-            walltime: Walltime::PerSubmission(Duration::new(true, 1, 3600, 0).unwrap()),
+            walltime: Some(Walltime::PerSubmission(
+                Duration::new(true, 1, 3600, 0).unwrap(),
+            )),
             ..Resources::default()
         };
 
@@ -1297,8 +2004,10 @@ command = "c"
     #[parallel]
     fn resource_cost() {
         let r = Resources {
-            processes: Processes::PerSubmission(10),
-            walltime: Walltime::PerDirectory(Duration::new(true, 0, 3600, 0).unwrap()),
+            processes: Some(Processes::PerSubmission(10)),
+            walltime: Some(Walltime::PerDirectory(
+                Duration::new(true, 0, 3600, 0).unwrap(),
+            )),
             ..Resources::default()
         };
 
@@ -1307,8 +2016,10 @@ command = "c"
         assert_eq!(r.cost(4), ResourceCost::with_values(40.0, 0.0));
 
         let r = Resources {
-            processes: Processes::PerSubmission(10),
-            walltime: Walltime::PerDirectory(Duration::new(true, 0, 3600, 0).unwrap()),
+            processes: Some(Processes::PerSubmission(10)),
+            walltime: Some(Walltime::PerDirectory(
+                Duration::new(true, 0, 3600, 0).unwrap(),
+            )),
             threads_per_process: Some(4),
             ..Resources::default()
         };
@@ -1318,8 +2029,10 @@ command = "c"
         assert_eq!(r.cost(4), ResourceCost::with_values(160.0, 0.0));
 
         let r = Resources {
-            processes: Processes::PerSubmission(10),
-            walltime: Walltime::PerDirectory(Duration::new(true, 0, 3600, 0).unwrap()),
+            processes: Some(Processes::PerSubmission(10)),
+            walltime: Some(Walltime::PerDirectory(
+                Duration::new(true, 0, 3600, 0).unwrap(),
+            )),
             threads_per_process: Some(4),
             gpus_per_process: Some(2),
         };

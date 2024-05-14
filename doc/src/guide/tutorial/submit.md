@@ -14,8 +14,8 @@ This section explains how to **submit** jobs to the **scheduler** with **row**.
 You can skip to the [next heading](#checking-your-job-script) if you are using one of
 these clusters.
 
-If not, then you need to create one or two configuration files that describe your
-cluster and its launchers.
+If not, then you need to create a configuration files that describe your
+cluster. You may also need to define launchers specific to your cluster.
 
 * [`$HOME/.config/row/clusters.toml`](../../clusters/index.md) gives your cluster
   a name, instructions on how to identify it, and lists the partitions your cluster
@@ -97,15 +97,15 @@ row submit
 > If your cluster does not default to the correct account, you can set it in
 > `workflow.toml`:
 > ```toml
-> [submit_options]
-> <cluster_name>.account = "<my account>"
+> [default.action.submit_options.<cluster name>]
+> account = "<my account>"
 > ```
 
 ### The submitted status
 
 **Row** tracks the **Job IDs** that it submits. Every time you execute `row show status`
 (or just about any `row` command), it will execute `squeue` in the background to see
-which jobs are still **submitted** (in any state).
+which jobs are still **submitted**.
 
 Use the `row show` family of commands to query details about submitted jobs.
 For the `hello` workflow:

@@ -6,7 +6,7 @@ prefix constructed from this configuration will be:
 {launcher.executable} [option1] [option2] ...
 ```
 
-See [Built-in launchers](built-in.md) for examples.
+Execute [`row show launchers`](../row/show/launchers.md) to see examples.
 
 ## executable
 
@@ -34,8 +34,8 @@ When `launcher.processes` is set, add the following option to the launcher prefi
 where `total_processes` is `n_directories * resources.processes.per_directory` or
 `resources.processes.per_submission` depending on the resource configuration.
 
-It is an error when `total_processes > 1` and the action requests *no* launchers that
-set `processes`.
+> Note: **Row** exits with an error when `total_processes > 1` and the action requests
+> *no* launchers that set `processes`.
 
 ## threads_per_process
 
