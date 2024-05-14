@@ -12,5 +12,5 @@ signac==2.2.0
     # via -r signac-requirements.in
 synced-collections==1.0.0
     # via signac
-tqdm==4.66.2
+tqdm==4.66.3
     # via signac
