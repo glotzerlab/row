@@ -1,0 +1,42 @@
+name: Bug report
+description: Report a problem with row.
+labels: ['bug']
+body:
+  - type: textarea
+    attributes:
+      label: Description
+      description: Describe the problem.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Steps to reproduce
+      description: |
+        What specific commands do you execute to trigger the problem?
+      placeholder: |
+        row show status
+        ...
+      render: shell
+  - type: textarea
+    attributes:
+      label: Input files
+      description: Attach any input files needed to execute the above steps.
+  - type: textarea
+    attributes:
+      label: Output
+      description: |
+        What output did you get?
+      render: shell
+  - type: textarea
+    attributes:
+      label: Expected output
+      description: What output do you expect?
+  - type: input
+    attributes:
+      label: Row version
+      description: What version of **row** are you using?
+      placeholder: 0.1.0
+  - type: markdown
+    attributes:
+      value: |
+        Execute `row --version` to find your **row** version.
