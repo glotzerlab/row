@@ -296,4 +296,3 @@ status may take a long time, so it should display a progress bar.
 
 # TODO: readthedocs builds
 # TODO: logo
-# TODO: release CI
