@@ -1,0 +1,100 @@
+name: release
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  pull_request:
+
+  push:
+    branches:
+      - "*"
+    tags:
+      - "*"
+
+  workflow_dispatch:
+
+env:
+  name: row
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  source:
+    name: Build source tarball
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4.1.4
+        with:
+          submodules: true
+          path: code
+
+      - name: Determine filename-safe ref from GITHUB_REF_NAME
+        run: echo ref="$(echo "${GITHUB_REF_NAME}" | sed  -e 's/\//-/g')" >> "$GITHUB_ENV"
+
+      - name: Copy source
+        run: cp -R code "${name}-${ref}"
+
+      - name: Remove .git
+        run: rm -rf "${name}-${ref}/.git" && ls -laR "${name}-${ref}"
+
+      - name: Tar/xz source
+        run: tar -cvJf "${name}-${ref}.tar.xz" "${name}-${ref}"
+
+      - uses: actions/upload-artifact@v4.3.3
+        with:
+          name: source
+          path: |
+            *.tar.*
+
+  release-notes:
+    name: Extract release notes
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4.1.4
+        with:
+          submodules: true
+          path: code
+
+      - name: Write release-notes.md
+        run: grep -P -m 2 -B 10000 "^## v*\d*\.\d*\.\d*" doc/src/release-notes.md | sed '$d' | tee "${GITHUB_WORKSPACE}/release-notes.md"
+        working-directory: code
+
+      - uses: actions/upload-artifact@v4.3.3
+        with:
+          name: release-notes
+          path: |
+            release-notes.md
+
+  publish:
+    name: Publish [GitHub]
+    needs: [source, release-notes]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4.1.7
+        with:
+          merge-multiple: true
+
+      - name: List files
+        run: ls -lR
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2.0.5
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          files: |
+            *.xz
+          body_path: release-notes.md
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
