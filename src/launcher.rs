@@ -230,7 +230,7 @@ mod tests {
         setup();
         let launchers = Configuration::built_in();
         let launchers_by_cluster = launchers.by_cluster("any_cluster");
-        assert!(launchers_by_cluster.get("unset_launcher").is_none());
+        assert!(!launchers_by_cluster.contains_key("unset_launcher"));
     }
 
     #[test]
