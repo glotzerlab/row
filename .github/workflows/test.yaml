@@ -106,10 +106,6 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v4.1.3
-    - name: Update rust
-      run: rustup install "$RUST_VERSION" --no-self-update && rustup default "${RUST_VERSION}"
-    - name: Check rust installation
-      run: rustc -vV
     - name: Install mdbook
       run: |
         mkdir -p "$HOME/.cargo/bin"
