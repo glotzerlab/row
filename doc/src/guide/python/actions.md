@@ -8,7 +8,7 @@ This guide will show you how to structure all of your actions in a single file:
 `actions.py`. This layout is inspired by **row's** predecessor **signac-flow**
 and its `project.py`.
 
-> Note: If you are familiar with **signac-fow**, see [migrating from signac-flow][1]
+> Note: If you are familiar with **signac-flow**, see [migrating from signac-flow][1]
 > for many helpful tips.
 
 [1]: ../../signac-flow.md
