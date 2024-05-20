@@ -22,7 +22,7 @@ updates:
       patterns:
       - '*'
 - package-ecosystem: "pip"
-  directory: "/"
+  directory: ".github/workflows"
   target-branch: trunk
   schedule:
     interval: "monthly"
@@ -61,14 +61,14 @@ updates:
   reviewers:
   - joaander
   groups:
-    pip-version:
+    cargo-version:
       applies-to: version-updates
       patterns:
       - '*'
       update-types:
       - minor
       - patch
-    pip-security:
+    cargo-security:
       applies-to: security-updates
       patterns:
       - '*'
