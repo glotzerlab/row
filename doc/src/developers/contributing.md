@@ -88,6 +88,6 @@ When applicable, update or write a new tutorial or how-to guide.
 Update the contributors documentation to name each developer that has contributed to the
 code.
 
-### Propose a change log entry
+### Add a change log entry
 
-Propose a short concise entry describing the change in the pull request description.
+Add a short concise entry describing the change in `doc/src/release-notes.md`.
