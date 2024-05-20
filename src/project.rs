@@ -512,7 +512,28 @@ previous_actions = ["two"]
             vec![PathBuf::from("dir5")]
         );
 
-        // TODO, test any
+        // Check any conditions.
+        let mut action = project.workflow.action[1].clone();
+        let include = action.group.include.as_mut().unwrap();
+        include.clear();
+        include.push(Selector::Condition((
+            "/i".into(),
+            Comparison::LessThan,
+            Value::from(1),
+        )));
+
+        include.push(Selector::Condition((
+            "/i".into(),
+            Comparison::GreaterThan,
+            Value::from(6),
+        )));
+
+        assert_eq!(
+            project
+                .find_matching_directories(&action, all_directories.clone())
+                .unwrap(),
+            vec![PathBuf::from("dir0"), PathBuf::from("dir7")]
+        );
     }
 
     #[test]
