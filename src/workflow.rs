@@ -180,13 +180,24 @@ pub enum Comparison {
     GreaterThan,
 }
 
+/// Condition definition
+type ConditionElement = (String, Comparison, serde_json::Value);
+
+/// Directory selector
+#[derive(Clone, Debug, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum Selector {
+    Condition(ConditionElement),
+    All(Vec<ConditionElement>),
+}
+
 /// Group definition.
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Eq)]
 #[serde(deny_unknown_fields)]
 pub struct Group {
     /// Include members of the group where all JSON elements match the given values.
     #[serde(default)]
-    pub include: Option<Vec<(String, Comparison, serde_json::Value)>>,
+    pub include: Option<Vec<Selector>>,
 
     /// Sort by the given set of JSON elements.
     #[serde(default)]
@@ -500,7 +511,7 @@ impl Action {
 
 impl Group {
     /// Get the group's `include`.
-    pub fn include(&self) -> &[(String, Comparison, serde_json::Value)] {
+    pub fn include(&self) -> &[Selector] {
         if let Some(include) = self.include.as_ref() {
             include
         } else {
@@ -1268,12 +1279,15 @@ products = ["d", "e"]
 name = "b"
 command = "c"
 [action.group]
-include = [["/d", "==", 5], ["/float", ">", 6.5], ["/string", "<", "str"], ["/array", "==", [1,2,3]], ["/bool", "==", false]]
 sort_by = ["/sort"]
 split_by_sort_key = true
 maximum_size = 10
 submit_whole = true
 reverse_sort = true
+[[action.group.include]]
+condition = ["/d", "==", 5]
+[[action.group.include]]
+all = [["/float", ">", 6.5], ["/string", "<", "str"], ["/array", "==", [1,2,3]], ["/bool", "==", false]]
 "#;
 
         let workflow = Workflow::open_str(temp.path(), workflow).unwrap();
@@ -1284,31 +1298,33 @@ reverse_sort = true
         assert_eq!(
             action.group.include(),
             vec![
-                (
+                Selector::Condition((
                     "/d".to_string(),
                     Comparison::EqualTo,
                     serde_json::Value::from(5)
-                ),
-                (
-                    "/float".to_string(),
-                    Comparison::GreaterThan,
-                    serde_json::Value::from(6.5)
-                ),
-                (
-                    "/string".to_string(),
-                    Comparison::LessThan,
-                    serde_json::Value::from("str")
-                ),
-                (
-                    "/array".to_string(),
-                    Comparison::EqualTo,
-                    serde_json::Value::from(vec![1, 2, 3])
-                ),
-                (
-                    "/bool".to_string(),
-                    Comparison::EqualTo,
-                    serde_json::Value::from(false)
-                )
+                )),
+                Selector::All(vec![
+                    (
+                        "/float".to_string(),
+                        Comparison::GreaterThan,
+                        serde_json::Value::from(6.5)
+                    ),
+                    (
+                        "/string".to_string(),
+                        Comparison::LessThan,
+                        serde_json::Value::from("str")
+                    ),
+                    (
+                        "/array".to_string(),
+                        Comparison::EqualTo,
+                        serde_json::Value::from(vec![1, 2, 3])
+                    ),
+                    (
+                        "/bool".to_string(),
+                        Comparison::EqualTo,
+                        serde_json::Value::from(false)
+                    )
+                ])
             ]
         );
         assert_eq!(action.group.sort_by(), vec![String::from("/sort")]);
@@ -1565,12 +1581,13 @@ walltime.per_submission = "00:00:01"
 # submit_options is tested above
 
 [default.action.group]
-include = [["/f", "==", 5]]
 sort_by = ["/g"]
 split_by_sort_key = true
 reverse_sort = true
 maximum_size = 6
 submit_whole = true
+[[default.action.group.include]]
+condition = ["/f", "==", 5]
 
 [[action]]
 
@@ -1598,7 +1615,11 @@ name = "d"
         assert!(action.submit_options.is_empty());
         assert_eq!(
             action.group.include(),
-            vec![("/f".into(), Comparison::EqualTo, serde_json::Value::from(5))]
+            vec![Selector::Condition((
+                "/f".into(),
+                Comparison::EqualTo,
+                serde_json::Value::from(5)
+            ))]
         );
         assert_eq!(action.group.sort_by(), vec!["/g"]);
         assert!(action.group.split_by_sort_key());
@@ -1628,12 +1649,13 @@ walltime.per_submission = "00:00:01"
 # submit_options is tested above
 
 [default.action.group]
-include = [["/f", "==", 5]]
 sort_by = ["/g"]
 split_by_sort_key = true
 reverse_sort = true
 maximum_size = 6
 submit_whole = true
+[[default.action.group.include]]
+condition = ["/f", "==", 5]
 
 [[action]]
 name = "aa"
@@ -1651,12 +1673,13 @@ walltime.per_submission = "00:00:02"
 # submit_options is tested above
 
 [action.group]
-include = [["/ff", "==", 10]]
 sort_by = ["/gg"]
 split_by_sort_key = false
 reverse_sort = false
 maximum_size = 12
 submit_whole = false
+[[action.group.include]]
+condition = ["/ff", "==", 10]
 
 [[action]]
 name = "dd"
@@ -1682,11 +1705,11 @@ name = "dd"
         assert!(action.submit_options.is_empty());
         assert_eq!(
             action.group.include(),
-            vec![(
+            vec![Selector::Condition((
                 "/ff".into(),
                 Comparison::EqualTo,
                 serde_json::Value::from(10)
-            )]
+            ))]
         );
         assert_eq!(action.group.sort_by(), vec!["/gg"]);
         assert!(!action.group.split_by_sort_key());
@@ -1717,12 +1740,13 @@ walltime.per_submission = "00:00:01"
 # submit_options is tested above
 
 [default.action.group]
-include = [["/f", "==", 5]]
 sort_by = ["/g"]
 split_by_sort_key = true
 reverse_sort = true
 maximum_size = 6
 submit_whole = true
+[[default.action.group.include]]
+condition = ["/f", "==", 5]
 
 [[action]]
 from = "a"
@@ -1752,7 +1776,11 @@ command = "e"
         assert!(action.submit_options.is_empty());
         assert_eq!(
             action.group.include(),
-            vec![("/f".into(), Comparison::EqualTo, serde_json::Value::from(5))]
+            vec![Selector::Condition((
+                "/f".into(),
+                Comparison::EqualTo,
+                serde_json::Value::from(5)
+            ))]
         );
         assert_eq!(action.group.sort_by(), vec!["/g"]);
         assert!(action.group.split_by_sort_key());
@@ -1783,12 +1811,13 @@ walltime.per_submission = "00:00:01"
 # submit_options is tested above
 
 [default.action.group]
-include = [["/f", "==", 5]]
 sort_by = ["/g"]
 split_by_sort_key = true
 reverse_sort = true
 maximum_size = 6
 submit_whole = true
+[[default.action.group.include]]
+condition = ["/f", "==", 5]
 
 [[action]]
 from = "a"
@@ -1808,12 +1837,13 @@ walltime.per_submission = "00:00:02"
 # submit_options is tested above
 
 [action.group]
-include = [["/ff", "==", 10]]
 sort_by = ["/gg"]
 split_by_sort_key = false
 reverse_sort = false
 maximum_size = 12
 submit_whole = false
+[[action.group.include]]
+condition = ["/ff", "==", 10]
 
 [[action]]
 name = "dd"
@@ -1844,11 +1874,11 @@ command = "e"
         assert!(action.submit_options.is_empty());
         assert_eq!(
             action.group.include(),
-            vec![(
+            vec![Selector::Condition((
                 "/ff".into(),
                 Comparison::EqualTo,
                 serde_json::Value::from(10)
-            )]
+            ))]
         );
         assert_eq!(action.group.sort_by(), vec!["/gg"]);
         assert!(!action.group.split_by_sort_key());
