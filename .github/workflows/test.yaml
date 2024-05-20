@@ -22,24 +22,36 @@ env:
   CLICOLOR: 1
   MDBOOK_VERSION: 0.4.37
   LINKCHECK_VERSION: 0.7.7
+  RUST_LATEST_VERSION: 1.78.0
 
 jobs:
   unit_test:
-    name: Unit test on ${{ matrix.os }} [${{ matrix.mode }}]
+    name: Unit test [${{ matrix.mode }}-rust-${{ matrix.rust }}-${{ matrix.os }}]
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-22.04]
-        mode: [debug, release]
+        os:
+          - ubuntu-22.04
+          - macos-14
+        rust:
+          # Oldest supported version of rust
+          - 1.77.2
+          - 1.78.0
+        mode:
+         - debug
 
         include:
-        - mode: 'debug'
-          mode_option: ''
-        - mode: 'release'
-          mode_option: '--release'
+        # Add a release build on linux with the latest version of rust
+        - os: ubuntu-22.04
+          rust: 1.78.0
+          mode: release
 
     steps:
     - uses: actions/checkout@v4.1.3
+    - name: Update rust
+      run: rustup install ${{ matrix.rust }} --no-self-update && rustup default ${{ matrix.rust }}
+    - name: Check rust installation
+      run: rustc -vV
     - uses: actions/cache@v4.0.2
       with:
         path: |
@@ -47,17 +59,21 @@ jobs:
           ~/.cargo/registry/cache/
           ~/.cargo/git/db/
           target/
-        key: ${{ runner.os }}-cargo-unit-test-${{ matrix.mode }}-${{ hashFiles('**/Cargo.lock') }}
+        key: ${{ runner.os }}-rust-${{ matrix.rust }}-cargo-unit-test-${{ matrix.mode }}-${{ hashFiles('**/Cargo.lock') }}
     - name: Build
-      run: cargo build ${{ matrix.mode_option }} --verbose
+      run: cargo build ${{ matrix.mode == 'release' && '--release' || '' }} --verbose
     - name: Run tests
-      run: cargo test ${{ matrix.mode_option }} --verbose
+      run: cargo test ${{ matrix.mode == 'release' && '--release' || '' }} --verbose
 
   execute_tutorials:
     name: Execute tutorials
     runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v4.1.3
+    - name: Update rust
+      run: rustup install "$RUST_LATEST_VERSION" --no-self-update && rustup default "$RUST_LATEST_VERSION"
+    - name: Check rust installation
+      run: rustc -vV
     - uses: actions/cache@v4.0.2
       with:
         path: |
@@ -65,7 +81,7 @@ jobs:
           ~/.cargo/registry/cache/
           ~/.cargo/git/db/
           target/
-        key: ${{ runner.os }}-cargo-execute-tutorials-${{ hashFiles('**/Cargo.lock') }}
+        key: ${{ runner.os }}-rust-${{ env.RUST_LATEST_VERSION }}-cargo-execute-tutorials-${{ hashFiles('**/Cargo.lock') }}
     - name: Install
       run: cargo install --path . --locked --verbose
     - name: Run hello.sh
@@ -116,8 +132,11 @@ jobs:
 
   tests_complete:
     name: All tests
+    if: always()
     needs: [unit_test, execute_tutorials, build_documentation]
     runs-on: ubuntu-latest
 
     steps:
-    - run: echo "Done!"
+    - run: jq --exit-status 'all(.result == "success")' <<< '${{ toJson(needs) }}'
+    - name: Done
+      run: exit 0

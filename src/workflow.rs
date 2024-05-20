@@ -373,7 +373,7 @@ impl Resources {
     /// Resolve omitted keys from the given template.
     fn resolve(&mut self, template: &Resources) {
         if self.processes.is_none() {
-            self.processes = template.processes.clone();
+            self.processes.clone_from(&template.processes);
         }
         if self.threads_per_process.is_none() {
             self.threads_per_process = template.threads_per_process;
@@ -382,7 +382,7 @@ impl Resources {
             self.gpus_per_process = template.gpus_per_process;
         }
         if self.walltime.is_none() {
-            self.walltime = template.walltime.clone();
+            self.walltime.clone_from(&template.walltime);
         }
     }
 
@@ -451,19 +451,19 @@ impl Action {
     /// Resolve the action's omitted keys with defaults
     fn resolve(&mut self, template: &Action) {
         if self.name.is_none() {
-            self.name = template.name.clone();
+            self.name.clone_from(&template.name);
         }
         if self.command.is_none() {
-            self.command = template.command.clone();
+            self.command.clone_from(&template.command);
         }
         if self.launchers.is_none() {
-            self.launchers = template.launchers.clone();
+            self.launchers.clone_from(&template.launchers);
         }
         if self.previous_actions.is_none() {
-            self.previous_actions = template.previous_actions.clone();
+            self.previous_actions.clone_from(&template.previous_actions);
         }
         if self.products.is_none() {
-            self.products = template.products.clone();
+            self.products.clone_from(&template.products);
         }
 
         self.resources.resolve(&template.resources);
@@ -477,16 +477,18 @@ impl Action {
                     .get_mut(name)
                     .expect("Key should be present");
                 if action_options.account.is_none() {
-                    action_options.account = template_options.account.clone();
+                    action_options.account.clone_from(&template_options.account);
                 }
                 if action_options.setup.is_none() {
-                    action_options.setup = template_options.setup.clone();
+                    action_options.setup.clone_from(&template_options.setup);
                 }
                 if action_options.partition.is_none() {
-                    action_options.partition = template_options.partition.clone();
+                    action_options
+                        .partition
+                        .clone_from(&template_options.partition);
                 }
                 if action_options.custom.is_empty() {
-                    action_options.custom = template_options.custom.clone();
+                    action_options.custom.clone_from(&template_options.custom);
                 }
             } else {
                 self.submit_options
@@ -545,10 +547,10 @@ impl Group {
     /// Resolve omitted keys from the given template.
     fn resolve(&mut self, template: &Group) {
         if self.include.is_none() {
-            self.include = template.include.clone();
+            self.include.clone_from(&template.include);
         }
         if self.sort_by.is_none() {
-            self.sort_by = template.sort_by.clone();
+            self.sort_by.clone_from(&template.sort_by);
         }
         if self.split_by_sort_key.is_none() {
             self.split_by_sort_key = template.split_by_sort_key;

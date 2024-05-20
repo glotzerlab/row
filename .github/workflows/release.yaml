@@ -1,0 +1,142 @@
+name: release
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  pull_request:
+
+  push:
+    branches:
+      - "*"
+    tags:
+      - "*"
+
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  name: row
+  CARGO_TERM_COLOR: always
+  CLICOLOR: 1
+  RUST_VERSION: 1.78.0
+
+jobs:
+  source:
+    name: Build source tarball
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4.1.4
+      with:
+        path: code
+
+    - name: Determine filename-safe ref from GITHUB_REF_NAME
+      run: echo ref="$(echo "${GITHUB_REF_NAME}" | sed  -e 's/\//-/g')" >> "$GITHUB_ENV"
+
+    - name: Copy source
+      run: cp -R code "${name}-${ref}"
+
+    - name: Remove .git
+      run: rm -rf "${name}-${ref}/.git" && ls -laR "${name}-${ref}"
+
+    - name: Tar/xz source
+      run: tar -cvJf "${name}-${ref}.tar.xz" "${name}-${ref}"
+
+    - uses: actions/upload-artifact@v4.3.3
+      with:
+        name: source
+        path: |
+          *.tar.*
+
+  release-notes:
+    name: Extract release notes
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4.1.4
+      with:
+        path: code
+
+    - name: Write release-notes.md
+      run: grep -P -m 2 -B 10000 "^## v*\d*\.\d*\.\d*" doc/src/release-notes.md | sed '$d' | tee "${GITHUB_WORKSPACE}/release-notes.md"
+      working-directory: code
+
+    - uses: actions/upload-artifact@v4.3.3
+      with:
+        name: release-notes
+        path: |
+          release-notes.md
+
+  binary:
+    name: Build [${{ matrix.target }}]
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        target:
+        - x86_64-unknown-linux-gnu
+        # - aarch64-apple-darwin
+        include:
+        - target: x86_64-unknown-linux-gnu
+          runner: ubuntu-20.04
+        # - target: aarch64-apple-darwin
+        #   runner: macos-14
+
+    steps:
+    - uses: actions/checkout@v4.1.4
+    - name: Determine filename-safe ref from GITHUB_REF_NAME
+      run: echo ref="$(echo "${GITHUB_REF_NAME}" | sed  -e 's/\//-/g')" >> "$GITHUB_ENV"
+    - name: Update rust
+      run: rustup install "$RUST_VERSION" --no-self-update && rustup default "$RUST_VERSION"
+    - name: Check rust installation
+      run: rustc -vV
+    - uses: actions/cache@v4.0.2
+      with:
+        path: |
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          target/
+        key: ${{ runner.os }}-rust-${{ env.RUST_VERSION }}-cargo-release-binary-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
+    - name: Build
+      run: cargo build --locked --bin "${name}" --release --target ${{ matrix.target }}
+    - name: Check output
+      run: file "target/${{ matrix.target }}/release/${name}"
+    - name: Compress
+      run: cp "target/${{ matrix.target }}/release/${name}" . && tar -cvJf "${name}-${ref}-${{ matrix.target }}.tar.xz" "${name}"
+    - uses: actions/upload-artifact@v4.3.3
+      with:
+        name: ${{ matrix.target }}
+        path: "${{ env.name }}-${{ env.ref }}-${{ matrix.target }}.tar.xz"
+
+  publish:
+    name: Publish [GitHub]
+    needs: [binary, source, release-notes]
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Download artifacts
+      uses: actions/download-artifact@v4.1.7
+      with:
+        merge-multiple: true
+
+    - name: List files
+      run: ls -lR
+
+    - name: Create release
+      uses: softprops/action-gh-release@v2.0.5
+      if: startsWith(github.ref, 'refs/tags/v')
+      with:
+        files: |
+          *.xz
+        body_path: release-notes.md
+        make_latest: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

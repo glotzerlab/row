@@ -294,9 +294,5 @@ status may take a long time, so it should display a progress bar.
   without applying the additional submission filters.
 - **workspace**: The location on the file system that contains **directories**.
 
-# TODO: Pull request template
-# TODO: Issue templates?
-# TODO: Dependabot configuration
-# TODO: readthedocs builds
 # TODO: logo
-# TODO: release CI
+# TODO: Expand include to apply any to the array and allow condition or all elements.

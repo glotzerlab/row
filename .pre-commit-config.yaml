@@ -3,12 +3,15 @@ ci:
   autoupdate_branch: 'trunk'
   autofix_prs: false
 
+default_language_version:
+  rust: 1.78.0
+
 repos:
-- repo: https://github.com/backplane/pre-commit-rust-hooks
-  rev: v1.1.0
+- repo: https://github.com/Young-Naive-Simple/pre-commit-rust/
+  rev: 3a8de64acc969112746489e5ec1f0b13e00d871e
   hooks:
   - id: fmt
-  - id: check
+  - id: cargo-check
   - id: clippy
     args:
       - --all-targets
@@ -25,10 +28,11 @@ repos:
   - id: check-yaml
   - id: check-case-conflict
   - id: mixed-line-ending
-- repo: https://github.com/rhysd/actionlint
-  rev: v1.6.27
-  hooks:
-    - id: actionlint
+# fails with _cgo_export.c:3:10: fatal error: 'stdlib.h' file not found on Mac.
+# - repo: https://github.com/rhysd/actionlint
+#   rev: v1.6.27
+#   hooks:
+#     - id: actionlint
 - repo: https://github.com/astral-sh/ruff-pre-commit
   rev: 'v0.3.4'
   hooks:
@@ -48,3 +52,4 @@ repos:
   rev: v1.21.0
   hooks:
     - id: typos
+      exclude_types: [css]

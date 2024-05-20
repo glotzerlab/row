@@ -111,7 +111,7 @@ pub fn submit<W: Write>(
             }
         }
 
-        action_groups.push((&action, groups));
+        action_groups.push((action, groups));
     }
 
     if matching_action_count == 0 {

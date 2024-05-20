@@ -1,0 +1,9 @@
+version: 2
+build:
+  os: "ubuntu-22.04"
+  commands:
+    - mkdir -p bin
+    - curl -sSL "https://github.com/rust-lang/mdBook/releases/download/v0.4.37/mdbook-v0.4.37-x86_64-unknown-linux-gnu.tar.gz" | tar -xvz --directory "bin"
+    - mkdir -p $READTHEDOCS_OUTPUT/html
+    - echo "site-url = \"/$READTHEDOCS_LANGUAGE/$READTHEDOCS_VERSION/\"" >> doc/book.toml
+    - bin/mdbook build doc --dest-dir=$READTHEDOCS_OUTPUT/html
