@@ -4,11 +4,11 @@ value_file = "value.json"
 [[action]]
 name = "process_point"
 command = "echo {directory}"
-[action.group]
-include = [["/type", "==", "point"]]
+[[action.group.include]]
+condition = ["/type", "==", "point"]
 
 [[action]]
 name = "process_letter"
 command = "echo {directory}"
-[action.group]
-include = [["/type", "==", "letter"]]
+[[action.group.include]]
+condition = ["/type", "==", "letter"]
