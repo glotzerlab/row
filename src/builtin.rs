@@ -65,6 +65,26 @@ impl BuiltIn for launcher::Configuration {
     }
 }
 
+fn andes() -> Cluster {
+    ////////////////////////////////////////////////////////////////////////////////////////
+    // OLCF Andes
+    Cluster {
+        name: "andes".into(),
+        identify: IdentificationMethod::ByEnvironment("LMOD_SYSTEM_NAME".into(), "andes".into()),
+        scheduler: SchedulerType::Slurm,
+        partition: vec![
+            // Auto-detected partitions: batch
+            Partition {
+                name: "batch".into(),
+                maximum_gpus_per_job: Some(0),
+                require_cpus_multiple_of: Some(32),
+                cpus_per_node: Some(32),
+                ..Partition::default()
+            },
+        ],
+    }
+}
+
 fn anvil() -> Cluster {
     ////////////////////////////////////////////////////////////////////////////////////////
     // Purdue Anvil
@@ -250,7 +270,7 @@ fn greatlakes() -> Cluster {
     }
 }
 
-// TODO: Add/test Frontier and Andes.
+// TODO: Add/test Frontier.
 
 fn none() -> Cluster {
     // Fallback none cluster.
@@ -267,7 +287,7 @@ fn none() -> Cluster {
 
 impl BuiltIn for cluster::Configuration {
     fn built_in() -> Self {
-        let cluster = vec![anvil(), delta(), greatlakes(), none()];
+        let cluster = vec![andes(), anvil(), delta(), greatlakes(), none()];
 
         cluster::Configuration { cluster }
     }

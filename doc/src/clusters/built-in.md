@@ -2,6 +2,13 @@
 
 **Row** includes built-in support for the following clusters.
 
+## Andes (OLCF)
+
+**Row automatically selects from the following partitions on [Andes]:
+* `batch`
+
+> Note: Andes has no shared partition. All jobs must use 32 CPUs per node.
+
 ## Anvil (Purdue)
 
 **Row** automatically selects from the following partitions on [Anvil]:

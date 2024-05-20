@@ -47,6 +47,7 @@ CLUSTERS = {
     'greatlakes': Cluster(cpus_per_node=36, gpus_per_node=2, gpu_arch='nvidia'),
     'anvil': Cluster(cpus_per_node=128, gpus_per_node=0, gpu_arch='nvidia'),
     'delta': Cluster(cpus_per_node=128, gpus_per_node=4, gpu_arch='nvidia'),
+    'andes': Cluster(cpus_per_node=32, gpus_per_node=0, gpu_arch='none', no_shared=True),
 }
 
 N_THREADS = 4
@@ -132,7 +133,7 @@ def init(account, setup):
                 """)
             )
 
-        if cluster.cpus_per_node >= 1:
+        if cluster.cpus_per_node >= 1 and not cluster.get('no_shared', False):
             workflow.write(
                 textwrap.dedent("""
                 [[action]]
@@ -145,7 +146,7 @@ def init(account, setup):
                 """)
             )
 
-        if cluster.cpus_per_node >= N_THREADS:
+        if cluster.cpus_per_node >= N_THREADS and not cluster.get('no_shared', False):
             workflow.write(
                 textwrap.dedent(f"""
                 [[action]]
@@ -159,7 +160,7 @@ def init(account, setup):
                 """)
             )
 
-        if cluster.cpus_per_node >= N_PROCESSES:
+        if cluster.cpus_per_node >= N_PROCESSES and not cluster.get('no_shared', False):
             workflow.write(
                 textwrap.dedent(f"""
                 [[action]]
@@ -173,7 +174,7 @@ def init(account, setup):
                 """)
             )
 
-        if cluster.cpus_per_node >= N_PROCESSES * N_THREADS:
+        if cluster.cpus_per_node >= N_PROCESSES * N_THREADS and not cluster.get('no_shared', False):
             workflow.write(
                 textwrap.dedent(f"""
                 [[action]]
