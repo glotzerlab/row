@@ -47,7 +47,7 @@ jobs:
           mode: release
 
     steps:
-    - uses: actions/checkout@v4.1.3
+    - uses: actions/checkout@v4.1.6
     - name: Update rust
       run: rustup install ${{ matrix.rust }} --no-self-update && rustup default ${{ matrix.rust }}
     - name: Check rust installation
@@ -69,7 +69,7 @@ jobs:
     name: Execute tutorials
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v4.1.3
+    - uses: actions/checkout@v4.1.6
     - name: Update rust
       run: rustup install "$RUST_LATEST_VERSION" --no-self-update && rustup default "$RUST_LATEST_VERSION"
     - name: Check rust installation
@@ -96,7 +96,7 @@ jobs:
         ROW_YES: "true"
     # The signac test requires python
     - name: Set up Python
-      uses: actions/setup-python@v5.0.0
+      uses: actions/setup-python@v5.1.0
       with:
         python-version: '3.12'
     - run: pip install -r .github/workflows/signac-requirements.txt
@@ -110,7 +110,7 @@ jobs:
     name: Build documentation
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v4.1.3
+    - uses: actions/checkout@v4.1.6
     - name: Install mdbook
       run: |
         mkdir -p "$HOME/.cargo/bin"
