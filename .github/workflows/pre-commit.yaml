@@ -19,7 +19,7 @@ jobs:
   pre-commit:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4.1.3
+    - uses: actions/checkout@v4.1.6
     # For unknown reasons, pre-commit fails with error: component download failed for cargo-x86_64-unknown-linux-gnu: could not rename downloaded file ...
     # unless we install with rustup first manually.
     - name: Update rust
@@ -33,7 +33,7 @@ jobs:
         path: |
           ~/.cache/pre-commit/
         key: ${{ runner.os }}-pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
-    - uses: actions/setup-python@v5.0.0
+    - uses: actions/setup-python@v5.1.0
       with:
         python-version: '3.12'
     - name: Install pre-commit
