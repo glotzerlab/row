@@ -42,12 +42,12 @@ import numpy  # noqa: F401
 # Set the number of cpus and gpus per node in the *default* partitions that row selects.
 # Testing non-default partitions is beyond the scope of this script. Set to 0 to prevent
 # CPU and/or GPU jobs from executing.
-Cluster = collections.namedtuple('Cluster', ['cpus_per_node', 'gpus_per_node', 'gpu_arch'])
+Cluster = collections.namedtuple('Cluster', ('cpus_per_node', 'gpus_per_node', 'gpu_arch', 'has_shared'), defaults=(None, None, 'nvidia', True))
 CLUSTERS = {
     'greatlakes': Cluster(cpus_per_node=36, gpus_per_node=2, gpu_arch='nvidia'),
     'anvil': Cluster(cpus_per_node=128, gpus_per_node=0, gpu_arch='nvidia'),
     'delta': Cluster(cpus_per_node=128, gpus_per_node=4, gpu_arch='nvidia'),
-    'andes': Cluster(cpus_per_node=32, gpus_per_node=0, gpu_arch='none', no_shared=True),
+    'andes': Cluster(cpus_per_node=32, gpus_per_node=0, gpu_arch='none', has_shared=False),
 }
 
 N_THREADS = 4
@@ -115,7 +115,7 @@ def init(account, setup):
             [workspace]
             path = "{cluster_name}"
 
-            [submit_options.{cluster_name}]
+            [default.action.submit_options.{cluster_name}]
             """)
         )
 
@@ -133,7 +133,7 @@ def init(account, setup):
                 """)
             )
 
-        if cluster.cpus_per_node >= 1 and not cluster.get('no_shared', False):
+        if cluster.cpus_per_node >= 1 and cluster.has_shared:
             workflow.write(
                 textwrap.dedent("""
                 [[action]]
@@ -146,7 +146,7 @@ def init(account, setup):
                 """)
             )
 
-        if cluster.cpus_per_node >= N_THREADS and not cluster.get('no_shared', False):
+        if cluster.cpus_per_node >= N_THREADS and cluster.has_shared:
             workflow.write(
                 textwrap.dedent(f"""
                 [[action]]
@@ -160,7 +160,7 @@ def init(account, setup):
                 """)
             )
 
-        if cluster.cpus_per_node >= N_PROCESSES and not cluster.get('no_shared', False):
+        if cluster.cpus_per_node >= N_PROCESSES and cluster.has_shared:
             workflow.write(
                 textwrap.dedent(f"""
                 [[action]]
@@ -174,7 +174,7 @@ def init(account, setup):
                 """)
             )
 
-        if cluster.cpus_per_node >= N_PROCESSES * N_THREADS and not cluster.get('no_shared', False):
+        if cluster.cpus_per_node >= N_PROCESSES * N_THREADS and cluster.has_shared:
             workflow.write(
                 textwrap.dedent(f"""
                 [[action]]
