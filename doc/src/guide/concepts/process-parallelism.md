@@ -29,10 +29,11 @@ Use **MPI** parallelism to launch:
 
 [mpi4py]: https://mpi4py.readthedocs.io
 
-## Processing multiple directories in parallel with **mpi4py**.
+## Processing multiple directories in parallel with Python and **mpi4py**.
 
-You can execute serial actions on many directories in parallel with the **[mpi4py]**.
-Here is an example using **signac**:
+You can execute serial actions on many directories in parallel using **[mpi4py]**.
+Use the communicators **rank** to index into the array of directories. Here is an
+example using **signac**:
 
 ```python
 {{#include mpi4py-example.py:action}}
@@ -42,7 +43,7 @@ Pair this with a workflow action like this to process many directories in parall
 
 ```toml
 [[action]]
-launcher = ["mpi"]
+launchers = ["mpi"]
 [action.group]
 maximum_size = 128
 [action.resources]
@@ -60,17 +61,17 @@ to **mpi4py** above:
 
 ```toml
 [[action]]
-launcher = ["mpi"]
+launchers = ["mpi"]
 [action.group]
 maximum_size = 128
 [action.resources]
 processes.per_directory = 4
 walltime.per_submission = "08:00:00"
 ```
-the only change is `processes.per_directory = 4`.
 
-In your Python code, use the `ranks_per_partition` flag to HOOMD-blue's `Communicator`.
-Here is an example using signac:
+In your Python code, use the `ranks_per_partition` flag to HOOMD-blue's `Communicator`
+to assign 4 ranks (processes) to each partition (directory). Then use the partition
+index into the array of directories. Here is an example using **signac**:
 
 ```python
 {{#include hoomd-example.py:action}}
