@@ -42,11 +42,17 @@ import numpy  # noqa: F401
 # Set the number of cpus and gpus per node in the *default* partitions that row selects.
 # Testing non-default partitions is beyond the scope of this script. Set to 0 to prevent
 # CPU and/or GPU jobs from executing.
-Cluster = collections.namedtuple('Cluster', ['cpus_per_node', 'gpus_per_node', 'gpu_arch'])
+Cluster = collections.namedtuple(
+    'Cluster',
+    ('cpus_per_node', 'gpus_per_node', 'gpu_arch', 'has_shared'),
+    defaults=(None, None, 'nvidia', True),
+)
 CLUSTERS = {
-    'greatlakes': Cluster(cpus_per_node=36, gpus_per_node=2, gpu_arch='nvidia'),
+    'andes': Cluster(cpus_per_node=32, gpus_per_node=0, gpu_arch='none', has_shared=False),
     'anvil': Cluster(cpus_per_node=128, gpus_per_node=0, gpu_arch='nvidia'),
     'delta': Cluster(cpus_per_node=128, gpus_per_node=4, gpu_arch='nvidia'),
+    'frontier': Cluster(cpus_per_node=0, gpus_per_node=8, gpu_arch='amd', has_shared=False),
+    'greatlakes': Cluster(cpus_per_node=36, gpus_per_node=2, gpu_arch='nvidia'),
 }
 
 N_THREADS = 4
@@ -93,6 +99,26 @@ def get_nvidia_gpus():
     return gpus
 
 
+def get_amd_gpus():
+    """Get the assigned AMD GPUs."""
+    result = subprocess.run(
+        ['rocm-smi', '--showuniqueid'], capture_output=True, check=True, text=True
+    )
+
+    gpus = []
+    pattern = re.compile(r'.*Unique ID: (.*)$')
+
+    # TODO: Do we need to parse ROCR_VISIBLE_DEVICES and match GPU[id] lines?
+    for line in result.stdout.splitlines():
+        print(line)
+        match = pattern.match(line)
+
+        if match:
+            gpus.append(match.group(1))
+
+    return gpus
+
+
 def init(account, setup):
     """Initialize the project."""
     cluster_name = get_cluster_name()
@@ -114,7 +140,7 @@ def init(account, setup):
             [workspace]
             path = "{cluster_name}"
 
-            [submit_options.{cluster_name}]
+            [default.action.submit_options.{cluster_name}]
             """)
         )
 
@@ -132,7 +158,7 @@ def init(account, setup):
                 """)
             )
 
-        if cluster.cpus_per_node >= 1:
+        if cluster.cpus_per_node >= 1 and cluster.has_shared:
             workflow.write(
                 textwrap.dedent("""
                 [[action]]
@@ -145,7 +171,7 @@ def init(account, setup):
                 """)
             )
 
-        if cluster.cpus_per_node >= N_THREADS:
+        if cluster.cpus_per_node >= N_THREADS and cluster.has_shared:
             workflow.write(
                 textwrap.dedent(f"""
                 [[action]]
@@ -159,7 +185,7 @@ def init(account, setup):
                 """)
             )
 
-        if cluster.cpus_per_node >= N_PROCESSES:
+        if cluster.cpus_per_node >= N_PROCESSES and cluster.has_shared:
             workflow.write(
                 textwrap.dedent(f"""
                 [[action]]
@@ -173,7 +199,7 @@ def init(account, setup):
                 """)
             )
 
-        if cluster.cpus_per_node >= N_PROCESSES * N_THREADS:
+        if cluster.cpus_per_node >= N_PROCESSES * N_THREADS and cluster.has_shared:
             workflow.write(
                 textwrap.dedent(f"""
                 [[action]]
@@ -217,7 +243,7 @@ def init(account, setup):
                 """)
             )
 
-        if cluster.gpus_per_node >= 1 and cluster.gpu_arch == 'nvidia':
+        if cluster.gpus_per_node >= 1 and cluster.gpu_arch == 'nvidia' and cluster.has_shared:
             workflow.write(
                 textwrap.dedent("""
                 [[action]]
@@ -231,7 +257,7 @@ def init(account, setup):
                 """)
             )
 
-        if cluster.gpus_per_node >= N_GPUS and cluster.gpu_arch == 'nvidia':
+        if cluster.gpus_per_node >= N_GPUS and cluster.gpu_arch == 'nvidia' and cluster.has_shared:
             workflow.write(
                 textwrap.dedent(f"""
                 [[action]]
@@ -245,7 +271,7 @@ def init(account, setup):
                 """)
             )
 
-        if cluster.gpus_per_node >= 1 and cluster.gpu_arch == 'nvidia':
+        if cluster.gpus_per_node >= 1 and cluster.gpu_arch == 'nvidia' and cluster.has_shared:
             workflow.write(
                 textwrap.dedent(f"""
                 [[action]]
@@ -255,6 +281,21 @@ def init(account, setup):
                 launchers = ["mpi"]
                 [action.resources]
                 processes.per_submission = {N_PROCESSES}
+                gpus_per_process = 1
+                walltime.per_submission = "00:05:00"
+                """)
+            )
+
+        if cluster.gpus_per_node >= 1 and cluster.gpu_arch == 'amd':
+            workflow.write(
+                textwrap.dedent(f"""
+                [[action]]
+                name = "mpi_wholenode_amd_gpus"
+                command = "python validate.py execute mpi_wholenode_amd_gpus {{directory}}"
+                products = ["mpi_wholenode_amd_gpus.out"]
+                launchers = ["mpi"]
+                [action.resources]
+                processes.per_submission = {cluster.gpus_per_node}
                 gpus_per_process = 1
                 walltime.per_submission = "00:05:00"
                 """)
@@ -326,6 +367,8 @@ def check_mpi(directory, n_processes, n_threads, n_hosts, name, n_gpus=0, gpu_ar
     gpus = []
     if n_gpus > 0 and gpu_arch == 'nvidia':
         gpus = comm.gather(get_nvidia_gpus(), root=0)
+    if n_gpus > 0 and gpu_arch == 'amd':
+        gpus = comm.gather(get_amd_gpus(), root=0)
 
     if comm.Get_rank() == 0:
         cpuset_sizes = [len(s) for s in cpusets]
@@ -461,6 +504,22 @@ def nvidia_gpu(directory):
 def nvidia_gpus(directory):
     """Validate multi-GPU jobs."""
     check_nvidia_gpu(directory, n_gpus=N_GPUS, name='nvidia_gpus')
+
+
+def mpi_wholenode_amd_gpus(directory):
+    """Check that MPI allocates processes correctly to all AMD GPUs on one node."""
+    cluster_name = get_cluster_name()
+    cluster = CLUSTERS.get(cluster_name)
+
+    check_mpi(
+        directory,
+        n_processes=cluster.gpus_per_node,
+        n_threads=1,
+        n_hosts=1,
+        name='mpi_wholenode_amd_gpus',
+        n_gpus=1,
+        gpu_arch='amd',
+    )
 
 
 if __name__ == '__main__':
