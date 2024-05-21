@@ -290,8 +290,6 @@ fn greatlakes() -> Cluster {
     }
 }
 
-// TODO: Add/test Frontier.
-
 fn none() -> Cluster {
     // Fallback none cluster.
     Cluster {
