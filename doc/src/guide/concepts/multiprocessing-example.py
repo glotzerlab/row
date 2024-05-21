@@ -21,9 +21,8 @@ def action(*jobs):
 
     with multiprocessing.Pool(processes=processes) as p:
         p.map(action_implementation, jobs)
+    # ANCHOR_END: action
 
-
-# ANCHOR_END: action
 
 if __name__ == '__main__':
     # Parse the command line arguments: python action.py --action <ACTION> [DIRECTORIES]

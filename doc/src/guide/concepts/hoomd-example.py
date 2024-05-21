@@ -20,9 +20,8 @@ def action(*jobs):
     processes_per_directory = os.environ['ACTION_PROCESSES_PER_DIRECTORY']
     communicator = hoomd.communicator.Communicator(ranks_per_partition=processes_per_directory)
     action_implementation(jobs[communicator.partition])
+    # ANCHOR_END: action
 
-
-# ANCHOR_END: action
 
 if __name__ == '__main__':
     # Parse the command line arguments: python action.py --action <ACTION> [DIRECTORIES]

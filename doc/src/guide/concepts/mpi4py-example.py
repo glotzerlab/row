@@ -23,9 +23,8 @@ def action(*jobs):
 
     rank = mpi4py.MPI.COMM_WORLD.Get_rank()
     action_implementation(jobs[rank])
+    # ANCHOR_END: action
 
-
-# ANCHOR_END: action
 
 if __name__ == '__main__':
     # Parse the command line arguments: python action.py --action <ACTION> [DIRECTORIES]
