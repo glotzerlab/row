@@ -33,7 +33,7 @@ Commands:
 | `project.py submit --bundle <N> --parallel` | A command *may* execute [group members][group] in [parallel]. |
 | `project.py submit -o <PATTERN>` | [`row submit --action <PATTERN>`](row/submit.md) |
 | `project.py <command> -j [JOB_ID1] [JOB_ID2] ...` | `row <command> [JOB_ID1] [JOB_ID2] ...` |
-| `project.py <command> -j a1234` | `cd workspace; row <command> a1234<tab><backspace>` |
+| `project.py <command> -j a1234` | `cd workspace; row <command> a1234*` |
 | `project.py <command> -f <FILTER>` | `row <command> $(signac find <FILTER>)` |
 
 Conditions:

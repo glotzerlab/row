@@ -108,7 +108,6 @@ def get_amd_gpus():
     gpus = []
     pattern = re.compile(r'.*Unique ID: (.*)$')
 
-    # TODO: Do we need to parse ROCR_VISIBLE_DEVICES and match GPU[id] lines?
     for line in result.stdout.splitlines():
         print(line)
         match = pattern.match(line)
