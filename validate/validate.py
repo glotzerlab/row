@@ -106,13 +106,15 @@ def get_amd_gpus():
     )
 
     gpus = []
-    pattern = re.compile(r'.*\(Unique ID: (.*)$')
+    pattern = re.compile(r'.*Unique ID: (.*)$')
 
     # TODO: Do we need to parse ROCR_VISIBLE_DEVICES and match GPU[id] lines?
     for line in result.stdout.splitlines():
+        print(line)
         match = pattern.match(line)
 
-        gpus.append(match.group(1))
+        if match:
+            gpus.append(match.group(1))
 
     return gpus
 
@@ -284,7 +286,7 @@ def init(account, setup):
                 """)
             )
 
-        if cluster.gpus_per_node >= 1 and cluster.gpu_arch == 'amd' and :
+        if cluster.gpus_per_node >= 1 and cluster.gpu_arch == 'amd':
             workflow.write(
                 textwrap.dedent(f"""
                 [[action]]
@@ -294,6 +296,7 @@ def init(account, setup):
                 launchers = ["mpi"]
                 [action.resources]
                 processes.per_submission = {cluster.gpus_per_node}
+                gpus_per_process = 1
                 walltime.per_submission = "00:05:00"
                 """)
             )
