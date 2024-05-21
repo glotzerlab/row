@@ -512,7 +512,7 @@ def mpi_wholenode_amd_gpus(directory):
 
     check_mpi(
         directory,
-        n_processes=cluster.gpus_per_node * N_NODES,
+        n_processes=cluster.gpus_per_node,
         n_threads=1,
         n_hosts=1,
         name='mpi_wholenode_amd_gpus',
