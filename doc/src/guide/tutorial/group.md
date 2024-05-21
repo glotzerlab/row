@@ -53,15 +53,15 @@ This workflow will apply the `process_point` action to the directories where
 `value/type == "point"` and the `process_letter` action to the directories where
 `value/type == "letter"`.
 
-`include` is an array. Each element is a length 3 array with the contents: `[JSON
-pointer, operator, operand]`. Think of each element as an expression. The [*JSON
-pointer*](../concepts/json-pointers.md) is a string that reads a particular value
+`condition` is a length 3 array with the contents: `[JSON pointer, operator, operand]`.
+Think of each element as an expression. The
+[*JSON pointer*](../concepts/json-pointers.md) is a string that reads a particular value
 from the directory's **value**. The *operator* is a comparison operator: `"<"`, `"<="`,
 `"=="`, `">="`, or `">"`. The *operand* is the value to compare to. Together, these 3
 elements make a *condition*.
 
-**Row** applies these *conditions* to all directories in the workspace. When all
-*conditions* are true, the directory is included in the action's **groups**.
+**Row** applies the *condition* to all directories in the workspace. When the
+*condition* is true, the directory is included in the action's **groups**.
 
 > Note: This implies that every JSON pointer used in an `include` condition **MUST**
 > be present in every value file.

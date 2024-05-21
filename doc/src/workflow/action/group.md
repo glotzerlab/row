@@ -6,12 +6,13 @@ that it submits.
 Example:
 ```toml
 [action.group]
-include = [["/subproject", "==", "project_one"]]
 sort_by = ["/value"]
 split_by_sort_key = true
 maximum_size = 16
 submit_whole = true
 reverse_sort = true
+[[action.group.include]]
+condition = ["/subproject", "==", "project_one"]
 ```
 
 > Note: You may omit `[action.group]` entirely.
@@ -21,27 +22,36 @@ groups of directories included in a given action.
 
 ## include
 
-`action.group.include`: **array** of **arrays** - Define a set of conditions that must
-all be true for a directory to be included in this group. Each condition is an **array**
-of three elements: The *JSON pointer*, *the operator*, and the *operand*. The [JSON
-pointer](../../guide/concepts/json-pointers.md) points to a specific element
-from the directory's value. The operator may be `"<"`, `"<="`, `"=="`, `">="`, or `">"`.
+`action.group.include`: **array** of **tables** - Define a set of selectors, *any* of
+which may be true for a directory to be included in this group.
+
+Each selector is a **table** with only one of the following keys:
+* `condition`: An array of three elements: The *JSON pointer*, *the operator*, and the
+  *operand*. The [JSON pointer](../../guide/concepts/json-pointers.md) points to a
+  specific element from the directory's value. The operator may be `"<"`, `"<="`,
+  `"=="`, `">="`, or `">"`.
+* `all`: Array of conditions (see above). All conditions must be true for this selector
+  to be true.
 
 For example, select all directories where a value is in the given range:
 ```toml
-include = [["/value", ">", 0.2], ["/value", "<", 0.9]]
+[[action.group.include]]
+all = [["/value", ">", 0.2], ["/value", "<", 0.9]]
 ```
 Choose directories where an array element is equal to a specific value:
 ```toml
-include = [["/array/1", "==", 12]]
+[[action.group.include]]
+condition = ["/array/1", "==", 12]
 ```
 Match against strings:
 ```toml
-include = [["/map/name", "==", "string"]]
+[[action.group.include]]
+condition = ["/map/name", "==", "string"]
 ```
 Compare by array:
 ```toml
-include = [["/array", "==", [1, "string", 14.0]]]
+[[action.group.include]]
+condition = ["/array", "==", [1, "string", 14.0]
 ```
 
 Both operands **must** have the same data type. The JSON pointer must be present in the

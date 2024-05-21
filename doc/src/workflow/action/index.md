@@ -32,7 +32,7 @@ action. The name may be set by [from](#from).
 > the same name. All elements with the same name **must** have identical
 > [`products`](#products) and [`previous_actions`](#previous_actions). All elements
 > with the same name **must also** select non-intersecting subsets of directories with
-> [`group.include`](group.md#include).
+> [`action.group.include`](group.md#include).
 
 ## command
 

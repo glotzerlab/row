@@ -17,7 +17,7 @@ use crate::scheduler::bash::Bash;
 use crate::scheduler::slurm::Slurm;
 use crate::scheduler::Scheduler;
 use crate::state::State;
-use crate::workflow::{Action, Workflow};
+use crate::workflow::{Action, Selector, Workflow};
 use crate::{Error, MultiProgressContainer};
 
 /// Encapsulate the workflow, state, and scheduler into a project.
@@ -184,23 +184,55 @@ impl Project {
 
         'outer: for name in directories {
             if let Some(value) = self.state.values().get(&name) {
-                for (include, comparison, expected) in action.group.include() {
-                    let actual = value
-                        .pointer(include)
-                        .ok_or_else(|| Error::JSONPointerNotFound(name.clone(), include.clone()))?;
-                    if !expr::evaluate_json_comparison(comparison, actual, expected).ok_or_else(
-                        || {
-                            Error::CannotCompareInclude(
-                                actual.clone(),
-                                expected.clone(),
-                                name.clone(),
-                            )
-                        },
-                    )? {
-                        continue 'outer;
+                if action.group.include().is_empty() {
+                    matching_directories.push(name);
+                } else {
+                    for selector in action.group.include() {
+                        let result = match selector {
+                            Selector::Condition((include, comparison, expected)) => {
+                                let actual = value.pointer(include).ok_or_else(|| {
+                                    Error::JSONPointerNotFound(name.clone(), include.clone())
+                                })?;
+
+                                expr::evaluate_json_comparison(comparison, actual, expected)
+                                    .ok_or_else(|| {
+                                        Error::CannotCompareInclude(
+                                            actual.clone(),
+                                            expected.clone(),
+                                            name.clone(),
+                                        )
+                                    })
+                            }
+
+                            Selector::All(conditions) => {
+                                let mut matches = 0;
+                                for (include, comparison, expected) in conditions {
+                                    let actual = value.pointer(include).ok_or_else(|| {
+                                        Error::JSONPointerNotFound(name.clone(), include.clone())
+                                    })?;
+
+                                    if expr::evaluate_json_comparison(comparison, actual, expected)
+                                        .ok_or_else(|| {
+                                            Error::CannotCompareInclude(
+                                                actual.clone(),
+                                                expected.clone(),
+                                                name.clone(),
+                                            )
+                                        })?
+                                    {
+                                        matches += 1;
+                                    }
+                                }
+                                Ok(matches == conditions.len())
+                            }
+                        };
+
+                        if result? {
+                            matching_directories.push(name);
+                            continue 'outer;
+                        }
                     }
                 }
-                matching_directories.push(name);
             } else {
                 warn!("Directory '{}' not found in workspace.", name.display());
             }
@@ -424,7 +456,8 @@ products = ["one"]
 name = "two"
 command = "c"
 products = ["two"]
-group.include = [["/i", "<", {}]]
+[[action.group.include]]
+condition = ["/i", "<", {}]
 
 [[action]]
 name = "three"
@@ -464,14 +497,42 @@ previous_actions = ["two"]
             all_directories[0..6]
         );
 
+        // Check all conditions.
         let mut action = project.workflow.action[1].clone();
         let include = action.group.include.as_mut().unwrap();
-        include.push(("/i".into(), Comparison::GreaterThan, Value::from(4)));
+        include.clear();
+        include.push(Selector::All(vec![
+            ("/i".into(), Comparison::GreaterThan, Value::from(4)),
+            ("/i".into(), Comparison::LessThan, Value::from(6)),
+        ]));
         assert_eq!(
             project
                 .find_matching_directories(&action, all_directories.clone())
                 .unwrap(),
             vec![PathBuf::from("dir5")]
+        );
+
+        // Check any conditions.
+        let mut action = project.workflow.action[1].clone();
+        let include = action.group.include.as_mut().unwrap();
+        include.clear();
+        include.push(Selector::Condition((
+            "/i".into(),
+            Comparison::LessThan,
+            Value::from(1),
+        )));
+
+        include.push(Selector::Condition((
+            "/i".into(),
+            Comparison::GreaterThan,
+            Value::from(6),
+        )));
+
+        assert_eq!(
+            project
+                .find_matching_directories(&action, all_directories.clone())
+                .unwrap(),
+            vec![PathBuf::from("dir0"), PathBuf::from("dir7")]
         );
     }
 
