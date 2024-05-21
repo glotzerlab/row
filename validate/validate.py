@@ -505,6 +505,7 @@ def nvidia_gpus(directory):
     """Validate multi-GPU jobs."""
     check_nvidia_gpu(directory, n_gpus=N_GPUS, name='nvidia_gpus')
 
+
 def mpi_wholenode_amd_gpus(directory):
     """Check that MPI allocates processes correctly to all AMD GPUs on one node."""
     cluster_name = get_cluster_name()
