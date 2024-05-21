@@ -10,6 +10,7 @@ This section explains how to **submit** jobs to the **scheduler** with **row**.
 * Andes (OLCF)
 * Anvil (Purdue)
 * Delta (NCSA)
+* Frontier (OLCF)
 * Great Lakes (University of Michigan)
 
 You can skip to the [next heading](#checking-your-job-script) if you are using one of

@@ -9,6 +9,8 @@
 
 > Note: Andes has no shared partition. All jobs must use 32 CPUs per node.
 
+[Andes]: https://docs.olcf.ornl.gov/systems/andes_user_guide.html
+
 ## Anvil (Purdue)
 
 **Row** automatically selects from the following partitions on [Anvil]:
@@ -39,6 +41,16 @@ Other partitions may be selected manually.
 allows full-node jobs and does not incur extra charges.
 
 [Delta]: https://docs.ncsa.illinois.edu/systems/delta
+
+## Frontier (OLCF)
+
+**Row automatically selects from the following partitions on [Frontier]:
+* `batch`
+
+> Note: Frontier has no shared partition. All jobs must use 8 GPUs per node.
+
+[Frontier]: https://docs.olcf.ornl.gov/systems/frontier_user_guide.html#
+
 
 ## Great Lakes (University of Michigan)
 

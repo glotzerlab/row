@@ -199,6 +199,26 @@ fn delta() -> Cluster {
     }
 }
 
+fn frontier() -> Cluster {
+    ////////////////////////////////////////////////////////////////////////////////////////
+    // OLCF Frontier
+    Cluster {
+        name: "frontier".into(),
+        identify: IdentificationMethod::ByEnvironment("LMOD_SYSTEM_NAME".into(), "frontier".into()),
+        scheduler: SchedulerType::Slurm,
+        partition: vec![
+            // Auto-detected partitions: batch
+            Partition {
+                name: "batch".into(),
+                minimum_gpus_per_job: Some(8),
+                require_gpus_multiple_of: Some(8),
+                gpus_per_node: Some(8),
+                ..Partition::default()
+            },
+        ],
+    }
+}
+
 fn greatlakes() -> Cluster {
     ////////////////////////////////////////////////////////////////////////////////////////
     // Great Lakes
@@ -287,7 +307,7 @@ fn none() -> Cluster {
 
 impl BuiltIn for cluster::Configuration {
     fn built_in() -> Self {
-        let cluster = vec![andes(), anvil(), delta(), greatlakes(), none()];
+        let cluster = vec![andes(), anvil(), delta(), frontier(), greatlakes(), none()];
 
         cluster::Configuration { cluster }
     }
