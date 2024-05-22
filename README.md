@@ -1,7 +1,7 @@
 # Row
 
-[![GitHub Actions](https://github.com/glotzerlab/row/actions/workflows/test.yaml/badge.svg?branch=trunk)](https://github.com/glotzerlab/row/actions/workflows/test.yaml)
 [![Read the Docs](https://img.shields.io/readthedocs/row/latest.svg)](https://row.readthedocs.io/)
+[![GitHub Actions](https://github.com/glotzerlab/row/actions/workflows/test.yaml/badge.svg?branch=trunk)](https://github.com/glotzerlab/row/actions/workflows/test.yaml)
 [![Contributors](https://img.shields.io/github/contributors-anon/glotzerlab/row.svg?style=flat)](https://row.readthedocs.io/en/latest/contributors.html)
 [![License](https://img.shields.io/badge/license-BSD--3--Clause-green.svg)](https://row.readthedocs.io/en/latest/license.html)
 
