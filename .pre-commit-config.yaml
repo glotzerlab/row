@@ -3,16 +3,16 @@ ci:
   autoupdate_branch: 'trunk'
   autofix_prs: false
 
-default_language_version:
-  rust: 1.78.0
-
 repos:
 - repo: https://github.com/Young-Naive-Simple/pre-commit-rust/
   rev: 3a8de64acc969112746489e5ec1f0b13e00d871e
   hooks:
   - id: fmt
+    language_version: 1.77.0
   - id: cargo-check
+    language_version: 1.77.0
   - id: clippy
+    language_version: 1.77.0
     args:
       - --all-targets
       - --all-features
