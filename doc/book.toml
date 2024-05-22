@@ -15,4 +15,4 @@ create-missing = false
 # [output.html] must be the last table so that .readthedocs.yaml can easily add a key to it
 [output.html]
 git-repository-url = "https://github.com/glotzerlab/row"
-additional-css = ["rtd.css"]
+additional-css = ["rtd-mdbook.css"]

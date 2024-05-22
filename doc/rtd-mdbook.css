@@ -1,0 +1,24 @@
+/* Use mdbook theme colors. */
+
+#mdbook-ad-placement .ethical-sidebar {
+    border: none;
+    box-shadow: none;
+    background-color: var(--sidebar-bg);
+}
+
+#mdbook-ad-placement .ethical-sidebar:hover {
+    background-color: var(--theme-hover);
+}
+
+#mdbook-ad-placement .ethical-sidebar a {
+      color: var(--sidebar-non-existant);
+}
+
+#sidebar #mdbook-ad-placement .ethical-sidebar .ethical-callout {
+      color: var(--sidebar-non-existant);
+}
+
+/* Multiple id selectors and !important are needed to override the !important in the injected CSS */
+#sidebar #mdbook-ad-placement .ethical-sidebar .ethical-callout a {
+      color: var(--sidebar-non-existant) !important;
+}
