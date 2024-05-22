@@ -4,7 +4,7 @@ Contributions are welcomed via [pull requests on GitHub][github]. Contact the **
 developers before starting work to ensure it meshes well with the planned development
 direction and follows standards set for the project.
 
-[github]: https://github.com/glotzerlab/gsd/row
+[github]: https://github.com/glotzerlab/row
 
 ## Features
 

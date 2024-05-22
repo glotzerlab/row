@@ -82,12 +82,12 @@ jobs:
       matrix:
         target:
         - x86_64-unknown-linux-gnu
-        # - aarch64-apple-darwin
+        - aarch64-apple-darwin
         include:
         - target: x86_64-unknown-linux-gnu
           runner: ubuntu-20.04
-        # - target: aarch64-apple-darwin
-        #   runner: macos-14
+        - target: aarch64-apple-darwin
+          runner: macos-14
 
     steps:
     - uses: actions/checkout@v4.1.6
@@ -116,7 +116,7 @@ jobs:
         name: ${{ matrix.target }}
         path: "${{ env.name }}-${{ env.ref }}-${{ matrix.target }}.tar.xz"
 
-  publish:
+  publish_github:
     name: Publish [GitHub]
     needs: [binary, source, release-notes]
     runs-on: ubuntu-latest
@@ -132,7 +132,7 @@ jobs:
 
     - name: Create release
       uses: softprops/action-gh-release@v2.0.5
-      if: startsWith(github.ref, 'refs/tags/v')
+      if: startsWith(github.ref, 'refs/tags/')
       with:
         files: |
           *.xz
@@ -140,3 +140,26 @@ jobs:
         make_latest: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  publish_cargo:
+    name: Publish [Cargo]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4.1.6
+    - name: Update rust
+      run: rustup install "$RUST_VERSION" --no-self-update && rustup default "$RUST_VERSION"
+    - name: Check rust installation
+      run: rustc -vV
+    - uses: actions/cache@v4.0.2
+      with:
+        path: |
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          target/
+        key: ${{ runner.os }}-rust-${{ env.RUST_VERSION }}-cargo-publish-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
+    - name: Dry run
+      run: cargo publish --all-features --dry-run
+    - name: Publish to crates.io
+      if: startsWith(github.ref, 'refs/tags/')
+      run: cargo publish --all-features --token ${{ secrets.CRATES_IO_API_TOKEN }}

@@ -2,6 +2,8 @@ ci:
   autoupdate_schedule: quarterly
   autoupdate_branch: 'trunk'
   autofix_prs: false
+  # rust does not work on pre-commit.ci: could not create temp file /opt/rust/rustup/tmp/17c53uaz8kdwrx0k_file: Read-only file system
+  skip: [fmt, cargo-check, clippy]
 
 default_language_version:
   rust: 1.78.0

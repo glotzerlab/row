@@ -1,6 +1,5 @@
 # Row
 
-[![GitHub Actions](https://github.com/glotzerlab/row/actions/workflows/test.yaml/badge.svg?branch=trunk)](https://github.com/glotzerlab/row/actions/workflows/test.yaml)
 [![Read the Docs](https://img.shields.io/readthedocs/row/latest.svg)](https://row.readthedocs.io/)
 [![Contributors](https://img.shields.io/github/contributors-anon/glotzerlab/row.svg?style=flat)](https://row.readthedocs.io/en/latest/contributors.html)
 [![License](https://img.shields.io/badge/license-BSD--3--Clause-green.svg)](https://row.readthedocs.io/en/latest/license.html)
@@ -21,8 +20,11 @@ Notable features:
 * Flexible group definitions:
   * Select directories with conditions on their value.
   * Split directories by their value and/or into fixed size groups.
+  * Construct groups of any eligible directories or require that the entire matching
+    group is submitted whole.
 * Execute groups in serial or parallel.
 * Schedule CPU and GPU resources.
+* Multiple users can operate the same workflow.
 * Automatically determine the partition based on the job's resources and size.
 * Built-in configurations for many national and university HPC systems.
 * Add custom cluster definitions for your resources.
