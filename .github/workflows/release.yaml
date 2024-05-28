@@ -66,7 +66,13 @@ jobs:
         path: code
 
     - name: Write release-notes.md
-      run: grep -P -m 2 -B 10000 "^## v*\d*\.\d*\.\d*" doc/src/release-notes.md | sed '$d' | tee "${GITHUB_WORKSPACE}/release-notes.md"
+      # 1. Search for the content from the start of the file to the 2nd version heading.
+      # 2. Remove the 2nd version heading.
+      # 3. Search for the content after the first version heading (removes any description at the
+      #    start of the file.
+      # 4. Remove the 1st version heading.
+      # This leaves the content of the release notes for the current release.
+      run: grep -P -m 2 -B 10000 "^## v*\d*\.\d*\.\d*" doc/src/release-notes.md | sed '$d' | grep -m 2 -B 10000 "^## v*\d*\.\d*\.\d*" | sed '1d' | tee "${GITHUB_WORKSPACE}/release-notes.md"
       working-directory: code
 
     - uses: actions/upload-artifact@v4.3.3
