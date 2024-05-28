@@ -2,7 +2,14 @@
 
 ## Installing binaries with conda
 
-*Coming soon...*
+**Row** is available on [conda-forge] for the *linux-64*, *linux-aarch64*, *osx-64*,
+*osx-arm64* architectures. Install with:
+
+```bash
+mamba install row
+```
+
+[conda-forge]: https://conda-forge.org/
 
 ## Installing binaries manually
 
