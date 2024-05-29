@@ -5,7 +5,9 @@ value_file = "value.json"
 name = "process_point"
 command = "echo {directory}"
 [action.group]
+# ANCHOR: sort
 sort_by = ["/x"]
+# ANCHOR_END: sort
 [[action.group.include]]
 condition = ["/type", "==", "point"]
 

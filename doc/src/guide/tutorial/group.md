@@ -41,10 +41,11 @@ read thousands of files every time you execute a **row** command.
 
 ## Grouping by value
 
-Now that your workspace directories have **values**, you can use those to
-form **groups**. Every action in your workflow operates on **groups**. Set the
-`action.group.include` key in an action to select which directories to include by
+Now that your workspace directories have **values**, you can use those to form
+**groups**. Every action in your workflow operates on **groups**. Add entries to the
+`action.group.include` array in an action to select which directories to include by
 **value**. To see how this works, replace the contents of `workflow.toml` with:
+
 ```toml
 {{#include group-workflow2.toml}}
 ```
@@ -53,14 +54,15 @@ This workflow will apply the `process_point` action to the directories where
 `value/type == "point"` and the `process_letter` action to the directories where
 `value/type == "letter"`.
 
-`condition` is a length 3 array with the contents: `[JSON pointer, operator, operand]`.
-Think of each element as an expression. The
+`action.group.include` is an array of conditions. A directory is included when *any*
+condition is true. `condition` is a length 3 array with the contents: `[JSON pointer,
+operator, operand]`. Think of the condition as an expression. The 
 [*JSON pointer*](../concepts/json-pointers.md) is a string that reads a particular value
 from the directory's **value**. The *operator* is a comparison operator: `"<"`, `"<="`,
 `"=="`, `">="`, or `">"`. The *operand* is the value to compare to. Together, these 3
 elements make a *condition*.
 
-**Row** applies the *condition* to all directories in the workspace. When the
+**Row** applies each *condition* to all directories in the workspace. When a
 *condition* is true, the directory is included in the action's **groups**.
 
 > Note: This implies that every JSON pointer used in an `include` condition **MUST**
@@ -114,7 +116,7 @@ behavior. You can choose to instead sort **groups** by any number of **value** e
 
 To demonstrate, add the line:
 ```toml
-{{#include group-workflow3.toml:9}}
+{{#include group-workflow3.toml:sort}}
 ```
 to the `[action.group]` table for the `"process_point"` action.
 
@@ -169,7 +171,7 @@ groups to a `maximum_size`.
 
 Add the line:
 ```toml
-{{#include group-workflow4.toml:10}}
+{{#include group-workflow4.toml:split}}
 ```
 to the `[action.group]` table for the `"process_point"` action.
 
@@ -225,7 +227,7 @@ of other ways that you might utilize `split_by_sort_key` in your workflows.
 **Row** can also limit groups to a maximum size. To see how this works,
 **REPLACE** the `split_by_sort_key = true` line with:
 ```toml
-{{#include group-workflow5.toml:10}}
+{{#include group-workflow5.toml:max}}
 ```
 
 Now:
