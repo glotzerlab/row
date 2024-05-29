@@ -23,6 +23,7 @@ env:
   MDBOOK_VERSION: 0.4.37
   LINKCHECK_VERSION: 0.7.7
   RUST_LATEST_VERSION: 1.78.0
+  BUNDLE_LICENSES_VERSION: 1.3.0
 
 jobs:
   unit_test:
@@ -128,6 +129,12 @@ jobs:
       run: mdbook build doc
       env:
         RUST_LOG: "mdbook=info,linkcheck=warn,reqwest=debug"
+    - name: Install cargo-bundle-licenses
+      run: |
+        curl -sSL "https://github.com/sstadick/cargo-bundle-licenses/releases/download/v$BUNDLE_LICENSES_VERSION/cargo-bundle-licenses-linux-amd64" -o "$HOME/.cargo/bin/cargo-bundle-licenses"
+        chmod a+x "$HOME/.cargo/bin/cargo-bundle-licenses"
+    - name: Check bundled licenses
+      run: cargo bundle-licenses --format yaml --output CI.yaml --previous THIRDPARTY.yaml --check-previous
 
   tests_complete:
     name: All tests
