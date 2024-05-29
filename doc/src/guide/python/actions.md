@@ -65,13 +65,13 @@ signac jobs and calls the requested **action** function.
 
 Next, replace the contents of `workflow.toml` with the corresponding workflow:
 ```toml
-{{#include signac-workflow.toml}}
+{{#include signac-workflow.toml:whole}}
 ```
 
 *Both* actions have the same **command**, set once by the
 [**default action**](../../workflow/default.md):
 ```toml
-{{#include signac-workflow.toml:5}}
+{{#include signac-workflow.toml:default}}
 ```
 
 `python actions.py` executes the `actions.py` file above. It is given the argument
