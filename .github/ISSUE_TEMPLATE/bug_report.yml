@@ -35,7 +35,7 @@ body:
     attributes:
       label: Row version
       description: What version of **row** are you using?
-      placeholder: 0.1.1
+      placeholder: 0.1.2
   - type: markdown
     attributes:
       value: |
