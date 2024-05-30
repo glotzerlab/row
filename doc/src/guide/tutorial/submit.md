@@ -16,8 +16,8 @@ This section explains how to **submit** jobs to the **scheduler** with **row**.
 You can skip to the [next heading](#checking-your-job-script) if you are using one of
 these clusters.
 
-If not, then you need to create a configuration files that describe your
-cluster. You may also need to define launchers specific to your cluster.
+If not, then you need to create a configuration file that describe your cluster. You may
+also need to define launchers specific to your cluster.
 
 * [`$HOME/.config/row/clusters.toml`](../../clusters/index.md) gives your cluster
   a name, instructions on how to identify it, and lists the partitions your cluster
@@ -56,7 +56,7 @@ Remember, **YOU ARE RESPONSIBLE** for the content of the scripts that you submit
 Make sure that the script is requesting the correct resources and is routed to the
 correct **partition**.
 
-For example, the example workflow might generate a job script like this on Anvil:
+For example, the example workflow generates this job script on Anvil:
 ```bash
 #!/bin/bash
 #SBATCH --job-name=hello-directory0+2
@@ -85,9 +85,9 @@ Notice the selection of 1 task on the `shared` **partition**. This is correct fo
 where the `shared` **partition** allows jobs smaller than one node and charges based
 on the number of CPU cores quested.
 
-> Note: If you are using **row** on one of the built-in clusters, then **row** should
-> always select the correct partition for your jobs. If you find it does not, please
-> open an [issue](https://github.com/glotzerlab/row/issues).
+> Note: When using **row** on one of the built-in clusters **row** should always select
+> the correct partition for your jobs. Please open an
+> [issue](https://github.com/glotzerlab/row/issues) if it does not.
 
 ### Submitting jobs
 

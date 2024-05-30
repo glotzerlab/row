@@ -6,7 +6,9 @@ name = "process_point"
 command = "echo {directory}"
 [action.group]
 sort_by = ["/x"]
+# ANCHOR: split
 split_by_sort_key = true
+# ANCHOR_END: split
 [[action.group.include]]
 condition = ["/type", "==", "point"]
 

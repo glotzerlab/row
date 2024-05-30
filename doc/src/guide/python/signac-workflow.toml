@@ -1,8 +1,11 @@
+# ANCHOR: whole
 [workspace]
 value_file = "signac_statepoint.json"
 
+# ANCHOR: default
 [default.action]
 command = "python actions.py --action $ACTION_NAME {directories}"
+# ANCHOR_END: default
 
 [[action]]
 name = "square"
@@ -14,3 +17,4 @@ name = "compute_sum"
 previous_actions = ["square"]
 resources.walltime.per_directory = "00:00:01"
 group.submit_whole = true
+# ANCHOR_END: whole

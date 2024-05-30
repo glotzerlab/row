@@ -6,7 +6,9 @@ name = "process_point"
 command = "echo {directory}"
 [action.group]
 sort_by = ["/x"]
+# ANCHOR: max
 maximum_size = 4
+# ANCHOR_END: max
 [[action.group.include]]
 condition = ["/type", "==", "point"]
 
