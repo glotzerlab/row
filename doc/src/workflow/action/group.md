@@ -27,8 +27,8 @@ which may be true for a directory to be included in this group.
 
 Each selector is a **table** with only one of the following keys:
 * `condition`: An array of three elements: The *JSON pointer*, *the operator*, and the
-  *operand*. The [JSON pointer](../../guide/concepts/json-pointers.md) points to a
-  specific element from the directory's value. The operator may be `"<"`, `"<="`,
+  *operand*. The [JSON pointer](../../guide/concepts/json-pointers.md) references a
+  specific portion of the directory's value. The operator may be `"<"`, `"<="`,
   `"=="`, `">="`, or `">"`.
 * `all`: Array of conditions (see above). All conditions must be true for this selector
   to be true.
@@ -54,8 +54,8 @@ Compare by array:
 condition = ["/array", "==", [1, "string", 14.0]
 ```
 
-Both operands **must** have the same data type. The JSON pointer must be present in the
-value of **every** directory.
+Both operands **must** have the same data type. The element referenced by JSON pointer
+must be present in the value of **every** directory.
 
 When you omit `include`, **row** includes **all** directories in the workspace.
 

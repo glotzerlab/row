@@ -1,8 +1,8 @@
 # Writing action commands in Python
 
-In **row**, actions execute arbitrary **shell commands**. When your action is
-**Python** code, you must structure that code so that it is a command line tool
-that takes directories as arguments. There are many ways you can achieve this goal.
+In **row**, actions execute arbitrary **shell commands**. When your action is **Python**
+code, you must wrap it with command line parsing that takes directories as arguments.
+There are many ways you can achieve this goal.
 
 This guide will show you how to structure all of your actions in a single file:
 `actions.py`. This layout is inspired by **row's** predecessor **signac-flow**
@@ -54,12 +54,14 @@ Now, create a file `actions.py` with the contents:
 This file defines each **action** as a function with the same name. These functions take
 an array of jobs as an argument: `def square(*jobs)` and `def compute_sum(*jobs)`. The
 `if __name__ == "__main__":` block parses the command line arguments, forms an array of
-signac jobs and calls the requested **action** function.
+signac jobs, and calls the requested **action** function.
 
 > Note: This example demonstrates looping over directories in **serial**. However, this
-> structure also gives you the power to choose **serial** or **parallel** execution.
+> structure also gives you the ability to choose **serial** or **[parallel]** execution.
 > Grouping many directories into a single cluster job submission will increase your
-> workflow's throughput.
+> workflow's throuability.
+
+[parallel]: ../concepts/process-parallelism.md
 
 ## Write workflow.toml
 
@@ -78,8 +80,8 @@ Next, replace the contents of `workflow.toml` with the corresponding workflow:
 `--action $ACTION_NAME` which selects the Python function to call. Here `$ACTION_NAME`
 is an [environment variable](../../env.md) that **row** sets in job scripts. The
 last arguments are given by `{directories}`. Unlike `{directory}` shown in previous
-tutorials, `{directories}` expands to *ALL* directories in the submitted **group**. In
-this way, `action.py` is executed once and is free to process the list of directories in
+tutorials, `{directories}` expands to *ALL* directories in the submitted **group**.
+`action.py` is executed once and is free to process the list of directories in
 any way it chooses (e.g. in serial, with
 [multiprocessing parallelism, multiple threads](../concepts/thread-parallelism.md),
 using [MPI parallelism](../concepts/process-parallelism.md), ...).
@@ -130,8 +132,7 @@ these steps:
 > Note: You may write functions that take only one job `def action(job)` without
 > modifying the given implementation of `__main__`. However, you will need to set
 > `action.group.maximum_size = 1` or use `{directory}` to ensure that `action.py` is
-> given a single directory. If you implement your code using arrays, you can use
-> **row's** grouping functionality to your benefit.
+> given a single directory.
 
 ## Next steps
 

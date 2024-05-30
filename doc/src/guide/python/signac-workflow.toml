@@ -2,8 +2,8 @@
 [workspace]
 value_file = "signac_statepoint.json"
 
-[default.action]
 # ANCHOR: default
+[default.action]
 command = "python actions.py --action $ACTION_NAME {directories}"
 # ANCHOR_END: default
 

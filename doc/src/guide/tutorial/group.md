@@ -57,8 +57,8 @@ This workflow will apply the `process_point` action to the directories where
 `action.group.include` is an array of conditions. A directory is included when *any*
 condition is true. `condition` is a length 3 array with the contents: `[JSON pointer,
 operator, operand]`. Think of the condition as an expression. The
-[*JSON pointer*](../concepts/json-pointers.md) is a string that reads a particular value
-from the directory's **value**. The *operator* is a comparison operator: `"<"`, `"<="`,
+[*JSON pointer*](../concepts/json-pointers.md) is a string that references a portion of
+the directory's **value**. The *operator* is a comparison operator: `"<"`, `"<="`,
 `"=="`, `">="`, or `">"`. The *operand* is the value to compare to. Together, these 3
 elements make a *condition*.
 
