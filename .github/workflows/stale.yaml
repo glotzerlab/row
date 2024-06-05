@@ -8,31 +8,4 @@ on:
 
 jobs:
   stale:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Run stale action
-      uses: actions/stale@v9.0.0
-      with:
-        operations-per-run: 120
-        delete-branch: true
-        days-before-close: 10
-        stale-issue-label: stale
-        stale-pr-label: stale
-        exempt-issue-labels: essential
-        exempt-pr-labels: essential
-
-        days-before-issue-stale: 260
-        stale-issue-message: >
-          This issue has been automatically marked as stale because it has not had
-          recent activity. It will be closed if no further activity occurs.
-        close-issue-message: >
-          This issue has been automatically closed because it has not had
-          recent activity.
-
-        days-before-pr-stale: 20
-        stale-pr-message: >
-          This pull request has been automatically marked as stale because it has not had
-          recent activity. It will be closed if no further activity occurs.
-        close-pr-message: >
-          This pull request has been automatically closed because it has not had
-          recent activity.
+    uses: glotzerlab/workflows/.github/workflows/stale.yaml@5cfac9da9cb78e16ae97a9119b6fd13c1c2d6f5e # 0.1.0
