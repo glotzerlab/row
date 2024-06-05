@@ -34,7 +34,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4.1.6
+    - name: Checkout
+      uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
       with:
         path: code
 
@@ -50,7 +51,7 @@ jobs:
     - name: Tar/xz source
       run: tar -cvJf "${name}-${ref}.tar.xz" "${name}-${ref}"
 
-    - uses: actions/upload-artifact@v4.3.3
+    - uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
       with:
         name: source
         path: |
@@ -61,7 +62,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4.1.6
+    - name: Checkout
+      uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
       with:
         path: code
 
@@ -80,7 +82,7 @@ jobs:
         tee "${GITHUB_WORKSPACE}/release-notes.md"
       working-directory: code
 
-    - uses: actions/upload-artifact@v4.3.3
+    - uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
       with:
         name: release-notes
         path: |
@@ -101,14 +103,15 @@ jobs:
           runner: macos-14
 
     steps:
-    - uses: actions/checkout@v4.1.6
+    - name: Checkout
+      uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
     - name: Determine filename-safe ref from GITHUB_REF_NAME
       run: echo ref="$(echo "${GITHUB_REF_NAME}" | sed  -e 's/\//-/g')" >> "$GITHUB_ENV"
     - name: Update rust
       run: rustup install "$RUST_VERSION" --no-self-update && rustup default "$RUST_VERSION"
     - name: Check rust installation
       run: rustc -vV
-    - uses: actions/cache@v4.0.2
+    - uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
       with:
         path: |
           ~/.cargo/registry/index/
@@ -122,7 +125,7 @@ jobs:
       run: file "target/${{ matrix.target }}/release/${name}"
     - name: Compress
       run: cp "target/${{ matrix.target }}/release/${name}" . && tar -cvJf "${name}-${ref}-${{ matrix.target }}.tar.xz" "${name}"
-    - uses: actions/upload-artifact@v4.3.3
+    - uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
       with:
         name: ${{ matrix.target }}
         path: "${{ env.name }}-${{ env.ref }}-${{ matrix.target }}.tar.xz"
@@ -134,7 +137,7 @@ jobs:
 
     steps:
     - name: Download artifacts
-      uses: actions/download-artifact@v4.1.7
+      uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
       with:
         merge-multiple: true
 
@@ -142,7 +145,7 @@ jobs:
       run: ls -lR
 
     - name: Create release
-      uses: softprops/action-gh-release@v2.0.5
+      uses: softprops/action-gh-release@69320dbe05506a9a39fc8ae11030b214ec2d1f87 # v2.0.5
       if: startsWith(github.ref, 'refs/tags/')
       with:
         files: |
@@ -156,12 +159,13 @@ jobs:
     name: Publish [Cargo]
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4.1.6
+    - name: Checkout
+      uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
     - name: Update rust
       run: rustup install "$RUST_VERSION" --no-self-update && rustup default "$RUST_VERSION"
     - name: Check rust installation
       run: rustc -vV
-    - uses: actions/cache@v4.0.2
+    - uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
       with:
         path: |
           ~/.cargo/registry/index/
