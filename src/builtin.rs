@@ -210,8 +210,7 @@ fn frontier() -> Cluster {
             // Auto-detected partitions: batch
             Partition {
                 name: "batch".into(),
-                minimum_gpus_per_job: Some(8),
-                require_gpus_multiple_of: Some(8),
+                warn_gpus_multiple_of: Some(8),
                 gpus_per_node: Some(8),
                 ..Partition::default()
             },
