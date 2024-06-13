@@ -6,7 +6,7 @@
 
 * `warn_[cpus|gpus]_multiple_of` key for *clusters.toml*
 
-*Changed*
+*Changed:*
 
 * OLCF Frontier configuration now uses `warn_gpus_multiple_of` instead of `require_gpus_multiple_of`
 
