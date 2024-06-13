@@ -755,10 +755,12 @@ scheduler = "slurm"
 name = "d"
 maximum_cpus_per_job = 2
 require_cpus_multiple_of = 4
+warn_cpus_multiple_of = 4
 memory_per_cpu = "e"
 minimum_gpus_per_job = 8
 maximum_gpus_per_job = 16
 require_gpus_multiple_of = 32
+warn_gpus_multiple_of = 32
 memory_per_gpu = "f"
 cpus_per_node = 10
 gpus_per_node = 11
@@ -784,10 +786,12 @@ account_suffix = "-gpu"
 
                 maximum_cpus_per_job: Some(2),
                 require_cpus_multiple_of: Some(4),
+                warn_cpus_multiple_of: Some(4),
                 memory_per_cpu: Some("e".into()),
                 minimum_gpus_per_job: Some(8),
                 maximum_gpus_per_job: Some(16),
                 require_gpus_multiple_of: Some(32),
+                warn_gpus_multiple_of: Some(32),
                 memory_per_gpu: Some("f".into()),
                 prevent_auto_select: false,
                 cpus_per_node: Some(10),
