@@ -310,7 +310,7 @@ impl Partition {
                 "{}: CPUs ({}) not a recommended multiple.",
                 self.name, total_cpus
             );
-            return true;
+            return true; // Issuing this warning does not prevent use of the partition.
         }
 
         if self.minimum_gpus_per_job.map_or(false, |x| total_gpus < x) {
@@ -348,7 +348,7 @@ impl Partition {
                 "{}: GPUs ({}) not a recommended multiple. ",
                 self.name, total_gpus
             );
-            return true;
+            return true; // Issuing this warning does not prevent use of the partition.
         }
 
         true
