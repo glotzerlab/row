@@ -363,11 +363,13 @@ impl Default for Partition {
             memory_per_cpu: None,
             cpus_per_node: None,
             require_cpus_multiple_of: None,
+            warn_cpus_multiple_of: None,
             minimum_gpus_per_job: None,
             maximum_gpus_per_job: None,
             memory_per_gpu: None,
             gpus_per_node: None,
             require_gpus_multiple_of: None,
+            warn_gpus_multiple_of: None,
             prevent_auto_select: false,
             account_suffix: None,
         }
