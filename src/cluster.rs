@@ -1,7 +1,7 @@
 // Copyright (c) 2024 The Regents of the University of Michigan.
 // Part of row, released under the BSD 3-Clause License.
 
-use log::{debug, info, trace};
+use log::{debug, info, trace, warn};
 use serde::{Deserialize, Serialize};
 use std::env;
 use std::fmt::Write as _;
@@ -305,8 +305,7 @@ impl Partition {
             .warn_cpus_multiple_of
             .map_or(false, |x| total_cpus % x != 0)
         {
-            let _ = writeln!(
-                reason,
+            warn!(
                 "{}: CPUs ({}) not a recommended multiple.",
                 self.name, total_cpus
             );
@@ -343,8 +342,7 @@ impl Partition {
             .warn_gpus_multiple_of
             .map_or(false, |x| total_gpus == 0 || total_gpus % x != 0)
         {
-            let _ = writeln!(
-                reason,
+            warn!(
                 "{}: GPUs ({}) not a recommended multiple. ",
                 self.name, total_gpus
             );
