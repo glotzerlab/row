@@ -81,6 +81,9 @@ pub struct Partition {
     /// Require CPUs to be a multiple of this value.
     pub require_cpus_multiple_of: Option<usize>,
 
+    /// Warn if CPUs are not a multiple of this value.
+    pub warn_cpus_multiple_of: Option<usize>,
+
     /// Memory per CPU.
     pub memory_per_cpu: Option<String>,
 
@@ -95,6 +98,9 @@ pub struct Partition {
 
     /// Require GPUs to be a multiple of this value.
     pub require_gpus_multiple_of: Option<usize>,
+
+    /// Warn if GPUs are not a multiple of this value.
+    pub warn_gpus_multiple_of: Option<usize>,
 
     /// Memory per GPU.
     pub memory_per_gpu: Option<String>,
@@ -295,6 +301,18 @@ impl Partition {
             return false;
         }
 
+        if self
+            .warn_cpus_multiple_of
+            .map_or(false, |x| total_cpus % x != 0)
+        {
+            let _ = writeln!(
+                reason,
+                "{}: CPUs ({}) not a recommended multiple.",
+                self.name, total_cpus
+            );
+            return true;
+        }
+
         if self.minimum_gpus_per_job.map_or(false, |x| total_gpus < x) {
             let _ = writeln!(reason, "{}: Not enough GPUs ({}).", self.name, total_gpus);
             return false;
@@ -319,6 +337,18 @@ impl Partition {
                 self.name, total_gpus
             );
             return false;
+        }
+
+        if self
+            .warn_gpus_multiple_of
+            .map_or(false, |x| total_gpus == 0 || total_gpus % x != 0)
+        {
+            let _ = writeln!(
+                reason,
+                "{}: GPUs ({}) not a recommended multiple. ",
+                self.name, total_gpus
+            );
+            return true;
         }
 
         true
