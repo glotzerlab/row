@@ -79,6 +79,18 @@ partition **must** use an integer multiple of the given number of cpus:
 total_cpus % require_cpus_multiple_of == 0
 ```
 
+### prefer_cpus_multiple_of
+
+`cluster.partition.require_cpus_multiple_of`: **integer** - All jobs submitted to this
+partition **should** use an integer multiple of the given number of cpus:
+```plaintext
+if not (total_cpus % require_cpus_multiple_of == 0):
+  warn! ...
+```
+
+This is a nonblocking variant of `require_cpus_multiple_of` that allows for submission
+of jobs that underutilize resources.
+
 ### memory_per_cpu
 
 `cluster.partition.memory_per_cpu`: **string** - CPU Jobs submitted to this partition
@@ -123,6 +135,18 @@ partition **must** use an integer multiple of the given number of gpus:
 ```plaintext
 total_gpus % require_gpus_multiple_of == 0
 ```
+
+### prefer_gpus_multiple_of
+
+`cluster.partition.require_gpus_multiple_of`: **integer** - All jobs submitted to this
+partition **should** use an integer multiple of the given number of gpus:
+```plaintext
+if not (total_gpus % require_gpus_multiple_of == 0):
+  warn! ...
+```
+
+This is a nonblocking variant of `require_gpus_multiple_of` that allows for submission
+of jobs that underutilize resources.
 
 ### memory_per_gpu
 
