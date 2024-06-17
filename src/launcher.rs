@@ -311,11 +311,11 @@ mod tests {
         };
         assert_eq!(
             mpi.prefix(&all, 11),
-            "srun --ntasks=66 --cpus-per-task=3 --gpus-per-task=8 "
+            "srun --ntasks=66 --cpus-per-task=3 --tres-per-task=gres/gpu:8 "
         );
         assert_eq!(
             mpi.prefix(&all, 1),
-            "srun --ntasks=6 --cpus-per-task=3 --gpus-per-task=8 "
+            "srun --ntasks=6 --cpus-per-task=3 --tres-per-task=gres/gpu:8 "
         );
     }
 

@@ -36,7 +36,7 @@ impl BuiltIn for launcher::Configuration {
                 executable: Some("srun".into()),
                 processes: Some("--ntasks=".into()),
                 threads_per_process: Some("--cpus-per-task=".into()),
-                gpus_per_process: Some("--gpus-per-task=".into()),
+                gpus_per_process: Some("--tres-per-task=gres/gpu:".into()),
             },
         );
 
@@ -46,7 +46,7 @@ impl BuiltIn for launcher::Configuration {
                 executable: Some("srun --mpi=pmi2".into()),
                 processes: Some("--ntasks=".into()),
                 threads_per_process: Some("--cpus-per-task=".into()),
-                gpus_per_process: Some("--gpus-per-task=".into()),
+                gpus_per_process: Some("--tres-per-task=gres/gpu:".into()),
             },
         );
 
