@@ -77,7 +77,7 @@ fn andes() -> Cluster {
             Partition {
                 name: "batch".into(),
                 maximum_gpus_per_job: Some(0),
-                require_cpus_multiple_of: Some(32),
+                prefer_cpus_multiple_of: Some(32),
                 cpus_per_node: Some(32),
                 ..Partition::default()
             },
