@@ -4,7 +4,7 @@
 
 ## Andes (OLCF)
 
-**Row automatically selects from the following partitions on [Andes]:
+**Row** automatically selects from the following partitions on [Andes]:
 * `batch`
 
 > Note: Andes has no shared partition. All jobs must use 32 CPUs per node.
@@ -44,7 +44,7 @@ allows full-node jobs and does not incur extra charges.
 
 ## Frontier (OLCF)
 
-**Row automatically selects from the following partitions on [Frontier]:
+**Row** automatically selects from the following partitions on [Frontier]:
 * `batch`
 
 > Note: Frontier has no shared partition. All jobs must use 8 GPUs per node.
