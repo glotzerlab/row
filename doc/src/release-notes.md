@@ -4,11 +4,12 @@
 
 *Added:*
 
-* `prefer_[cpus|gpus]_multiple_of` key for *clusters.toml*
+* `warn_[cpus|gpus]_not_multiple_of` key for *clusters.toml*
 
 *Changed:*
 
-* OLCF Frontier configuration now uses `prefer_gpus_multiple_of` instead of `require_gpus_multiple_of`
+* OLCF Frontier configuration now uses `warn_gpus_not_multiple_of` instead of `require_gpus_multiple_of`
+* OLCF Andes configuration now uses `warn_cpus_not_multiple_of` instead of `require_cpus_multiple_of`
 
 ## 0.1.3 (2024-05-30)
 

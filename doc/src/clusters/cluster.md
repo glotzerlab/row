@@ -79,12 +79,12 @@ partition **must** use an integer multiple of the given number of cpus:
 total_cpus % require_cpus_multiple_of == 0
 ```
 
-### prefer_cpus_multiple_of
+### warn_cpus_not_multiple_of
 
-`cluster.partition.require_cpus_multiple_of`: **integer** - All jobs submitted to this
+`cluster.partition.warn_cpus_not_multiple_of`: **integer** - All jobs submitted to this
 partition **should** use an integer multiple of the given number of cpus:
 ```plaintext
-if not (total_cpus % require_cpus_multiple_of == 0):
+if total_cpus % warn_cpus_not_multiple_of != 0:
   warn! ...
 ```
 
@@ -136,12 +136,12 @@ partition **must** use an integer multiple of the given number of gpus:
 total_gpus % require_gpus_multiple_of == 0
 ```
 
-### prefer_gpus_multiple_of
+### warn_gpus_not_multiple_of
 
-`cluster.partition.require_gpus_multiple_of`: **integer** - All jobs submitted to this
+`cluster.partition.warn_gpus_not_multiple_of`: **integer** - All jobs submitted to this
 partition **should** use an integer multiple of the given number of gpus:
 ```plaintext
-if not (total_gpus % require_gpus_multiple_of == 0):
+if total_gpus % warn_gpus_not_multiple_of != 0:
   warn! ...
 ```
 
