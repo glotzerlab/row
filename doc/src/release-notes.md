@@ -7,6 +7,7 @@
 * Prevent `gpus-per-task is mutually exclusive with tres-per-task` error.
 * Correctly set `--mem-per-gpu` on Great Lakes.
 * Correct formatting in the documentation.
+* Correct typos in the documentation.
 
 ## 0.1.3 (2024-05-30)
 
