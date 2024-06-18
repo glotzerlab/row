@@ -1,15 +1,18 @@
 # Release notes
 
-## 0.2.0 (not yet released)
+## 0.2.0 (2024-06-18)
+
+**Row** 0.2 adds support for partial-node job submissions on clusters without shared
+partitions and fixes GPU job submissions on some clusters.
 
 *Added:*
 
-* `warn_[cpus|gpus]_not_multiple_of` key for *clusters.toml*
+* `warn_[cpus|gpus]_not_multiple_of` key in *clusters.toml*.
 
 *Changed:*
 
-* OLCF Frontier configuration now uses `warn_gpus_not_multiple_of` instead of `require_gpus_multiple_of`
-* OLCF Andes configuration now uses `warn_cpus_not_multiple_of` instead of `require_cpus_multiple_of`
+* OLCF Frontier configuration now uses `warn_gpus_not_multiple_of` instead of `require_gpus_multiple_of`.
+* OLCF Andes configuration now uses `warn_cpus_not_multiple_of` instead of `require_cpus_multiple_of`.
 
 *Fixed:*
 
