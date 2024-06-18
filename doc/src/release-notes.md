@@ -1,6 +1,6 @@
 # Release notes
 
-## 0.1.4 (2024-06-13)
+## 0.2.0 (not yet released)
 
 *Added:*
 
