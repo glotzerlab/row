@@ -36,7 +36,7 @@ impl BuiltIn for launcher::Configuration {
                 executable: Some("srun".into()),
                 processes: Some("--ntasks=".into()),
                 threads_per_process: Some("--cpus-per-task=".into()),
-                gpus_per_process: Some("--gpus-per-task=".into()),
+                gpus_per_process: Some("--tres-per-task=gres/gpu:".into()),
             },
         );
 
@@ -46,7 +46,7 @@ impl BuiltIn for launcher::Configuration {
                 executable: Some("srun --mpi=pmi2".into()),
                 processes: Some("--ntasks=".into()),
                 threads_per_process: Some("--cpus-per-task=".into()),
-                gpus_per_process: Some("--gpus-per-task=".into()),
+                gpus_per_process: Some("--tres-per-task=gres/gpu:".into()),
             },
         );
 
@@ -239,13 +239,13 @@ fn greatlakes() -> Cluster {
                 name: "gpu_mig40,gpu".into(),
                 minimum_gpus_per_job: Some(1),
                 maximum_gpus_per_job: Some(1),
-                memory_per_cpu: Some("60G".into()),
+                memory_per_gpu: Some("60G".into()),
                 ..Partition::default()
             },
             Partition {
                 name: "gpu".into(),
                 minimum_gpus_per_job: Some(1),
-                memory_per_cpu: Some("60G".into()),
+                memory_per_gpu: Some("60G".into()),
                 // cannot set gpus_per_node, the partition is heterogeneous
                 ..Partition::default()
             },
@@ -253,14 +253,14 @@ fn greatlakes() -> Cluster {
             Partition {
                 name: "gpu_mig40".into(),
                 minimum_gpus_per_job: Some(1),
-                memory_per_cpu: Some("125G".into()),
+                memory_per_gpu: Some("125G".into()),
                 prevent_auto_select: true,
                 ..Partition::default()
             },
             Partition {
                 name: "spgpu".into(),
                 minimum_gpus_per_job: Some(1),
-                memory_per_cpu: Some("47000M".into()),
+                memory_per_gpu: Some("47000M".into()),
                 prevent_auto_select: true,
                 ..Partition::default()
             },
