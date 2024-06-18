@@ -11,6 +11,13 @@
 * OLCF Frontier configuration now uses `warn_gpus_not_multiple_of` instead of `require_gpus_multiple_of`
 * OLCF Andes configuration now uses `warn_cpus_not_multiple_of` instead of `require_cpus_multiple_of`
 
+*Fixed:*
+
+* Prevent `gpus-per-task is mutually exclusive with tres-per-task` error.
+* Correctly set `--mem-per-gpu` on Great Lakes.
+* Correct formatting in the documentation.
+* Correct typos in the documentation.
+
 ## 0.1.3 (2024-05-30)
 
 *Fixed:*
