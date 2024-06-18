@@ -458,7 +458,7 @@ mod tests {
         println!("{script}");
 
         assert!(script.contains(
-            "srun --ntasks=6 --cpus-per-task=4 --gpus-per-task=1 command \"${directories[@]}\""
+            "srun --ntasks=6 --cpus-per-task=4 --tres-per-task=gres/gpu:1 command \"${directories[@]}\""
         ));
     }
 
