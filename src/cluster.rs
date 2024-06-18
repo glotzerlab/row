@@ -1,7 +1,7 @@
 // Copyright (c) 2024 The Regents of the University of Michigan.
 // Part of row, released under the BSD 3-Clause License.
 
-use log::{debug, info, trace};
+use log::{debug, info, trace, warn};
 use serde::{Deserialize, Serialize};
 use std::env;
 use std::fmt::Write as _;
@@ -81,6 +81,9 @@ pub struct Partition {
     /// Require CPUs to be a multiple of this value.
     pub require_cpus_multiple_of: Option<usize>,
 
+    /// Warn if CPUs are not a multiple of this value.
+    pub warn_cpus_not_multiple_of: Option<usize>,
+
     /// Memory per CPU.
     pub memory_per_cpu: Option<String>,
 
@@ -95,6 +98,9 @@ pub struct Partition {
 
     /// Require GPUs to be a multiple of this value.
     pub require_gpus_multiple_of: Option<usize>,
+
+    /// Warn if GPUs are not a multiple of this value.
+    pub warn_gpus_not_multiple_of: Option<usize>,
 
     /// Memory per GPU.
     pub memory_per_gpu: Option<String>,
@@ -295,6 +301,17 @@ impl Partition {
             return false;
         }
 
+        if self
+            .warn_cpus_not_multiple_of
+            .map_or(false, |x| total_cpus % x != 0)
+        {
+            warn!(
+                "{}: CPUs ({}) not a preferred multiple.",
+                self.name, total_cpus
+            );
+            return true; // Issuing this warning does not prevent use of the partition.
+        }
+
         if self.minimum_gpus_per_job.map_or(false, |x| total_gpus < x) {
             let _ = writeln!(reason, "{}: Not enough GPUs ({}).", self.name, total_gpus);
             return false;
@@ -321,6 +338,17 @@ impl Partition {
             return false;
         }
 
+        if self
+            .warn_gpus_not_multiple_of
+            .map_or(false, |x| total_gpus == 0 || total_gpus % x != 0)
+        {
+            warn!(
+                "{}: GPUs ({}) not a preferred multiple. ",
+                self.name, total_gpus
+            );
+            return true; // Issuing this warning does not prevent use of the partition.
+        }
+
         true
     }
 }
@@ -333,11 +361,13 @@ impl Default for Partition {
             memory_per_cpu: None,
             cpus_per_node: None,
             require_cpus_multiple_of: None,
+            warn_cpus_not_multiple_of: None,
             minimum_gpus_per_job: None,
             maximum_gpus_per_job: None,
             memory_per_gpu: None,
             gpus_per_node: None,
             require_gpus_multiple_of: None,
+            warn_gpus_not_multiple_of: None,
             prevent_auto_select: false,
             account_suffix: None,
         }
@@ -723,10 +753,12 @@ scheduler = "slurm"
 name = "d"
 maximum_cpus_per_job = 2
 require_cpus_multiple_of = 4
+warn_cpus_not_multiple_of = 4
 memory_per_cpu = "e"
 minimum_gpus_per_job = 8
 maximum_gpus_per_job = 16
 require_gpus_multiple_of = 32
+warn_gpus_not_multiple_of = 32
 memory_per_gpu = "f"
 cpus_per_node = 10
 gpus_per_node = 11
@@ -752,10 +784,12 @@ account_suffix = "-gpu"
 
                 maximum_cpus_per_job: Some(2),
                 require_cpus_multiple_of: Some(4),
+                warn_cpus_not_multiple_of: Some(4),
                 memory_per_cpu: Some("e".into()),
                 minimum_gpus_per_job: Some(8),
                 maximum_gpus_per_job: Some(16),
                 require_gpus_multiple_of: Some(32),
+                warn_gpus_not_multiple_of: Some(32),
                 memory_per_gpu: Some("f".into()),
                 prevent_auto_select: false,
                 cpus_per_node: Some(10),

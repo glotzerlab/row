@@ -1,6 +1,15 @@
 # Release notes
 
-## 0.1.4 (not yet released)
+## 0.2.0 (not yet released)
+
+*Added:*
+
+* `warn_[cpus|gpus]_not_multiple_of` key for *clusters.toml*
+
+*Changed:*
+
+* OLCF Frontier configuration now uses `warn_gpus_not_multiple_of` instead of `require_gpus_multiple_of`
+* OLCF Andes configuration now uses `warn_cpus_not_multiple_of` instead of `require_cpus_multiple_of`
 
 *Fixed:*
 
