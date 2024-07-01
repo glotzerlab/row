@@ -13,7 +13,7 @@ keywords = ["workflow", "slurm", "queue", "hpc", "cluster"]
 categories = ["command-line-utilities", "science"]
 
 [dependencies]
-clap = { version = "4.5.4", features = ["derive", "env"] }
+clap = { version = "4.5.8", features = ["derive", "env"] }
 clap-verbosity-flag = "2.2.0"
 console = "0.15.8"
 env_logger = "0.11.3"
@@ -21,18 +21,18 @@ home = "0.5.9"
 human_format = "1.1.0"
 indicatif = "0.17.8"
 indicatif-log-bridge = "0.2.2"
-log = "0.4.21"
-memchr = "2.7.2"
+log = "0.4.22"
+memchr = "2.7.4"
 nix = { version = "0.29.0", features = ["signal"] }
 path-absolutize = "3.1.1"
 postcard = { version = "1.0.8", default-features = false, features = ["use-std"] }
 serde = { version = "1.0.203", features = ["derive"] }
-serde_json = "1.0.117"
+serde_json = "1.0.119"
 signal-hook = { version = "0.3.17", default-features = false }
-speedate = "0.14.0"
+speedate = "0.14.3"
 thiserror = "1.0.61"
-toml = "0.8.13"
-uuid = { version = "1.8.0", features = ["v4"] }
+toml = "0.8.14"
+uuid = { version = "1.9.1", features = ["v4"] }
 wildmatch = "2.3.4"
 
 [dev-dependencies]
