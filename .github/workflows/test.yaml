@@ -46,7 +46,7 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+      uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
     - name: Update rust
       run: rustup install ${{ matrix.rust }} --no-self-update && rustup default ${{ matrix.rust }}
     - name: Check rust installation
@@ -69,7 +69,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
     - name: Checkout
-      uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+      uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
     - name: Update rust
       run: rustup install "$RUST_LATEST_VERSION" --no-self-update && rustup default "$RUST_LATEST_VERSION"
     - name: Check rust installation
@@ -100,7 +100,7 @@ jobs:
       with:
         python-version: "3.12"
     - name: Set up Python environment
-      uses: glotzerlab/workflows/setup-uv@5cfac9da9cb78e16ae97a9119b6fd13c1c2d6f5e # 0.1.0
+      uses: glotzerlab/workflows/setup-uv@ea2e25d07af862a1c696a932c2bd6b242d142049 # 0.2.0
       with:
         lockfile: ".github/workflows/signac-requirements.txt"
     - name: Run signac.sh
@@ -114,9 +114,9 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
     - name: Checkout
-      uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+      uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
     - name: Set up mdbook
-      uses: glotzerlab/workflows/setup-mdbook@5cfac9da9cb78e16ae97a9119b6fd13c1c2d6f5e # 0.1.0
+      uses: glotzerlab/workflows/setup-mdbook@ea2e25d07af862a1c696a932c2bd6b242d142049 # 0.2.0
     - name: Add linkcheck configuration
       run: |
         echo -e "[output.linkcheck]\nfollow-web-links=true" >> doc/book.toml
@@ -126,7 +126,7 @@ jobs:
       env:
         RUST_LOG: "mdbook=info,linkcheck=warn,reqwest=debug"
     - name: Set up mdbook
-      uses: glotzerlab/workflows/setup-cargo-bundle-licenses@5cfac9da9cb78e16ae97a9119b6fd13c1c2d6f5e # 0.1.0
+      uses: glotzerlab/workflows/setup-cargo-bundle-licenses@ea2e25d07af862a1c696a932c2bd6b242d142049 # 0.2.0
     - name: Check bundled licenses
       run: cargo bundle-licenses --format yaml --output CI.yaml --previous THIRDPARTY.yaml --check-previous
 
