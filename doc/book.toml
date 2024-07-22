@@ -16,3 +16,4 @@ create-missing = false
 [output.html]
 git-repository-url = "https://github.com/glotzerlab/row"
 additional-css = ["rtd-mdbook.css"]
+edit-url-template = "https://github.com/glotzerlab/row/edit/trunk/doc/{path}"

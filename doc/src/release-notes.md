@@ -1,5 +1,11 @@
 # Release notes
 
+## 0.3.0 (not yet released)
+
+*Added:*
+
+* Edit links on documentation pages.
+
 ## 0.2.0 (2024-06-18)
 
 **Row** 0.2 adds support for partial-node job submissions on clusters without shared
