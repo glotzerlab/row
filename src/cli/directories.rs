@@ -17,46 +17,52 @@ use row::MultiProgressContainer;
 #[derive(Args, Debug)]
 #[allow(clippy::struct_excessive_bools)]
 pub struct Arguments {
-    /// Select the action to scan (defaults to all).
-    action: String,
-
     /// Select directories to summarize (defaults to all). Use 'show directories -' to read from stdin.
     directories: Vec<PathBuf>,
 
+    /// Select the action to scan (defaults to all).
+    #[arg(long, short, display_order = 0)]
+    action: Option<String>,
+
     /// Hide the table header.
-    #[arg(long, display_order = 0)]
+    #[arg(long, display_order = 0, requires = "action")]
     no_header: bool,
 
     /// Do not separate groups with newlines.
-    #[arg(long, display_order = 0)]
+    #[arg(long, display_order = 0, requires = "action")]
     no_separate_groups: bool,
 
     /// Show an element of each directory's value (repeat to show multiple elements).
-    #[arg(long, value_name = "JSON POINTER", display_order = 0)]
+    #[arg(
+        long,
+        value_name = "JSON POINTER",
+        display_order = 0,
+        requires = "action"
+    )]
     value: Vec<String>,
 
     /// Limit the number of groups displayed.
-    #[arg(short, long, display_order = 0)]
+    #[arg(short, long, display_order = 0, requires = "action")]
     n_groups: Option<usize>,
 
     /// Show completed directories.
-    #[arg(long, display_order = 0)]
+    #[arg(long, display_order = 0, requires = "action")]
     completed: bool,
 
     /// Show submitted
-    #[arg(long, display_order = 0)]
+    #[arg(long, display_order = 0, requires = "action")]
     submitted: bool,
 
     /// Show eligible directories.
-    #[arg(long, display_order = 0)]
+    #[arg(long, display_order = 0, requires = "action")]
     eligible: bool,
 
     /// Show waiting directories.
-    #[arg(long, display_order = 0)]
+    #[arg(long, display_order = 0, requires = "action")]
     waiting: bool,
 
     /// Show only directory names.
-    #[arg(long, default_value_t = false, display_order = 0)]
+    #[arg(long, default_value_t = false, display_order = 0, requires = "action")]
     short: bool,
 }
 
@@ -71,15 +77,15 @@ pub fn directories<W: Write>(
     output: &mut W,
 ) -> Result<(), Box<dyn Error>> {
     debug!("Showing directories.");
-    if args.short {
-        print_directories_short(options, args, multi_progress, output)
-    } else {
-        print_directories_long(options, args, multi_progress, output)
+    match &args.action {
+        Some(action) => print_matching(&action.clone(), options, args, multi_progress, output),
+        None => print_all(options, args, multi_progress, output),
     }
 }
 
 #[allow(clippy::too_many_lines)]
-pub fn print_directories_long<W: Write>(
+pub fn print_matching<W: Write>(
+    action_name: &str,
     options: &GlobalOptions,
     args: Arguments,
     multi_progress: &mut MultiProgressContainer,
@@ -104,10 +110,10 @@ pub fn print_directories_long<W: Write>(
 
     project
         .workflow()
-        .action_by_name(&args.action)
-        .ok_or_else(|| row::Error::ActionNotFound(args.action.clone()))?;
+        .action_by_name(action_name)
+        .ok_or_else(|| row::Error::ActionNotFound(action_name.to_string()))?;
 
-    let mut table = Table::new().with_hide_header(args.no_header);
+    let mut table = Table::new().with_hide_header(if args.short { true } else { args.no_header });
     table.header = vec![
         Item::new("Directory".to_string(), Style::new().underlined()),
         Item::new("Status".to_string(), Style::new().underlined()),
@@ -124,7 +130,7 @@ pub fn print_directories_long<W: Write>(
     }
 
     for action in &project.workflow().action {
-        if action.name() != args.action {
+        if action.name() != action_name {
             continue;
         }
 
@@ -182,6 +188,12 @@ pub fn print_directories_long<W: Write>(
                     Style::new().bold(),
                 ));
 
+                // Only show directory names when user requests short output.
+                if args.short {
+                    table.rows.push(Row::Items(row));
+                    continue;
+                }
+
                 // Status
                 row.push(status);
 
@@ -217,12 +229,14 @@ pub fn print_directories_long<W: Write>(
                 table.rows.push(Row::Items(row));
             }
 
-            if !args.no_separate_groups && group_idx != groups.len() - 1 {
+            if !args.no_separate_groups && group_idx != groups.len() - 1 && !args.short {
                 table.rows.push(Row::Separator);
             }
         }
 
-        table.rows.push(Row::Separator);
+        if !args.short {
+            table.rows.push(Row::Separator);
+        }
     }
 
     table.write(output)?;
@@ -233,7 +247,7 @@ pub fn print_directories_long<W: Write>(
     Ok(())
 }
 
-pub fn print_directories_short<W: Write>(
+pub fn print_all<W: Write>(
     options: &GlobalOptions,
     args: Arguments,
     multi_progress: &mut MultiProgressContainer,
