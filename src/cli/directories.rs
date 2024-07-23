@@ -54,13 +54,16 @@ pub struct Arguments {
     /// Show waiting directories.
     #[arg(long, display_order = 0)]
     waiting: bool,
+
+    /// Show only directory names.
+    #[arg(long, default_value_t = false, display_order = 0)]
+    short: bool,
 }
 
 /// Show directories that match an action.
 ///
 /// Print a human-readable list of directories, their status, job ID, and value(s).
 ///
-#[allow(clippy::too_many_lines)]
 pub fn directories<W: Write>(
     options: &GlobalOptions,
     args: Arguments,
@@ -68,7 +71,20 @@ pub fn directories<W: Write>(
     output: &mut W,
 ) -> Result<(), Box<dyn Error>> {
     debug!("Showing directories.");
+    if args.short {
+        print_directories_short(options, args, multi_progress, output)
+    } else {
+        print_directories_long(options, args, multi_progress, output)
+    }
+}
 
+#[allow(clippy::too_many_lines)]
+pub fn print_directories_long<W: Write>(
+    options: &GlobalOptions,
+    args: Arguments,
+    multi_progress: &mut MultiProgressContainer,
+    output: &mut W,
+) -> Result<(), Box<dyn Error>> {
     // Show directories with selected statuses.
     let mut show_completed = args.completed;
     let mut show_submitted = args.submitted;
@@ -213,6 +229,24 @@ pub fn directories<W: Write>(
     output.flush()?;
 
     project.close(multi_progress)?;
+
+    Ok(())
+}
+
+pub fn print_directories_short<W: Write>(
+    options: &GlobalOptions,
+    args: Arguments,
+    multi_progress: &mut MultiProgressContainer,
+    output: &mut W,
+) -> Result<(), Box<dyn Error>> {
+    let project = Project::open(options.io_threads, &options.cluster, multi_progress)?;
+
+    let query_directories =
+        cli::parse_directories(args.directories, || Ok(project.state().list_directories()))?;
+
+    for directory in &query_directories {
+        writeln!(output, "{}", directory.display())?;
+    }
 
     Ok(())
 }
