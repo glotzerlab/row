@@ -2,18 +2,18 @@ ci:
   autoupdate_schedule: quarterly
   autoupdate_branch: 'trunk'
   autofix_prs: false
-  # rust does not work on pre-commit.ci: could not create temp file /opt/rust/rustup/tmp/17c53uaz8kdwrx0k_file: Read-only file system
-  skip: [fmt, cargo-check, clippy]
+  # rust does not work on pre-commit.ci
+  skip: [fmt, check, clippy]
 
 default_language_version:
-  rust: 1.78.0
+  rust: 1.80.0
 
 repos:
-- repo: https://github.com/Young-Naive-Simple/pre-commit-rust/
-  rev: 3a8de64acc969112746489e5ec1f0b13e00d871e
+- repo: https://github.com/backplane/pre-commit-rust-hooks
+  rev: v1.1.0
   hooks:
   - id: fmt
-  - id: cargo-check
+  - id: check
   - id: clippy
     args:
       - --all-targets
@@ -30,11 +30,10 @@ repos:
   - id: check-yaml
   - id: check-case-conflict
   - id: mixed-line-ending
-# fails with _cgo_export.c:3:10: fatal error: 'stdlib.h' file not found on Mac.
-# - repo: https://github.com/rhysd/actionlint
-#   rev: v1.6.27
-#   hooks:
-#     - id: actionlint
+- repo: https://github.com/rhysd/actionlint
+  rev: v1.7.1
+  hooks:
+    - id: actionlint
 - repo: https://github.com/astral-sh/ruff-pre-commit
   rev: 'v0.5.0'
   hooks:
