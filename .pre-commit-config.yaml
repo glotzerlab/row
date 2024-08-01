@@ -6,7 +6,7 @@ ci:
   skip: [fmt, cargo-check, clippy]
 
 default_language_version:
-  rust: 1.78.0
+  rust: 1.80.0
 
 repos:
 - repo: https://github.com/Young-Naive-Simple/pre-commit-rust/

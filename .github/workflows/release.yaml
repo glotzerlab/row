@@ -26,7 +26,7 @@ env:
   name: row
   CARGO_TERM_COLOR: always
   CLICOLOR: 1
-  RUST_VERSION: 1.78.0
+  RUST_VERSION: 1.80.0
 
 jobs:
   source:
