@@ -172,7 +172,7 @@ jobs:
           ~/.cargo/registry/cache/
           ~/.cargo/git/db/
           target/
-        key: ${{ runner.os }}-rust-${{ env.RUST_VERSION }}-cargo-publish-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
+        key: ${{ runner.os }}-rust-${{ env.RUST_VERSION }}-cargo-publish-${{ hashFiles('**/Cargo.lock') }}
     - name: Dry run
       run: cargo publish --all-features --dry-run
     - name: Publish to crates.io
