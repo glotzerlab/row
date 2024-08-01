@@ -530,29 +530,17 @@ impl Group {
 
     /// Get the group's `split_by_sort_key`.
     pub fn split_by_sort_key(&self) -> bool {
-        if let Some(split_by_sort_key) = self.split_by_sort_key {
-            split_by_sort_key
-        } else {
-            false
-        }
+        self.split_by_sort_key.unwrap_or_default()
     }
 
     /// Get the group's `reverse_sort`.
     pub fn reverse_sort(&self) -> bool {
-        if let Some(reverse_sort) = self.reverse_sort {
-            reverse_sort
-        } else {
-            false
-        }
+        self.reverse_sort.unwrap_or_default()
     }
 
     /// Get the group's `submit_whole`.
     pub fn submit_whole(&self) -> bool {
-        if let Some(submit_whole) = self.submit_whole {
-            submit_whole
-        } else {
-            false
-        }
+        self.submit_whole.unwrap_or_default()
     }
 
     /// Resolve omitted keys from the given template.
