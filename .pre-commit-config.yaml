@@ -3,7 +3,7 @@ ci:
   autoupdate_branch: 'trunk'
   autofix_prs: false
   # rust does not work on pre-commit.ci
-  skip: [fmt, cargo-check, clippy]
+  skip: [fmt, check, clippy]
 
 default_language_version:
   rust: 1.80.0
