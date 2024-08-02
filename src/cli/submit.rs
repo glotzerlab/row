@@ -89,8 +89,10 @@ pub fn submit<W: Write>(
         let groups = project.separate_into_groups(action, status.eligible)?;
 
         if action.group.submit_whole() {
-            let whole_groups =
-                project.separate_into_groups(action, project.state().list_directories())?;
+            let whole_groups = project.separate_into_groups(
+                action,
+                project.find_matching_directories(action, project.state().list_directories())?,
+            )?;
             for group in &groups {
                 if !whole_groups.contains(group) {
                     return Err(Box::new(row::Error::PartialGroupSubmission(
