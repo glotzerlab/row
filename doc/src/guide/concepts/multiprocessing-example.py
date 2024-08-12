@@ -1,5 +1,6 @@
 """Example actions.py using multiprocessing."""
 
+# ANCHOR: action
 import argparse
 import multiprocessing
 import os
@@ -7,7 +8,6 @@ import os
 import signac
 
 
-# ANCHOR: action
 def action_implementation(job):
     """Implement the action on a single job."""
     # Your code that operates on one directory goes here.

@@ -3,11 +3,11 @@
 import argparse
 import os
 
+# ANCHOR: action
 import hoomd
 import signac
 
 
-# ANCHOR: action
 def action_implementation(job, communicator):
     """Implement the action on a single job."""
     # Your HOOMD-blue simulation goes here. Use the given communicator. For example:
