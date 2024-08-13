@@ -53,7 +53,11 @@ pub fn clean(
     // Delete all existing completion staging files.
     project.close(multi_progress)?;
 
-    let selection = args.selection.as_ref().unwrap_or(&Selection {directory: true, submitted: true, completed: true});
+    let selection = args.selection.as_ref().unwrap_or(&Selection {
+        directory: true,
+        submitted: true,
+        completed: true,
+    });
 
     let num_submitted = project.state().num_submitted();
     if num_submitted > 0 {
