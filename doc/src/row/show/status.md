@@ -5,7 +5,7 @@ Usage:
 row show status [OPTIONS] [DIRECTORIES]
 ```
 
-`row show status` prints a summary of all directories in the workspace.
+`row show status` prints a summary of actions in the workflow.
 The summary includes the number of directories in each
 [status](../../guide/concepts/status.md) and an estimate of the remaining cost in either
 CPU-hours or GPU-hours based on the number of submitted, eligible, and waiting jobs and
@@ -30,9 +30,9 @@ echo "dir1" | row show status -
 Set `--action <pattern>` to choose which actions to display by name. By default, **row**
 shows the status of all actions. `<pattern>` is a wildcard pattern.
 
-### `-`all`
+### `-all`
 
-Show all actions. Even those with 0 directories.
+Show all actions. By default, `show status` hides actions with 0 matching directories.
 
 ### `--completed`
 

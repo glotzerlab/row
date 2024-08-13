@@ -46,7 +46,7 @@ pub struct Arguments {
     #[arg(long, display_order = 0, conflicts_with = "all")]
     waiting: bool,
 
-    /// Show all actions (even those with 0 directories)
+    /// Show all actions.
     #[arg(long, display_order = 0)]
     all: bool,
 }
