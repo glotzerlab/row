@@ -5,11 +5,15 @@
 *Added:*
 
 * Edit links to documentation pages.
+* New arguments to `show status` display actions that are in the requested states:
+ `--completed`, `--eligible`, `--submitted`, and `--waiting`.
 
 *Changed:*
 
 * Show `import` lines in Python examples.
 * Improve the verbose output from `submit`.
+* `show status` hides actions with 0 directories by default. Pass `--all` to show all
+  actions.
 
 *Fixed:*
 
