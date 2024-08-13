@@ -148,6 +148,50 @@ fn status() -> Result<(), Box<dyn std::error::Error>> {
 
 #[test]
 #[parallel]
+fn status_waiting() -> Result<(), Box<dyn std::error::Error>> {
+    let temp = TempDir::new()?;
+    let _ = setup_sample_workflow(&temp, 10);
+
+    Command::cargo_bin("row")?
+        .args(["show", "status"])
+        .args(["--cluster", "none"])
+        .args(["--waiting"])
+        .current_dir(temp.path())
+        .env_remove("ROW_COLOR")
+        .env_remove("CLICOLOR")
+        .env("ROW_HOME", "/not/a/path")
+        .assert()
+        .success()
+        .stdout(predicate::str::is_match("(?m)^one +0 +0 +10 +0")?.not())
+        .stdout(predicate::str::is_match("(?m)^two +0 +0 +0 +10")?);
+
+    Ok(())
+}
+
+#[test]
+#[parallel]
+fn status_eligible() -> Result<(), Box<dyn std::error::Error>> {
+    let temp = TempDir::new()?;
+    let _ = setup_sample_workflow(&temp, 10);
+
+    Command::cargo_bin("row")?
+        .args(["show", "status"])
+        .args(["--cluster", "none"])
+        .args(["--eligible"])
+        .current_dir(temp.path())
+        .env_remove("ROW_COLOR")
+        .env_remove("CLICOLOR")
+        .env("ROW_HOME", "/not/a/path")
+        .assert()
+        .success()
+        .stdout(predicate::str::is_match("(?m)^one +0 +0 +10 +0")?)
+        .stdout(predicate::str::is_match("(?m)^two +0 +0 +0 +10")?.not());
+
+    Ok(())
+}
+
+#[test]
+#[parallel]
 fn status_action_selection() -> Result<(), Box<dyn std::error::Error>> {
     let temp = TempDir::new()?;
     let _ = setup_sample_workflow(&temp, 10);
