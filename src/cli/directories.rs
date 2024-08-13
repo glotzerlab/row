@@ -255,10 +255,19 @@ pub fn print_all<W: Write>(
 ) -> Result<(), Box<dyn Error>> {
     let project = Project::open(options.io_threads, &options.cluster, multi_progress)?;
 
+    let all_directories = project.state().list_directories();
     let query_directories =
-        cli::parse_directories(args.directories, || Ok(project.state().list_directories()))?;
+        cli::parse_directories(args.directories, || Ok(all_directories.clone()))?;
+    let all_directories = HashSet::<PathBuf>::from_iter(all_directories);
 
     for directory in &query_directories {
+        if !all_directories.contains(directory) {
+            warn!(
+                "Directory '{}' not found in workspace.",
+                directory.display()
+            );
+            continue;
+        }
         writeln!(output, "{}", directory.display())?;
     }
 
