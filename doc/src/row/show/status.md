@@ -30,15 +30,39 @@ echo "dir1" | row show status -
 Set `--action <pattern>` to choose which actions to display by name. By default, **row**
 shows the status of all actions. `<pattern>` is a wildcard pattern.
 
+### `-`all`
+
+Show all actions. Even those with 0 directories.
+
+### `--completed`
+
+Show actions with *completed* directories.
+
+### `--eligible`
+
+Show actions with *eligible* directories.
+
 ### `--no-header`
 
 Hide the header in the output.
+
+### `--submitted`
+
+Show actions with *submitted* directories.
+
+### `--waiting`
+
+Show actions with *waiting* directories.
 
 ## Examples
 
 * Show the status of the entire workspace:
   ```bash
   row show status
+  ```
+* Show the status of all actions that have eligible directories:
+  ```bash
+  row show status --eligible
   ```
 * Show the status of a specific action:
   ```bash
