@@ -17,7 +17,7 @@ use row::{
 #[derive(Args, Debug)]
 pub struct Arguments {
     #[command(flatten)]
-    selection: Selection,
+    selection: Option<Selection>,
 
     /// Force removal of the completed and/or submitted cache when there are submitted jobs.
     #[arg(long, display_order = 0)]
@@ -25,7 +25,7 @@ pub struct Arguments {
 }
 
 #[derive(Args, Debug)]
-#[group(required = true, multiple = false)]
+#[group(multiple = true)]
 #[allow(clippy::struct_excessive_bools)]
 pub struct Selection {
     /// Remove the directory cache.
@@ -39,10 +39,6 @@ pub struct Selection {
     /// Remove the completed cache.
     #[arg(long, display_order = 0)]
     completed: bool,
-
-    /// Remove all caches.
-    #[arg(long, display_order = 0)]
-    all: bool,
 }
 
 /// Remove row cache files.
@@ -57,19 +53,19 @@ pub fn clean(
     // Delete all existing completion staging files.
     project.close(multi_progress)?;
 
-    let selection = &args.selection;
+    let selection = args.selection.as_ref().unwrap_or(&Selection {directory: true, submitted: true, completed: true});
 
     let num_submitted = project.state().num_submitted();
     if num_submitted > 0 {
-        let force_needed = selection.completed || selection.submitted || selection.all;
+        let force_needed = selection.completed || selection.submitted;
 
         if force_needed {
             warn!("There are {num_submitted} directories with submitted jobs.");
         }
-        if selection.submitted || selection.all {
+        if selection.submitted {
             warn!("The submitted cache is not recoverable. Row may resubmit running jobs.");
         }
-        if selection.completed || selection.all {
+        if selection.completed {
             warn!("These jobs may add to the completed cache after it is cleaned.");
         }
         if force_needed && !args.force {
@@ -80,7 +76,7 @@ pub fn clean(
 
     let data_directory = project.workflow().root.join(DATA_DIRECTORY_NAME);
 
-    if selection.submitted || selection.all {
+    if selection.submitted {
         let path = data_directory.join(SUBMITTED_CACHE_FILE_NAME);
         info!("Removing '{}'.", path.display());
         if let Err(error) = fs::remove_file(&path) {
@@ -90,7 +86,7 @@ pub fn clean(
             }
         }
     }
-    if selection.completed || selection.all {
+    if selection.completed {
         let path = data_directory.join(COMPLETED_CACHE_FILE_NAME);
         info!("Removing '{}'.", path.display());
         if let Err(error) = fs::remove_file(&path) {
@@ -100,7 +96,7 @@ pub fn clean(
             }
         }
     }
-    if selection.directory || selection.all {
+    if selection.directory {
         let path = data_directory.join(DIRECTORY_CACHE_FILE_NAME);
         info!("Removing '{}'.", path.display());
         if let Err(error) = fs::remove_file(&path) {
