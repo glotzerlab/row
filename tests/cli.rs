@@ -44,6 +44,13 @@ name = "two"
 command = "touch workspace/{directory}/two"
 products = ["two"]
 previous_actions = ["one"]
+
+[[action]]
+name = "three"
+command = "touch workspace/{directory}/three"
+products = ["three"]
+[[action.group.include]]
+condition = ["/v", "<", 0]
 "#,
     )?;
 
@@ -141,7 +148,8 @@ fn status() -> Result<(), Box<dyn std::error::Error>> {
         .assert()
         .success()
         .stdout(predicate::str::is_match("(?m)^one +0 +0 +10 +0")?)
-        .stdout(predicate::str::is_match("(?m)^two +0 +0 +0 +10")?);
+        .stdout(predicate::str::is_match("(?m)^two +0 +0 +0 +10")?)
+        .stdout(predicate::str::is_match("(?m)^three +0 +0 +0 +0")?.not());
 
     Ok(())
 }
@@ -163,7 +171,8 @@ fn status_waiting() -> Result<(), Box<dyn std::error::Error>> {
         .assert()
         .success()
         .stdout(predicate::str::is_match("(?m)^one +0 +0 +10 +0")?.not())
-        .stdout(predicate::str::is_match("(?m)^two +0 +0 +0 +10")?);
+        .stdout(predicate::str::is_match("(?m)^two +0 +0 +0 +10")?)
+        .stdout(predicate::str::is_match("(?m)^three +0 +0 +0 +0")?.not());
 
     Ok(())
 }
@@ -185,7 +194,86 @@ fn status_eligible() -> Result<(), Box<dyn std::error::Error>> {
         .assert()
         .success()
         .stdout(predicate::str::is_match("(?m)^one +0 +0 +10 +0")?)
-        .stdout(predicate::str::is_match("(?m)^two +0 +0 +0 +10")?.not());
+        .stdout(predicate::str::is_match("(?m)^two +0 +0 +0 +10")?.not())
+        .stdout(predicate::str::is_match("(?m)^three +0 +0 +0 +0")?.not());
+
+    Ok(())
+}
+
+#[test]
+#[parallel]
+fn status_submitted() -> Result<(), Box<dyn std::error::Error>> {
+    let temp = TempDir::new()?;
+    let _ = setup_sample_workflow(&temp, 10);
+
+    Command::cargo_bin("row")?
+        .args(["show", "status"])
+        .args(["--cluster", "none"])
+        .args(["--submitted"])
+        .current_dir(temp.path())
+        .env_remove("ROW_COLOR")
+        .env_remove("CLICOLOR")
+        .env("ROW_HOME", "/not/a/path")
+        .assert()
+        .success()
+        .stdout(predicate::str::is_match("(?m)^one +0 +0 +10 +0")?.not())
+        .stdout(predicate::str::is_match("(?m)^two +0 +0 +0 +10")?.not())
+        .stdout(predicate::str::is_match("(?m)^three +0 +0 +0 +0")?.not());
+
+    Ok(())
+}
+
+#[test]
+#[parallel]
+fn status_all() -> Result<(), Box<dyn std::error::Error>> {
+    let temp = TempDir::new()?;
+    let _ = setup_sample_workflow(&temp, 10);
+
+    Command::cargo_bin("row")?
+        .args(["show", "status"])
+        .args(["--cluster", "none"])
+        .args(["--all"])
+        .current_dir(temp.path())
+        .env_remove("ROW_COLOR")
+        .env_remove("CLICOLOR")
+        .env("ROW_HOME", "/not/a/path")
+        .assert()
+        .success()
+        .stdout(predicate::str::is_match("(?m)^one +0 +0 +10 +0")?)
+        .stdout(predicate::str::is_match("(?m)^two +0 +0 +0 +10")?)
+        .stdout(predicate::str::is_match("(?m)^three +0 +0 +0 +0")?);
+
+    Ok(())
+}
+
+#[test]
+#[parallel]
+fn status_completed() -> Result<(), Box<dyn std::error::Error>> {
+    let temp = TempDir::new()?;
+    let _ = setup_sample_workflow(&temp, 10);
+
+    Command::cargo_bin("row")?
+        .arg("submit")
+        .args(["--cluster", "none"])
+        .current_dir(temp.path())
+        .env_remove("ROW_COLOR")
+        .env_remove("CLICOLOR")
+        .env("ROW_HOME", "/not/a/path")
+        .assert()
+        .success();
+
+    Command::cargo_bin("row")?
+        .args(["show", "status"])
+        .args(["--cluster", "none"])
+        .args(["--completed"])
+        .current_dir(temp.path())
+        .env_remove("ROW_COLOR")
+        .env_remove("CLICOLOR")
+        .env("ROW_HOME", "/not/a/path")
+        .assert()
+        .success()
+        .stdout(predicate::str::is_match("(?m)^one +10 +0 +0 +0")?)
+        .stdout(predicate::str::is_match("(?m)^two +0 +0 +10 +0")?.not());
 
     Ok(())
 }
