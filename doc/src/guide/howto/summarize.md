@@ -23,9 +23,8 @@ submit_whole = true
 ```
 
 Actions that summarize output have no clear location to place output files (such as
-plots). Many users will write summary output to the project root.
-You may omit `products` in this case so that you do not need to create empty files in
-each directory. This also makes it easy to rerun the analysis whenever needed as **row**
-will never consider it **complete**.
+plots). Many users will write summary output to the project root and omit `products`.
+In this way, you can rerun the analysis whenever needed as **row** will never consider
+the action **complete**.
 
 [`submit_whole=true`]: ../../workflow/action/group.md#submit_whole

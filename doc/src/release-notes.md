@@ -4,7 +4,16 @@
 
 *Added:*
 
-* Edit links on documentation pages.
+* Edit links to documentation pages.
+
+*Changed:*
+
+* Show `import` lines in Python examples.
+* Improve the verbose output from `submit`.
+
+*Fixed:*
+
+* `submit_whole = true` checks only directories that match `group.include`.
 
 ## 0.2.0 (2024-06-18)
 

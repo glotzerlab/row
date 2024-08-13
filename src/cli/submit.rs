@@ -89,8 +89,10 @@ pub fn submit<W: Write>(
         let groups = project.separate_into_groups(action, status.eligible)?;
 
         if action.group.submit_whole() {
-            let whole_groups =
-                project.separate_into_groups(action, project.state().list_directories())?;
+            let whole_groups = project.separate_into_groups(
+                action,
+                project.find_matching_directories(action, project.state().list_directories())?,
+            )?;
             for group in &groups {
                 if !whole_groups.contains(group) {
                     return Err(Box::new(row::Error::PartialGroupSubmission(
@@ -120,6 +122,8 @@ pub fn submit<W: Write>(
         return Ok(());
     }
 
+    info!("Preparing jobs that execute the following actions:");
+
     let mut total_cost = ResourceCost::new();
     let mut action_directories: Vec<(Action, Vec<PathBuf>)> = Vec::new();
     for (action, groups) in action_groups {
@@ -139,11 +143,11 @@ pub fn submit<W: Write>(
 
         if job_count > 0 {
             info!(
-                "Preparing {} {} that may cost up to {} for action '{}'.",
+                " - {}: {} {} that may cost up to {}.",
+                action.name(),
                 job_count,
                 if job_count == 1 { "job" } else { "jobs" },
                 cost,
-                action.name()
             );
         }
         total_cost = total_cost + cost;
@@ -163,9 +167,9 @@ pub fn submit<W: Write>(
 
     if args.dry_run {
         let scheduler = project.scheduler();
-        info!("Would submit the following scripts...");
+        info!("Execute without --dry-run to submit the following scripts...");
         for (index, (action, directories)) in action_directories.iter().enumerate() {
-            info!("script {}/{}:", index + 1, action_directories.len());
+            info!("Script {}/{}:", index + 1, action_directories.len());
             let script = scheduler.make_script(action, directories)?;
 
             write!(output, "{script}")?;
