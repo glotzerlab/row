@@ -51,6 +51,11 @@ be one of:
 * `"slurm"`
 * `"bash"`
 
+## submit_options
+
+`cluster.submit_options`: **array** of **strings** - Scheduler submission options that
+are passed to every job on this cluster.
+
 ## partition
 
 `cluster.partition`: **array** of **tables** - Define the scheduler partitions that
