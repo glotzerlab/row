@@ -40,15 +40,14 @@ repos:
   - id: ruff-format
   - id: ruff
 - repo: https://github.com/glotzerlab/fix-license-header
-  rev: v0.3.2
+  rev: v0.4.0
   hooks:
   - id: fix-license-header
-    name: Fix license headers (rust)
+    name: Fix license headers
     types_or: [rust]
     args:
     - --license-file=LICENSE
     - --add=Part of row, released under the BSD 3-Clause License.
-    - --comment-prefix=//
 - repo: https://github.com/crate-ci/typos
   rev: v1.22.9
   hooks:
