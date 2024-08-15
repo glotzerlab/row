@@ -16,6 +16,7 @@ use row::project::{Project, Status};
 use row::workflow::ResourceCost;
 use row::MultiProgressContainer;
 
+#[allow(clippy::struct_excessive_bools)]
 #[derive(Args, Debug)]
 pub struct Arguments {
     /// Select the actions to summarize with a wildcard pattern.
@@ -28,6 +29,26 @@ pub struct Arguments {
 
     /// Select directories to summarize (defaults to all). Use 'status -' to read from stdin.
     directories: Vec<PathBuf>,
+
+    /// Show actions with completed directories.
+    #[arg(long, display_order = 0, conflicts_with = "all")]
+    completed: bool,
+
+    /// Show actions with submitted directories.
+    #[arg(long, display_order = 0, conflicts_with = "all")]
+    submitted: bool,
+
+    /// Show actions with eligible directories.
+    #[arg(long, display_order = 0, conflicts_with = "all")]
+    eligible: bool,
+
+    /// Show actions with waiting directories.
+    #[arg(long, display_order = 0, conflicts_with = "all")]
+    waiting: bool,
+
+    /// Show all actions.
+    #[arg(long, display_order = 0)]
+    all: bool,
 }
 
 /// Format a status string for non-terminal outputs.
@@ -84,6 +105,19 @@ pub fn status<W: Write>(
     output: &mut W,
 ) -> Result<(), Box<dyn Error>> {
     debug!("Showing the workflow's status.");
+
+    // Show directories with selected statuses.
+    let mut show_completed = args.completed;
+    let mut show_submitted = args.submitted;
+    let mut show_eligible = args.eligible;
+    let mut show_waiting = args.waiting;
+    if !show_completed && !show_submitted && !show_eligible && !show_waiting {
+        show_completed = true;
+        show_submitted = true;
+        show_eligible = true;
+        show_waiting = true;
+    }
+
     let action_matcher = WildMatch::new(&args.action);
 
     let mut project = Project::open(options.io_threads, &options.cluster, multi_progress)?;
@@ -134,9 +168,16 @@ pub fn status<W: Write>(
             cost = cost + action.resources.cost(group.len());
         }
 
-        table
-            .rows
-            .push(Row::Items(make_row(action.name(), &status, &cost)));
+        if args.all
+            || (!status.completed.is_empty() && show_completed)
+            || (!status.submitted.is_empty() && show_submitted)
+            || (!status.eligible.is_empty() && show_eligible)
+            || (!status.waiting.is_empty() && show_waiting)
+        {
+            table
+                .rows
+                .push(Row::Items(make_row(action.name(), &status, &cost)));
+        }
     }
 
     if matching_action_count == 0 {
