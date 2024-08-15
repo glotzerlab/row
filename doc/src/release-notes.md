@@ -7,6 +7,7 @@
 * Edit links to documentation pages.
 * New arguments to `show status` display actions that are in the requested states:
  `--completed`, `--eligible`, `--submitted`, and `--waiting`.
+* `cluster.submit_options` configuration option in `clusters.toml`.
 
 *Changed:*
 
@@ -15,6 +16,8 @@
 * `show status` hides actions with 0 directories by default. Pass `--all` to show all
   actions.
 * `clean` now cleans all caches by default.
+* Submit jobs with `--constraint="scratch"` by default on Delta.
+* Submit jobs with `--constraint="nvme"` by default on Frontier.
 
 *Fixed:*
 
