@@ -72,6 +72,7 @@ fn andes() -> Cluster {
         name: "andes".into(),
         identify: IdentificationMethod::ByEnvironment("LMOD_SYSTEM_NAME".into(), "andes".into()),
         scheduler: SchedulerType::Slurm,
+        submit_options: Vec::new(),
         partition: vec![
             // Auto-detected partitions: batch
             Partition {
@@ -92,6 +93,7 @@ fn anvil() -> Cluster {
         name: "anvil".into(),
         identify: IdentificationMethod::ByEnvironment("RCAC_CLUSTER".into(), "anvil".into()),
         scheduler: SchedulerType::Slurm,
+        submit_options: Vec::new(),
         partition: vec![
             // Auto-detected partitions: shared | wholenode | gpu
             Partition {
@@ -149,6 +151,7 @@ fn delta() -> Cluster {
         name: "delta".into(),
         identify: IdentificationMethod::ByEnvironment("LMOD_SYSTEM_NAME".into(), "Delta".into()),
         scheduler: SchedulerType::Slurm,
+        submit_options: vec!["--constraint=\"scratch\"".to_string()],
         partition: vec![
             // Auto-detected partitions: cpu | gpuA100x4
             Partition {
@@ -206,6 +209,7 @@ fn frontier() -> Cluster {
         name: "frontier".into(),
         identify: IdentificationMethod::ByEnvironment("LMOD_SYSTEM_NAME".into(), "frontier".into()),
         scheduler: SchedulerType::Slurm,
+        submit_options: vec!["--constraint=\"nvme\"".to_string()],
         partition: vec![
             // Auto-detected partitions: batch
             Partition {
@@ -225,6 +229,7 @@ fn greatlakes() -> Cluster {
         name: "greatlakes".into(),
         identify: IdentificationMethod::ByEnvironment("CLUSTER_NAME".into(), "greatlakes".into()),
         scheduler: SchedulerType::Slurm,
+        submit_options: Vec::new(),
         partition: vec![
             // Auto-detected partitions: standard | gpu_mig40,gpu | gpu.
             Partition {
@@ -295,6 +300,7 @@ fn none() -> Cluster {
         name: "none".into(),
         identify: IdentificationMethod::Always(true),
         scheduler: SchedulerType::Bash,
+        submit_options: Vec::new(),
         partition: vec![Partition {
             name: "none".into(),
             ..Partition::default()

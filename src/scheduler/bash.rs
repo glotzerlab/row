@@ -539,6 +539,7 @@ mod tests {
             scheduler: SchedulerType::Bash,
             identify: IdentificationMethod::Always(false),
             partition: Vec::new(),
+            submit_options: Vec::new(),
         };
         let script = Bash::new(cluster, launchers)
             .make_script(&action, &directories)
