@@ -14,6 +14,7 @@
 * Improve the verbose output from `submit`.
 * `show status` hides actions with 0 directories by default. Pass `--all` to show all
   actions.
+* `clean` now cleans all caches by default.
 
 *Fixed:*
 
