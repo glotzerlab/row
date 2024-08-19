@@ -552,6 +552,51 @@ fn directories_value() -> Result<(), Box<dyn std::error::Error>> {
 
 #[test]
 #[parallel]
+fn directories_short() -> Result<(), Box<dyn std::error::Error>> {
+    let temp = TempDir::new()?;
+    let _ = setup_sample_workflow(&temp, 10);
+
+    Command::cargo_bin("row")?
+        .args(["show", "directories"])
+        .args(["--cluster", "none"])
+        .args(["--action", "one"])
+        .arg("--short")
+        .current_dir(temp.path())
+        .env_remove("ROW_COLOR")
+        .env_remove("CLICOLOR")
+        .env("ROW_HOME", "/not/a/path")
+        .assert()
+        .success()
+        .stdout(predicate::str::starts_with("dir"));
+
+    Ok(())
+}
+
+#[test]
+#[parallel]
+fn directories_short_no_action() -> Result<(), Box<dyn std::error::Error>> {
+    let temp = TempDir::new()?;
+    let _ = setup_sample_workflow(&temp, 10);
+
+    Command::cargo_bin("row")?
+        .args(["show", "directories"])
+        .args(["--cluster", "none"])
+        .arg("--short")
+        .current_dir(temp.path())
+        .env_remove("ROW_COLOR")
+        .env_remove("CLICOLOR")
+        .env("ROW_HOME", "/not/a/path")
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains(
+            "following required arguments were not provided",
+        ));
+
+    Ok(())
+}
+
+#[test]
+#[parallel]
 fn show_cluster() -> Result<(), Box<dyn std::error::Error>> {
     let temp = TempDir::new()?;
 
