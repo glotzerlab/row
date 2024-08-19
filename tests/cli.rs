@@ -420,8 +420,17 @@ fn directories_no_action() -> Result<(), Box<dyn std::error::Error>> {
         .env("ROW_HOME", "/not/a/path")
         .current_dir(temp.path())
         .assert()
-        .failure()
-        .stderr(predicate::str::contains("Usage"));
+        .success()
+        .stdout(predicate::str::is_match("(?m)^dir0 *$")?)
+        .stdout(predicate::str::is_match("(?m)^dir1 *$")?)
+        .stdout(predicate::str::is_match("(?m)^dir2 *$")?)
+        .stdout(predicate::str::is_match("(?m)^dir3 *$")?)
+        .stdout(predicate::str::is_match("(?m)^dir4 *$")?)
+        .stdout(predicate::str::is_match("(?m)^dir5 *$")?)
+        .stdout(predicate::str::is_match("(?m)^dir6 *$")?)
+        .stdout(predicate::str::is_match("(?m)^dir7 *$")?)
+        .stdout(predicate::str::is_match("(?m)^dir8 *$")?)
+        .stdout(predicate::str::is_match("(?m)^dir9 *$")?);
 
     Ok(())
 }
@@ -435,7 +444,7 @@ fn directories() -> Result<(), Box<dyn std::error::Error>> {
     Command::cargo_bin("row")?
         .args(["show", "directories"])
         .args(["--cluster", "none"])
-        .arg("one")
+        .args(["--action", "one"])
         .current_dir(temp.path())
         .env_remove("ROW_COLOR")
         .env_remove("CLICOLOR")
@@ -466,7 +475,7 @@ fn directories_select_directories() -> Result<(), Box<dyn std::error::Error>> {
     Command::cargo_bin("row")?
         .args(["show", "directories"])
         .args(["--cluster", "none"])
-        .arg("one")
+        .args(["--action", "one"])
         .arg("dir3")
         .arg("dir9")
         .current_dir(temp.path())
@@ -499,7 +508,7 @@ fn directories_no_header() -> Result<(), Box<dyn std::error::Error>> {
     Command::cargo_bin("row")?
         .args(["show", "directories"])
         .args(["--cluster", "none"])
-        .arg("one")
+        .args(["--action", "one"])
         .arg("--no-header")
         .current_dir(temp.path())
         .env_remove("ROW_COLOR")
@@ -523,7 +532,7 @@ fn directories_value() -> Result<(), Box<dyn std::error::Error>> {
         .args(["--cluster", "none"])
         .args(["--value", "/v"])
         .args(["--value", "/v2"])
-        .arg("one")
+        .args(["--action", "one"])
         .arg("dir3")
         .arg("dir9")
         .current_dir(temp.path())
