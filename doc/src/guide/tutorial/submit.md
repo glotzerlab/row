@@ -122,7 +122,7 @@ hello          0         3        0       0    3 CPU-hours
 
 Similarly,
 ```bash
-row show directories hello
+row show directories --action hello
 ```
 will show something like:
 ```plaintext

@@ -10,7 +10,7 @@ row submit [OPTIONS] [DIRECTORIES]
 actions. Then it forms [groups](../workflow/action/group.md) and submits one job for
 each group. Pass `--dry-run` to see the script(s) that will be submitted. Execute
 ```
-row show directories action --eligible
+row show directories --action action --eligible
 ```
 to see the specific directory groups that will be submitted.
 

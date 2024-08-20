@@ -21,7 +21,7 @@ Commands:
 | flow | row |
 |------|-----|
 | `project.py status` | [`row show status`](row/show/status.md) |
-| `project.py status --detailed` | [`row show directories <ACTION>`](row/show/directories.md) |
+| `project.py status --detailed` | [`row show directories --action action`](row/show/directories.md) |
 | `project.py run` | [`row submit --cluster=none`](row/submit.md) |
 | `project.py run --parallel` | A command *may* execute [group members][group] in [parallel]. |
 | `project.py exec ...` | Execute your action's command in the shell. |

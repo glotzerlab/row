@@ -16,4 +16,4 @@ row submit --action=step1 -n 1 --yes || exit 1
 
 row show status || exit 1
 
-row show directories step1 -n 3 --value="/value"
+row show directories --action step1 -n 3 --value="/value"

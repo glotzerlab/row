@@ -20,23 +20,23 @@ cd ..
 cp ../group-workflow2.toml workflow.toml
 
 # ANCHOR: show_point1
-row show directories process_point --value /type --value /x --value /y
+row show directories --action process_point --value /type --value /x --value /y
 # ANCHOR_END: show_point1
 
 # ANCHOR: show_letter
-row show directories process_letter --value /type --value /letter
+row show directories --action process_letter --value /type --value /letter
 # ANCHOR_END: show_letter
 
 cp ../group-workflow3.toml workflow.toml
 
 # ANCHOR: show_point2
-row show directories process_point --value /type --value /x --value /y
+row show directories --action process_point --value /type --value /x --value /y
 # ANCHOR_END: show_point2
 
 cp ../group-workflow4.toml workflow.toml
 
 # ANCHOR: show_point3
-row show directories process_point --value /type --value /x --value /y
+row show directories --action process_point --value /type --value /x --value /y
 # ANCHOR_END: show_point3
 
 # ANCHOR: submit
@@ -46,5 +46,5 @@ row submit -a process_point
 cp ../group-workflow5.toml workflow.toml
 
 # ANCHOR: show_point4
-row show directories process_point --value /type --value /x --value /y
+row show directories --action process_point --value /type --value /x --value /y
 # ANCHOR_END: show_point4

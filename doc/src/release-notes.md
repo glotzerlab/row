@@ -8,6 +8,7 @@
 * New arguments to `show status` display actions that are in the requested states:
  `--completed`, `--eligible`, `--submitted`, and `--waiting`.
 * `cluster.submit_options` configuration option in `clusters.toml`.
+* `--short` option to `show launchers` and `show directories`.
 
 *Changed:*
 
@@ -18,6 +19,8 @@
 * `clean` now cleans all caches by default.
 * Submit jobs with `--constraint="scratch"` by default on Delta.
 * Submit jobs with `--constraint="nvme"` by default on Frontier.
+* Change `--name` option of `show cluster` to `--short`.
+* `show directories` now accepts an optional `--action` argument
 
 *Fixed:*
 

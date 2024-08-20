@@ -13,9 +13,9 @@ Print the [current cluster configuration](../../clusters/index.md) in TOML forma
 
 Show the configuration of all clusters: both user-defined and built-in.
 
-### `--name`
+### `--short`
 
-Show only the cluster's name.
+Show only the name of the matching cluster(s).
 
 ## Examples
 
