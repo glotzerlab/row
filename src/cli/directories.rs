@@ -256,8 +256,9 @@ pub fn print_all<W: Write>(
     let project = Project::open(options.io_threads, &options.cluster, multi_progress)?;
 
     let all_directories = project.state().list_directories();
-    let query_directories =
+    let mut query_directories =
         cli::parse_directories(args.directories, || Ok(all_directories.clone()))?;
+    query_directories.sort_unstable();
     let all_directories = HashSet::<PathBuf>::from_iter(all_directories);
 
     for directory in &query_directories {

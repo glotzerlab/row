@@ -410,7 +410,7 @@ fn submit() -> Result<(), Box<dyn std::error::Error>> {
 #[parallel]
 fn directories_no_action() -> Result<(), Box<dyn std::error::Error>> {
     let temp = TempDir::new()?;
-    let _ = setup_sample_workflow(&temp, 10);
+    let _ = setup_sample_workflow(&temp, 4);
 
     Command::cargo_bin("row")?
         .args(["show", "directories"])
@@ -421,16 +421,7 @@ fn directories_no_action() -> Result<(), Box<dyn std::error::Error>> {
         .current_dir(temp.path())
         .assert()
         .success()
-        .stdout(predicate::str::is_match("(?m)^dir0 *$")?)
-        .stdout(predicate::str::is_match("(?m)^dir1 *$")?)
-        .stdout(predicate::str::is_match("(?m)^dir2 *$")?)
-        .stdout(predicate::str::is_match("(?m)^dir3 *$")?)
-        .stdout(predicate::str::is_match("(?m)^dir4 *$")?)
-        .stdout(predicate::str::is_match("(?m)^dir5 *$")?)
-        .stdout(predicate::str::is_match("(?m)^dir6 *$")?)
-        .stdout(predicate::str::is_match("(?m)^dir7 *$")?)
-        .stdout(predicate::str::is_match("(?m)^dir8 *$")?)
-        .stdout(predicate::str::is_match("(?m)^dir9 *$")?);
+        .stdout(predicates::str::diff("dir0\ndir1\ndir2\ndir3\n"));
 
     Ok(())
 }
@@ -554,7 +545,7 @@ fn directories_value() -> Result<(), Box<dyn std::error::Error>> {
 #[parallel]
 fn directories_short() -> Result<(), Box<dyn std::error::Error>> {
     let temp = TempDir::new()?;
-    let _ = setup_sample_workflow(&temp, 10);
+    let _ = setup_sample_workflow(&temp, 4);
 
     Command::cargo_bin("row")?
         .args(["show", "directories"])
@@ -567,7 +558,7 @@ fn directories_short() -> Result<(), Box<dyn std::error::Error>> {
         .env("ROW_HOME", "/not/a/path")
         .assert()
         .success()
-        .stdout(predicate::str::starts_with("dir"));
+        .stdout(predicates::str::diff("dir0\ndir1\ndir2\ndir3\n"));
 
     Ok(())
 }
@@ -590,7 +581,8 @@ fn directories_short_no_action() -> Result<(), Box<dyn std::error::Error>> {
         .failure()
         .stderr(predicate::str::contains(
             "following required arguments were not provided",
-        ));
+        ))
+        .stderr(predicate::str::contains("--action"));
 
     Ok(())
 }
@@ -613,6 +605,25 @@ fn show_cluster() -> Result<(), Box<dyn std::error::Error>> {
 
     Ok(())
 }
+#[test]
+#[parallel]
+fn show_cluster_short() -> Result<(), Box<dyn std::error::Error>> {
+    let temp = TempDir::new()?;
+
+    Command::cargo_bin("row")?
+        .args(["show", "cluster"])
+        .args(["--cluster", "none"])
+        .arg("--short")
+        .current_dir(temp.path())
+        .env_remove("ROW_COLOR")
+        .env_remove("CLICOLOR")
+        .env("ROW_HOME", "/not/a/path")
+        .assert()
+        .success()
+        .stdout(predicate::eq("none\n"));
+
+    Ok(())
+}
 
 #[test]
 #[parallel]
@@ -629,6 +640,26 @@ fn show_launchers() -> Result<(), Box<dyn std::error::Error>> {
         .assert()
         .success()
         .stdout(predicate::str::contains(r#"executable = "mpirun""#));
+
+    Ok(())
+}
+#[test]
+#[parallel]
+fn show_launchers_short() -> Result<(), Box<dyn std::error::Error>> {
+    let temp = TempDir::new()?;
+
+    Command::cargo_bin("row")?
+        .args(["show", "launchers"])
+        .args(["--cluster", "none"])
+        .arg("--short")
+        .current_dir(temp.path())
+        .env_remove("ROW_COLOR")
+        .env_remove("CLICOLOR")
+        .env("ROW_HOME", "/not/a/path")
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("mpi"))
+        .stdout(predicate::str::contains("openmp\n"));
 
     Ok(())
 }
