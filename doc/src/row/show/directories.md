@@ -7,7 +7,7 @@ row show directories [OPTIONS] [DIRECTORIES]
 
 `row show directories` lists each selected directory.
 
-When provided an action, `row show directories` also shows each directory's 
+When provided an action, `row show directories` also shows each directory's
 [status](../../guide/concepts/status.md) and scheduler job ID (when submitted) for the
 given action. You can also show elements from the directory's value, accessed by
 [JSON pointer](../../guide/concepts/json-pointers.md). Blank lines separate
