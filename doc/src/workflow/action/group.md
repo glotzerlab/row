@@ -57,8 +57,6 @@ Compare by array:
 condition = ["/array", "==", [1, "string", 14.0]
 ```
 
-
-
 > Note: **Row** compares arrays *lexicographically*.
 
 <div class="warning">
