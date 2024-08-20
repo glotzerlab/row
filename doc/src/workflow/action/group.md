@@ -23,15 +23,18 @@ groups of directories included in a given action.
 ## include
 
 `action.group.include`: **array** of **tables** - Define a set of selectors, *any* of
-which may be true for a directory to be included in this group.
+which may be `true` for a directory to be included in this group.
 
 Each selector is a **table** with only one of the following keys:
 * `condition`: An array of three elements: The *JSON pointer*, *the operator*, and the
   *operand*. The [JSON pointer](../../guide/concepts/json-pointers.md) references a
   specific portion of the directory's value. The operator may be `"<"`, `"<="`,
-  `"=="`, `">="`, or `">"`.
-* `all`: Array of conditions (see above). All conditions must be true for this selector
-  to be true.
+  `"=="`, `">="`, or `">"`. Both operands **must** have the same data type. The element
+  referenced by each JSON pointer must be present in the value of **every** directory.
+* `all`: Array of conditions (see above). All conditions must be `true` for this selector
+  to be `true`. `all` is evaluated with short-circuit logic. When an element in `all`
+  evaluates to `false`, the JSON pointers in the remaining elements are not evaluated
+  and are not required to be present.
 
 For example, select all directories where a value is in the given range:
 ```toml
@@ -54,10 +57,7 @@ Compare by array:
 condition = ["/array", "==", [1, "string", 14.0]
 ```
 
-Both operands **must** have the same data type. The element referenced by JSON pointer
-must be present in the value of **every** directory.
 
-When you omit `include`, **row** includes **all** directories in the workspace.
 
 > Note: **Row** compares arrays *lexicographically*.
 
@@ -65,6 +65,8 @@ When you omit `include`, **row** includes **all** directories in the workspace.
 JSON Objects (also known as maps or dictionaries) are not comparable. You must use
 pointers to specific keys in objects.
 </div>
+
+When you omit `include`, **row** includes **all** directories in the workspace.
 
 ## sort_by
 
@@ -122,7 +124,7 @@ would split into the groups:
 
 When omitted, there is no maximum group size.
 
-When `maximum_size` is set **and** `split_by_sort_key` is `true`, **row** first splits
+When both `maximum_size` **and** `split_by_sort_key` are `true`, **row** first splits
 by the sort key, then splits the resulting groups according to `maximum_size`.
 
 ## submit_whole
