@@ -71,4 +71,4 @@ action parallelizes over directories and therefore takes the same amount of time
 independent of the submission group size. Use `per_directory` when your action loops
 over the directories and therefore the walltime scales with the number of directories.
 
-When omitted, `walltime` defaults to `per_directories = 01:00:00`.
+When omitted, `walltime` defaults to `per_directory = 01:00:00`.

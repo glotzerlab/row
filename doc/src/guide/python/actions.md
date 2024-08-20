@@ -59,7 +59,7 @@ signac jobs, and calls the requested **action** function.
 > Note: This example demonstrates looping over directories in **serial**. However, this
 > structure also gives you the ability to choose **serial** or **[parallel]** execution.
 > Grouping many directories into a single cluster job submission will increase your
-> workflow's throuability.
+> workflow's throughput.
 
 [parallel]: ../concepts/process-parallelism.md
 

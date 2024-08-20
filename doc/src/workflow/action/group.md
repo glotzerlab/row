@@ -128,10 +128,10 @@ by the sort key, then splits the resulting groups according to `maximum_size`.
 ## submit_whole
 
 `action.group.submit_whole`: **boolean** - Set to `true` to require that
-[`row submit`](../../row/submit.md) must always submit *whole* groups. Normally,
-*submit* forms groups from the *eligible* directories (those not already completed and
-not submitted). When `submit_whole` is `true`, *submit* will issue an error if such an
-eligible group is not present in the set of all groups matched by this directory.
+[`row submit`](../../row/submit.md) must always submit *whole* groups. *submit* forms
+groups from the *eligible* directories (those not already completed and not submitted).
+When `submit_whole` is `true`, *submit* will issue an error if the *eligible* group
+is not present in the set of all groups matched by `include`.
 
 For example, set `submit_whole` to `true` when your action computes an average or
 otherwise summarizes the group. This will prevent you from accidentally averaging

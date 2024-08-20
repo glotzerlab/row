@@ -49,7 +49,7 @@ pub struct Arguments {
     #[arg(long, display_order = 0, requires = "action")]
     completed: bool,
 
-    /// Show submitted
+    /// Show submitted directories.
     #[arg(long, display_order = 0, requires = "action")]
     submitted: bool,
 

@@ -13,7 +13,7 @@ on:
   workflow_dispatch:
 
 env:
-  RUST_VERSION: 1.78.0
+  RUST_VERSION: 1.80.0
 
 jobs:
   pre-commit:
@@ -34,7 +34,7 @@ jobs:
         path: |
           ~/.cache/pre-commit/
         key: ${{ runner.os }}-pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
-    - uses: actions/setup-python@82c7e631bb3cdc910f68e0081d67478d79c6982d # v5.1.0
+    - uses: actions/setup-python@39cd14951b08e74b54015e9e001cdefcf80e669f # v5.1.1
       with:
         python-version: "3.12"
     - name: Set up Python environment

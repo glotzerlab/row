@@ -20,7 +20,7 @@ env:
   CARGO_TERM_COLOR: always
   ROW_COLOR: always
   CLICOLOR: 1
-  RUST_LATEST_VERSION: 1.78.0
+  RUST_LATEST_VERSION: 1.80.0
 
 jobs:
   unit_test:
@@ -34,14 +34,14 @@ jobs:
         rust:
           # Oldest supported version of rust
           - 1.77.2
-          - 1.78.0
+          - 1.80.0
         mode:
          - debug
 
         include:
         # Add a release build on linux with the latest version of rust
         - os: ubuntu-22.04
-          rust: 1.78.0
+          rust: 1.80.0
           mode: release
 
     steps:
@@ -96,7 +96,7 @@ jobs:
         ROW_YES: "true"
     # The signac test requires python
     - name: Set up Python
-      uses: actions/setup-python@82c7e631bb3cdc910f68e0081d67478d79c6982d # v5.1.0
+      uses: actions/setup-python@39cd14951b08e74b54015e9e001cdefcf80e669f # v5.1.1
       with:
         python-version: "3.12"
     - name: Set up Python environment

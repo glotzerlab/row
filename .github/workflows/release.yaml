@@ -26,7 +26,7 @@ env:
   name: row
   CARGO_TERM_COLOR: always
   CLICOLOR: 1
-  RUST_VERSION: 1.78.0
+  RUST_VERSION: 1.80.0
 
 jobs:
   source:
@@ -48,10 +48,10 @@ jobs:
     - name: Remove .git
       run: rm -rf "${name}-${ref}/.git" && ls -laR "${name}-${ref}"
 
-    - name: Tar/xz source
-      run: tar -cvJf "${name}-${ref}.tar.xz" "${name}-${ref}"
+    - name: Tar/zstd source
+      run: tar --zstd -cvf "${name}-${ref}.tar.zst" "${name}-${ref}"
 
-    - uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
+    - uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b # v4.3.4
       with:
         name: source
         path: |
@@ -82,7 +82,7 @@ jobs:
         tee "${GITHUB_WORKSPACE}/release-notes.md"
       working-directory: code
 
-    - uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
+    - uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b # v4.3.4
       with:
         name: release-notes
         path: |
@@ -124,11 +124,11 @@ jobs:
     - name: Check output
       run: file "target/${{ matrix.target }}/release/${name}"
     - name: Compress
-      run: cp "target/${{ matrix.target }}/release/${name}" . && tar -cvJf "${name}-${ref}-${{ matrix.target }}.tar.xz" "${name}"
-    - uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
+      run: cp "target/${{ matrix.target }}/release/${name}" . && tar --zstd -cvf "${name}-${ref}-${{ matrix.target }}.tar.zst" "${name}"
+    - uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b # v4.3.4
       with:
         name: ${{ matrix.target }}
-        path: "${{ env.name }}-${{ env.ref }}-${{ matrix.target }}.tar.xz"
+        path: "${{ env.name }}-${{ env.ref }}-${{ matrix.target }}.tar.zst"
 
   publish_github:
     name: Publish [GitHub]
@@ -137,7 +137,7 @@ jobs:
 
     steps:
     - name: Download artifacts
-      uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+      uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
       with:
         merge-multiple: true
 
@@ -145,11 +145,11 @@ jobs:
       run: ls -lR
 
     - name: Create release
-      uses: softprops/action-gh-release@a74c6b72af54cfa997e81df42d94703d6313a2d0 # v2.0.6
+      uses: softprops/action-gh-release@c062e08bd532815e2082a85e87e3ef29c3e6d191 # v2.0.8
       if: startsWith(github.ref, 'refs/tags/')
       with:
         files: |
-          *.xz
+          *.zst
         body_path: release-notes.md
         make_latest: true
       env:
@@ -172,7 +172,7 @@ jobs:
           ~/.cargo/registry/cache/
           ~/.cargo/git/db/
           target/
-        key: ${{ runner.os }}-rust-${{ env.RUST_VERSION }}-cargo-publish-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
+        key: ${{ runner.os }}-rust-${{ env.RUST_VERSION }}-cargo-publish-${{ hashFiles('**/Cargo.lock') }}
     - name: Dry run
       run: cargo publish --all-features --dry-run
     - name: Publish to crates.io

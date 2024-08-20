@@ -70,7 +70,7 @@ pub enum ColorMode {
 pub enum ShowCommands {
     /// Show the current state of the workflow.
     ///
-    /// `row show status` prints a summary of all directories in the workspace.
+    /// `row show status` prints a summary of all actions in the workflow.
     /// The summary includes the number of directories in each status and an
     /// estimate of the remaining cost in either CPU-hours or GPU-hours based
     /// on the number of submitted, eligible, and waiting jobs and the
@@ -81,6 +81,10 @@ pub enum ShowCommands {
     /// * Show the status of the entire workspace:
     ///
     ///   row show status
+    ///
+    /// * Show the status of all actions with eligible directories
+    ///
+    ///   row show status --eligible
     ///
     /// * Show the status of a specific action:
     ///

@@ -115,6 +115,11 @@ impl Scheduler for Slurm {
         let minutes = (total + 59) / 60;
         let _ = writeln!(preamble, "#SBATCH --time={minutes}");
 
+        // Add global cluster submit options first so that users can override them.
+        for option in &self.cluster.submit_options {
+            let _ = writeln!(preamble, "#SBATCH {option}");
+        }
+
         // Use provided submission options
         if let Some(submit_options) = action.submit_options.get(&self.cluster.name) {
             if let Some(ref account) = submit_options.account {
@@ -299,6 +304,7 @@ mod tests {
             identify: IdentificationMethod::Always(false),
             scheduler: SchedulerType::Slurm,
             partition: vec![Partition::default()],
+            submit_options: Vec::new(),
         };
 
         let slurm = Slurm::new(cluster, launchers.by_cluster("cluster"));
@@ -321,6 +327,27 @@ mod tests {
         assert!(!script.contains("#SBATCH --cpus-per-task"));
         assert!(!script.contains("#SBATCH --gpus-per-task"));
         assert!(script.contains("#SBATCH --time=180"));
+    }
+
+    #[test]
+    #[parallel]
+    fn cluster_submit_options() {
+        let (action, directories, mut slurm) = setup();
+        slurm.cluster.submit_options = vec!["--option=value".to_string()];
+
+        let script = slurm
+            .make_script(&action, &directories)
+            .expect("valid script");
+        println!("{script}");
+
+        assert!(script.contains("#SBATCH --job-name=action"));
+        assert!(script.contains("#SBATCH --ntasks=1"));
+        assert!(!script.contains("#SBATCH --account"));
+        assert!(script.contains("#SBATCH --partition=partition"));
+        assert!(!script.contains("#SBATCH --cpus-per-task"));
+        assert!(!script.contains("#SBATCH --gpus-per-task"));
+        assert!(script.contains("#SBATCH --time=180"));
+        assert!(script.contains("#SBATCH --option=value"));
     }
 
     #[test]
@@ -421,6 +448,7 @@ mod tests {
             name: "cluster".into(),
             identify: IdentificationMethod::Always(false),
             scheduler: SchedulerType::Slurm,
+            submit_options: Vec::new(),
             partition: vec![Partition {
                 memory_per_cpu: Some("a".into()),
                 ..Partition::default()
@@ -447,6 +475,7 @@ mod tests {
             name: "cluster".into(),
             identify: IdentificationMethod::Always(false),
             scheduler: SchedulerType::Slurm,
+            submit_options: Vec::new(),
             partition: vec![Partition {
                 memory_per_gpu: Some("b".into()),
                 ..Partition::default()
@@ -475,6 +504,7 @@ mod tests {
             name: "cluster".into(),
             identify: IdentificationMethod::Always(false),
             scheduler: SchedulerType::Slurm,
+            submit_options: Vec::new(),
             partition: vec![Partition {
                 cpus_per_node: Some(10),
                 ..Partition::default()
@@ -503,6 +533,7 @@ mod tests {
             name: "cluster".into(),
             identify: IdentificationMethod::Always(false),
             scheduler: SchedulerType::Slurm,
+            submit_options: Vec::new(),
             partition: vec![Partition {
                 gpus_per_node: Some(5),
                 ..Partition::default()

@@ -46,6 +46,10 @@ pub struct Cluster {
 
     /// The partitions in the cluster's queue.
     pub partition: Vec<Partition>,
+
+    /// Submit options to include in every job submitted to this cluster.
+    #[serde(default)]
+    pub submit_options: Vec<String>,
 }
 
 /// Methods to identify clusters.
@@ -400,30 +404,35 @@ mod tests {
                 identify: IdentificationMethod::Always(false),
                 scheduler: SchedulerType::Bash,
                 partition: Vec::new(),
+                submit_options: Vec::new(),
             },
             Cluster {
                 name: "cluster1".into(),
                 identify: IdentificationMethod::ByEnvironment("_row_select".into(), "a".into()),
                 scheduler: SchedulerType::Bash,
                 partition: Vec::new(),
+                submit_options: Vec::new(),
             },
             Cluster {
                 name: "cluster2".into(),
                 identify: IdentificationMethod::ByEnvironment("_row_select".into(), "b".into()),
                 scheduler: SchedulerType::Bash,
                 partition: Vec::new(),
+                submit_options: Vec::new(),
             },
             Cluster {
                 name: "cluster3".into(),
                 identify: IdentificationMethod::Always(true),
                 scheduler: SchedulerType::Bash,
                 partition: Vec::new(),
+                submit_options: Vec::new(),
             },
             Cluster {
                 name: "cluster4".into(),
                 identify: IdentificationMethod::ByEnvironment("_row_Select".into(), "b".into()),
                 scheduler: SchedulerType::Bash,
                 partition: Vec::new(),
+                submit_options: Vec::new(),
             },
         ];
         let cluster_configuration = Configuration { cluster: clusters };
@@ -591,6 +600,7 @@ mod tests {
             identify: IdentificationMethod::Always(true),
             scheduler: SchedulerType::Bash,
             partition: partitions,
+            submit_options: Vec::new(),
         };
 
         let cpu_resources = Resources {
@@ -728,6 +738,7 @@ name = "b"
         assert_eq!(cluster.name, "a");
         assert_eq!(cluster.identify, IdentificationMethod::Always(true));
         assert_eq!(cluster.scheduler, SchedulerType::Bash);
+        assert!(cluster.submit_options.is_empty());
         assert_eq!(
             cluster.partition,
             vec![Partition {
@@ -748,6 +759,7 @@ name = "b"
 name = "a"
 identify.by_environment = ["b", "c"]
 scheduler = "slurm"
+submit_options = ["option1", "option2"]
 
 [[cluster.partition]]
 name = "d"
@@ -777,6 +789,7 @@ account_suffix = "-gpu"
             IdentificationMethod::ByEnvironment("b".into(), "c".into())
         );
         assert_eq!(cluster.scheduler, SchedulerType::Slurm);
+        assert_eq!(cluster.submit_options, vec!["option1", "option2"]);
         assert_eq!(
             cluster.partition,
             vec![Partition {

@@ -145,7 +145,7 @@ learn how to use **row** to automatically generate job scripts that request **CP
 [`custom` submit options](../../workflow/action/submit-options.md) to request others.
 
 Most **clusters** also have separate **partitions** (requested with
-`--partition=<partition>` for certain resources (e.g. GPU). See your **cluster's**
+`--partition=<partition>` for certain resources). See your **cluster's**
 documentation for details.
 
 ## Next steps
