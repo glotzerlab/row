@@ -211,7 +211,7 @@ impl Project {
                                         Error::JSONPointerNotFound(name.clone(), include.clone())
                                     })?;
 
-                                    if expr::evaluate_json_comparison(comparison, actual, expected)
+                                    if !expr::evaluate_json_comparison(comparison, actual, expected)
                                         .ok_or_else(|| {
                                             Error::CannotCompareInclude(
                                                 actual.clone(),
@@ -220,8 +220,9 @@ impl Project {
                                             )
                                         })?
                                     {
-                                        matches += 1;
+                                        break;
                                     }
+                                    matches += 1;
                                 }
                                 Ok(matches == conditions.len())
                             }

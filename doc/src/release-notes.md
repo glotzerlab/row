@@ -19,6 +19,7 @@
 * `clean` now cleans all caches by default.
 * Submit jobs with `--constraint="scratch"` by default on Delta.
 * Submit jobs with `--constraint="nvme"` by default on Frontier.
+* `group.include.all` now employs short circuit evaluation.
 * Change `--name` option of `show cluster` to `--short`.
 * `show directories` now accepts an optional `--action` argument.
 
