@@ -3,13 +3,14 @@
 ## Installing binaries with conda
 
 **Row** is available on [conda-forge] for the *linux-64*, *linux-aarch64*, *osx-64*,
-*osx-arm64* architectures. Install with:
+*osx-arm64* architectures. Install with [micromamba]:
 
 ```bash
-mamba install row
+micromamba install row
 ```
 
 [conda-forge]: https://conda-forge.org/
+[micromamba]: https://mamba.readthedocs.io/en/latest/user_guide/micromamba.html
 
 ## Installing binaries manually
 
@@ -20,7 +21,7 @@ hardware architecture.
 
 Extract the file:
 ```bash
-tar -xvJf row-*.tar.xz
+tar -xvf row-*.tar.zst
 ```
 
 Place the executable `row` in a directory that is on your `$PATH`.
@@ -37,7 +38,7 @@ Install [Rust]. Then execute:
 cargo install row --locked
 ```
 
-Add `$HOME/.cargo/bin` to your `$PATH`.
+Ensure that `$HOME/.cargo/bin` is on your `$PATH`.
 
 > Note: You can keep your installation up to date with **[cargo-update]**.
 
@@ -56,4 +57,4 @@ Install row:
 cargo install --path row --locked
 ```
 
-Add `$HOME/.cargo/bin` to your `$PATH`.
+Ensure that `$HOME/.cargo/bin` is on your `$PATH`.

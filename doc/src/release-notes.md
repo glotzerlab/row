@@ -1,6 +1,15 @@
 # Release notes
 
-## 0.3.0 (not yet released)
+## 0.3.0 (2024-08-21)
+
+*Highlights:*
+
+**Row** 0.3 adds command line arguments to reduce the output from `show` commands,
+including the `--short` option to most `show` subcommand and status filtering options
+to `show status`. For example, `row show status --eligible` shows only actions that have
+eligible directories and `row show cluster --all --short` lists the names of all the
+available cluster configurations. **Row** 0.3 also makes a number of fixes and changes
+when using `group.include` in a non-trivial manner.
 
 *Added:*
 
