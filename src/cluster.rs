@@ -24,7 +24,7 @@ use crate::Error;
 pub struct Configuration {
     /// The cluster configurations.
     #[serde(default)]
-    pub(crate) cluster: Vec<Cluster>,
+    pub cluster: Vec<Cluster>,
 }
 
 /// Cluster

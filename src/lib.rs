@@ -182,7 +182,7 @@ pub enum Error {
 
     // cluster errors
     #[error(
-        "Cluster '{0}' not found: execute 'row show cluster --all' to see available clusters."
+        "Cluster '{0}' not found: execute 'row show cluster --all --short' to see available clusters."
     )]
     ClusterNameNotFound(String),
 

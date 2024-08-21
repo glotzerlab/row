@@ -15,6 +15,10 @@ pub struct Arguments {
     /// Show all launchers.
     #[arg(long, display_order = 0)]
     all: bool,
+
+    /// Show only launcher names.
+    #[arg(long, display_order = 0, conflicts_with = "all")]
+    short: bool,
 }
 
 /// Show the launchers.
@@ -41,12 +45,18 @@ pub fn launchers<W: Write>(
         let clusters = cluster::Configuration::open()?;
         let cluster = clusters.identify(options.cluster.as_deref())?;
 
-        info!("Launcher configurations for cluster '{}':", cluster.name);
-        write!(
-            output,
-            "{}",
-            &toml::to_string_pretty(&launchers.by_cluster(&cluster.name))?
-        )?;
+        if args.short {
+            for launcher_name in launchers.by_cluster(&cluster.name).keys() {
+                writeln!(output, "{launcher_name}")?;
+            }
+        } else {
+            info!("Launcher configurations for cluster '{}':", cluster.name);
+            write!(
+                output,
+                "{}",
+                &toml::to_string_pretty(&launchers.by_cluster(&cluster.name))?
+            )?;
+        }
     }
 
     Ok(())

@@ -12,12 +12,12 @@ use row::cluster;
 #[derive(Args, Debug)]
 pub struct Arguments {
     /// Show all clusters.
-    #[arg(long, group = "select", display_order = 0)]
+    #[arg(long, display_order = 0)]
     all: bool,
 
-    /// Show only the autodetected cluster's name.
-    #[arg(long, group = "select", display_order = 0)]
-    name: bool,
+    /// Show only the cluster name(s).
+    #[arg(long, display_order = 0)]
+    short: bool,
 }
 
 /// Show the cluster.
@@ -34,13 +34,19 @@ pub fn cluster<W: Write>(
     let clusters = cluster::Configuration::open()?;
 
     if args.all {
-        info!("All cluster configurations:");
-        write!(output, "{}", &toml::to_string_pretty(&clusters)?)?;
+        if args.short {
+            for cluster in clusters.cluster {
+                writeln!(output, "{}", cluster.name)?;
+            }
+        } else {
+            info!("All cluster configurations:");
+            write!(output, "{}", &toml::to_string_pretty(&clusters)?)?;
+        }
     } else {
         let cluster = clusters.identify(options.cluster.as_deref())?;
         info!("Cluster configurations for '{}':", cluster.name);
 
-        if args.name {
+        if args.short {
             writeln!(output, "{}", cluster.name)?;
         } else {
             write!(output, "{}", &toml::to_string_pretty(&cluster)?)?;

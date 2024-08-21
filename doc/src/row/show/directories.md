@@ -2,12 +2,14 @@
 
 Usage:
 ```bash
-row show directories [OPTIONS] <ACTION> [DIRECTORIES]
+row show directories [OPTIONS] [DIRECTORIES]
 ```
 
-`row show directories` lists each selected directory with its
+`row show directories` lists each selected directory.
+
+When provided an action, `row show directories` also shows each directory's
 [status](../../guide/concepts/status.md) and scheduler job ID (when submitted) for the
-given `<ACTION>`. You can also show elements from the directory's value, accessed by
+given action. You can also show elements from the directory's value, accessed by
 [JSON pointer](../../guide/concepts/json-pointers.md). Blank lines separate
 [groups](../../workflow/action/group.md).
 
@@ -22,10 +24,14 @@ the action's [include condition](../../workflow/action/group.md#include)
 
 Pass a single `-` to read the directories from stdin (separated by newlines):
 ```bash
-echo "dir1" | row show directories action -
+echo "dir1" | row show directories [OPTIONS] -
 ```
 
 ## `[OPTIONS]`
+
+### `--action`
+
+Select directories that are included by the provided action.
 
 ### `--completed`
 
@@ -49,6 +55,10 @@ Hide the header in the output.
 
 Do not write blank lines between groups.
 
+### `--short`
+
+Show only the directory names.
+
 ### `--submitted`
 
 Show directories with the *submitted* status.
@@ -67,17 +77,25 @@ Show directories with the *waiting* status.
 
 * Show all the directories for action `one`:
   ```bash
-  row show directories one
+  row show directories --action one
   ```
 * Show the directory value element `/value`:
   ```bash
-  row show directories action --value=/value
+  row show directories --action action --value=/value
   ```
 * Show specific directories:
   ```bash
-  row show directories action directory1 directory2
+  row show directories --action action directory1 directory2
   ```
 * Show eligible directories
   ```bash
-  row show directories action --eligible
+  row show directories --action action --eligible
+  ```
+* Show the names of all directories
+  ```bash
+  row show directories
+  ```
+* Show the names of eligible directories
+  ```bash
+  row show directories --action action --eligible --short
   ```

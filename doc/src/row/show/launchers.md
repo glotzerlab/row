@@ -17,6 +17,10 @@ and the built-in launchers.
 
 Show the launcher configurations for all clusters.
 
+### `--short`
+
+Show only the names of the launchers.
+
 ## Examples
 
 * Show the launchers for the autodetected cluster:
@@ -30,4 +34,8 @@ Show the launcher configurations for all clusters.
 * Show all launchers:
   ```bash
   row show launchers --all
+  ```
+* Show only names of all launchers:
+  ```bash
+  row show launchers --all --short
   ```

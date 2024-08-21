@@ -47,7 +47,7 @@ step2              0         0        4      96  800 GPU-hours
 ```
 
 ```bash
-$ row show directories step1 -n 3 --value="/value"
+$ row show directories --action step1 -n 3 --value="/value"
 Directory Status    Job ID        /value
 dir1      completed                  116
 dir10     completed                  952
