@@ -26,7 +26,7 @@ row submit directory1
 # ANCHOR_END: submit2
 
 # ANCHOR: directories_hello
-row show directories hello
+row show directories --action hello
 # ANCHOR_END: directories_hello
 
 # ANCHOR: submit3

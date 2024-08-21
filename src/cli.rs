@@ -102,32 +102,42 @@ pub enum ShowCommands {
 
     /// List directories in the workspace.
     ///
-    /// `row show directories` lists each selected directory with its status
-    /// and scheduler job ID (when submitted). for the given `<ACTION`>. You
-    /// can also show elements from the directory's value, accessed by JSON
-    /// pointer. Blank lines separate groups.
+    /// `row show directories` lists each selected directory.
     ///
-    /// By default, `row show status` displays directories with any status. Set
-    /// one or more of `--completed`, `--submitted`, `--eligible`, and
-    /// `--waiting` to show specific directories that have specific statuses.
+    /// When provided an action, `row show directories` also shows each
+    /// directory's status and scheduler job ID (when submitted) for the given
+    /// action. You can also show elements from the directory's value, accessed
+    /// by JSON pointer. Blank lines separate groups.
+    ///
+    /// By default, `row show status` displays directories with any status. Set one or more
+    /// of `--completed`, `--submitted`, `--eligible`, and `--waiting` to show specific
+    /// directories that have specific statuses.
     ///
     /// EXAMPLES
     ///
     /// * Show all the directories for action `one`:
     ///
-    ///   row show directories one
+    ///   row show directories --action one
     ///
     /// * Show the directory value element `/value`:
     ///
-    ///   row show directories action --value=/value
+    ///   row show directories --action action --value=/value
     ///
     /// * Show specific directories:
     ///
-    ///   row show directories action directory1 directory2
+    ///   row show directories --action action directory1 directory2
     ///
     /// * Show eligible directories
     ///
-    ///   row show directories action --eligible
+    ///   row show directories --action action --eligible
+    ///
+    /// * Show the names of all directories
+    ///
+    ///   row show directories
+    ///
+    /// * Show the names of eligible directories
+    ///
+    ///   row show directories --action action --eligible --short
     ///
     Directories(directories::Arguments),
 
@@ -173,6 +183,9 @@ pub enum ShowCommands {
     ///
     ///  row show launchers --all
     ///
+    ///* Show only names of all launchers:
+    ///
+    ///  row show launchers --all --short
     Launchers(launchers::Arguments),
 }
 

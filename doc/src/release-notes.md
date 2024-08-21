@@ -8,6 +8,7 @@
 * New arguments to `show status` display actions that are in the requested states:
  `--completed`, `--eligible`, `--submitted`, and `--waiting`.
 * `cluster.submit_options` configuration option in `clusters.toml`.
+* `--short` option to `show launchers` and `show directories`.
 
 *Changed:*
 
@@ -19,10 +20,13 @@
 * Submit jobs with `--constraint="scratch"` by default on Delta.
 * Submit jobs with `--constraint="nvme"` by default on Frontier.
 * `group.include.all` now employs short circuit evaluation.
+* Change `--name` option of `show cluster` to `--short`.
+* `show directories` now accepts an optional `--action` argument.
 
 *Fixed:*
 
 * `submit_whole = true` checks only directories that match `group.include`.
+* Do not print trailing spaces after the final column in tabular output.
 
 ## 0.2.0 (2024-06-18)
 

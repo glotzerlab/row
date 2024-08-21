@@ -132,7 +132,13 @@ impl Table {
     fn write_row<W: Write>(writer: &mut W, row: &[Item], column_width: &[usize]) -> io::Result<()> {
         for (i, item) in row.iter().enumerate() {
             let text = match item.alignment {
-                Alignment::Left => format!("{:<width$}", &item.text, width = column_width[i]),
+                Alignment::Left => {
+                    if i == row.len() - 1 {
+                        item.text.clone()
+                    } else {
+                        format!("{:<width$}", &item.text, width = column_width[i])
+                    }
+                }
                 Alignment::Right => format!("{:>width$}", &item.text, width = column_width[i]),
             };
 
