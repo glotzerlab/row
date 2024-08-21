@@ -20,7 +20,7 @@ pub struct Arguments {
     /// Select directories to summarize (defaults to all). Use 'show directories -' to read from stdin.
     directories: Vec<PathBuf>,
 
-    /// Select the action to scan (defaults to all).
+    /// Select directories that are included by the provided action.
     #[arg(long, short, display_order = 0)]
     action: Option<String>,
 
