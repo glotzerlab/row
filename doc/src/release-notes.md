@@ -20,11 +20,12 @@
 * Submit jobs with `--constraint="scratch"` by default on Delta.
 * Submit jobs with `--constraint="nvme"` by default on Frontier.
 * Change `--name` option of `show cluster` to `--short`.
-* `show directories` now accepts an optional `--action` argument
+* `show directories` now accepts an optional `--action` argument.
 
 *Fixed:*
 
 * `submit_whole = true` checks only directories that match `group.include`.
+* Do not print trailing spaces after the final column in tabular output.
 
 ## 0.2.0 (2024-06-18)
 
