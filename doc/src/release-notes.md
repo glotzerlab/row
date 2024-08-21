@@ -2,7 +2,7 @@
 
 ## 0.3.0 (2024-08-21)
 
-*Highlights*
+*Highlights:*
 
 **Row** 0.3 adds command line arguments to reduce the output from `show` commands,
 including the `--short` option to most `show` subcommand and status filtering options
