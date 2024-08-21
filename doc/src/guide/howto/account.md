@@ -5,9 +5,9 @@ Use the default action to conveniently set the account (or accounts) once in you
 
 ```toml
 [default.action.submit_options.cluster1]
-account "cluster1-account"
+account = "cluster1-account"
 [default.action.submit_options.cluster2]
-account "cluster2-account"
+account = "cluster2-account"
 
 [[action]]
 # Will use the defaults above.
