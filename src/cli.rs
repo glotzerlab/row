@@ -104,11 +104,10 @@ pub enum ShowCommands {
     ///
     /// `row show directories` lists each selected directory.
     ///
-    /// When provided an action, `row show directories` also shows each directory's
-    /// [status](../../guide/concepts/status.md) and scheduler job ID (when submitted) for the
-    /// given action. You can also show elements from the directory's value, accessed by
-    /// [JSON pointer](../../guide/concepts/json-pointers.md). Blank lines separate
-    /// [groups](../../workflow/action/group.md).
+    /// When provided an action, `row show directories` also shows each
+    /// directory's status and scheduler job ID (when submitted) for the given
+    /// action. You can also show elements from the directory's value, accessed
+    /// by JSON pointer. Blank lines separate groups.
     ///
     /// By default, `row show status` displays directories with any status. Set one or more
     /// of `--completed`, `--submitted`, `--eligible`, and `--waiting` to show specific
