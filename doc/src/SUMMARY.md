@@ -58,6 +58,7 @@
 
 - [Release notes](release-notes.md)
 - [Migrating from signac-flow](signac-flow.md)
+- [Logo](logo.md)
 - [For developers](developers/index.md)
   - [Contributing](developers/contributing.md)
   - [Code style](developers/style.md)

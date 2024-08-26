@@ -1,4 +1,4 @@
-# Row
+![Row](row-horizontal.svg)
 
 [![Read the Docs](https://img.shields.io/readthedocs/row/latest.svg)](https://row.readthedocs.io/)
 [![Contributors](https://img.shields.io/github/contributors-anon/glotzerlab/row.svg?style=flat)](https://row.readthedocs.io/en/latest/contributors.html)
