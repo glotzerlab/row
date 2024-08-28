@@ -7,11 +7,6 @@ title = "Row documentation"
 [build]
 create-missing = false
 
-# Uncomment to enable link checking in docs. Normally these checks are only performed in CI.
-# You also need to install https://github.com/Michael-F-Bryan/mdbook-linkcheck.
-# [output.linkcheck]
-# follow-web-links = true
-
 # [output.html] must be the last table so that .readthedocs.yaml can easily add a key to it
 [output.html]
 git-repository-url = "https://github.com/glotzerlab/row"
