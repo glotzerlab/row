@@ -96,11 +96,11 @@ jobs:
         ROW_YES: "true"
     # The signac test requires python
     - name: Set up Python
-      uses: actions/setup-python@39cd14951b08e74b54015e9e001cdefcf80e669f # v5.1.1
+      uses: actions/setup-python@f677139bbe7f9c59b41e40162b753c062f5d49a3 # v5.2.0
       with:
         python-version: "3.12"
     - name: Set up Python environment
-      uses: glotzerlab/workflows/setup-uv@ea2e25d07af862a1c696a932c2bd6b242d142049 # 0.2.0
+      uses: glotzerlab/workflows/setup-uv@ae7e7c6931098a313ef8069ef04b88a55c3a40f6 # 0.3.0
       with:
         lockfile: ".github/workflows/signac-requirements.txt"
     - name: Run signac.sh
@@ -116,7 +116,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
     - name: Set up mdbook
-      uses: glotzerlab/workflows/setup-mdbook@ea2e25d07af862a1c696a932c2bd6b242d142049 # 0.2.0
+      uses: glotzerlab/workflows/setup-mdbook@ae7e7c6931098a313ef8069ef04b88a55c3a40f6 # 0.3.0
     - name: Build documentation
       run: mdbook build doc
       env:
@@ -139,7 +139,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
     - name: Set up cargo-bundle-licenses
-      uses: glotzerlab/workflows/setup-cargo-bundle-licenses@ea2e25d07af862a1c696a932c2bd6b242d142049 # 0.2.0
+      uses: glotzerlab/workflows/setup-cargo-bundle-licenses@ae7e7c6931098a313ef8069ef04b88a55c3a40f6 # 0.3.0
     - name: Check bundled licenses
       run: cargo bundle-licenses --format yaml --output CI.yaml --previous THIRDPARTY.yaml --check-previous
 
