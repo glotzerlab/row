@@ -4152,7 +4152,7 @@ third_party_libraries:
       SOFTWARE.
 
 - package_name: indicatif-log-bridge
-  package_version: 0.2.2
+  package_version: 0.2.3
   repository: https://github.com/djugei/indicatif-log-bridge
   license: MIT
   licenses:
@@ -5268,7 +5268,7 @@ third_party_libraries:
       IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
       DEALINGS IN THE SOFTWARE.
 - package_name: postcard
-  package_version: 1.0.9
+  package_version: 1.0.10
   repository: https://github.com/jamesmunns/postcard
   license: MIT OR Apache-2.0
   licenses:
@@ -6211,7 +6211,7 @@ third_party_libraries:
       ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
       DEALINGS IN THE SOFTWARE.
 - package_name: serde
-  package_version: 1.0.208
+  package_version: 1.0.209
   repository: https://github.com/serde-rs/serde
   license: MIT OR Apache-2.0
   licenses:
@@ -6419,7 +6419,7 @@ third_party_libraries:
 
       END OF TERMS AND CONDITIONS
 - package_name: serde_derive
-  package_version: 1.0.208
+  package_version: 1.0.209
   repository: https://github.com/serde-rs/serde
   license: MIT OR Apache-2.0
   licenses:
@@ -6627,7 +6627,7 @@ third_party_libraries:
 
       END OF TERMS AND CONDITIONS
 - package_name: serde_json
-  package_version: 1.0.125
+  package_version: 1.0.127
   repository: https://github.com/serde-rs/json
   license: MIT OR Apache-2.0
   licenses:
