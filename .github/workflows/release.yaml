@@ -51,7 +51,7 @@ jobs:
     - name: Tar/zstd source
       run: tar --zstd -cvf "${name}-${ref}.tar.zst" "${name}-${ref}"
 
-    - uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b # v4.3.4
+    - uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
       with:
         name: source
         path: |
@@ -82,7 +82,7 @@ jobs:
         tee "${GITHUB_WORKSPACE}/release-notes.md"
       working-directory: code
 
-    - uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b # v4.3.4
+    - uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
       with:
         name: release-notes
         path: |
@@ -125,7 +125,7 @@ jobs:
       run: file "target/${{ matrix.target }}/release/${name}"
     - name: Compress
       run: cp "target/${{ matrix.target }}/release/${name}" . && tar --zstd -cvf "${name}-${ref}-${{ matrix.target }}.tar.zst" "${name}"
-    - uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b # v4.3.4
+    - uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
       with:
         name: ${{ matrix.target }}
         path: "${{ env.name }}-${{ env.ref }}-${{ matrix.target }}.tar.zst"
