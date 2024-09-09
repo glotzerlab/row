@@ -126,7 +126,6 @@ jobs:
       with:
         args: -n
               --exclude https://glotzerlab.engin.umich.edu
-              --exclude https://arc.umich.edu
               --exclude 'https://github.com/glotzerlab/row/edit.*'
               --exclude doi.org
               './**/*.md'

@@ -69,4 +69,4 @@ allows full-node jobs and does not incur extra charges.
 > This is a combination of 2 partitions which decreases queue wait time due to the
 > larger number of nodes that can run your job.
 
-[Great Lakes]: https://arc.umich.edu/greatlakes/
+[Great Lakes]: https://its.umich.edu/advanced-research-computing/high-performance-computing/great-lakes
