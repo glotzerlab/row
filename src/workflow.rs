@@ -416,47 +416,27 @@ impl Resources {
 impl Action {
     /// Get the action's `name`.
     pub fn name(&self) -> &str {
-        if let Some(name) = self.name.as_ref() {
-            name
-        } else {
-            ""
-        }
+        self.name.as_deref().unwrap_or("")
     }
 
     /// Get the action's `command`.
     pub fn command(&self) -> &str {
-        if let Some(command) = self.command.as_ref() {
-            command
-        } else {
-            ""
-        }
+        self.command.as_deref().unwrap_or("")
     }
 
     /// Get the action's `launchers`.
     pub fn launchers(&self) -> &[String] {
-        if let Some(launchers) = self.launchers.as_ref() {
-            launchers
-        } else {
-            &[]
-        }
+        self.launchers.as_deref().unwrap_or(&[])
     }
 
     /// Get the action's `previous_actions`.
     pub fn previous_actions(&self) -> &[String] {
-        if let Some(previous_actions) = self.previous_actions.as_ref() {
-            previous_actions
-        } else {
-            &[]
-        }
+        self.previous_actions.as_deref().unwrap_or(&[])
     }
 
     /// Get the action's products
     pub fn products(&self) -> &[String] {
-        if let Some(products) = self.products.as_ref() {
-            products
-        } else {
-            &[]
-        }
+        self.products.as_deref().unwrap_or(&[])
     }
 
     /// Resolve the action's omitted keys with defaults
@@ -512,20 +492,12 @@ impl Action {
 impl Group {
     /// Get the group's `include`.
     pub fn include(&self) -> &[Selector] {
-        if let Some(include) = self.include.as_ref() {
-            include
-        } else {
-            &[]
-        }
+        self.include.as_deref().unwrap_or(&[])
     }
 
     /// Get the group's `sort_by`.
     pub fn sort_by(&self) -> &[String] {
-        if let Some(sort_by) = self.sort_by.as_ref() {
-            sort_by
-        } else {
-            &[]
-        }
+        self.sort_by.as_deref().unwrap_or(&[])
     }
 
     /// Get the group's `split_by_sort_key`.
