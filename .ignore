@@ -1,2 +1,4 @@
 !/workflow.toml
 !/.ignore
+!/*.yaml
+!/.github

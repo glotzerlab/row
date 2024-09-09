@@ -20,7 +20,7 @@ env:
   CARGO_TERM_COLOR: always
   ROW_COLOR: always
   CLICOLOR: 1
-  RUST_LATEST_VERSION: 1.80.0
+  RUST_LATEST_VERSION: 1.81.0
 
 jobs:
   unit_test:
@@ -34,14 +34,14 @@ jobs:
         rust:
           # Oldest supported version of rust
           - 1.77.2
-          - 1.80.0
+          - 1.81.0
         mode:
          - debug
 
         include:
         # Add a release build on linux with the latest version of rust
         - os: ubuntu-22.04
-          rust: 1.80.0
+          rust: 1.81.0
           mode: release
 
     steps:
