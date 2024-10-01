@@ -46,7 +46,7 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.2.0
     - name: Update rust
       run: rustup install ${{ matrix.rust }} --no-self-update && rustup default ${{ matrix.rust }}
     - name: Check rust installation
@@ -69,7 +69,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
     - name: Checkout
-      uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.2.0
     - name: Update rust
       run: rustup install "$RUST_LATEST_VERSION" --no-self-update && rustup default "$RUST_LATEST_VERSION"
     - name: Check rust installation
@@ -114,7 +114,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
     - name: Checkout
-      uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.2.0
     - name: Set up mdbook
       uses: glotzerlab/workflows/setup-mdbook@ae7e7c6931098a313ef8069ef04b88a55c3a40f6 # 0.3.0
     - name: Build documentation
@@ -137,7 +137,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
     - name: Checkout
-      uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.2.0
     - name: Set up cargo-bundle-licenses
       uses: glotzerlab/workflows/setup-cargo-bundle-licenses@ae7e7c6931098a313ef8069ef04b88a55c3a40f6 # 0.3.0
     - name: Check bundled licenses
