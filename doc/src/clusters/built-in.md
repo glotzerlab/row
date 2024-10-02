@@ -35,7 +35,7 @@ chooses the largest amount of memory available per core by default.
 * `gpuA100x4`
 
 
-{{#include ../guide/howto/account.md:23:25}}
+{{#include ../guide/howto/account.md:delta}}
 
 [Delta] jobs default to a small amount of memory per core. **Row** inserts
 `--mem-per-cpu` or `--mem-per-gpu` to select the maximum amount of memory possible that
