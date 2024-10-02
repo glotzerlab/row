@@ -34,7 +34,8 @@ chooses the largest amount of memory available per core by default.
 * `cpu`
 * `gpuA100x4`
 
-For autoselection, set the `account` key to the prefix of your account (e.g. `xxxx-delta` for an account `xxxx-delta-gpu`). Other partitions may be selected manually.
+
+{{#include ../guide/howto/account.md:23:25}}
 
 [Delta] jobs default to a small amount of memory per core. **Row** inserts
 `--mem-per-cpu` or `--mem-per-gpu` to select the maximum amount of memory possible that
