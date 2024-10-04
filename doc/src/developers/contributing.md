@@ -43,7 +43,7 @@ Git identifies every commit you make with your name and e-mail. [Set your identi
 to correctly identify your work and set it *identically on all systems* and accounts
 where you make commits.
 
-[id]: http://www.git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup
+[id]: https://www.git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup
 
 ## Source code
 
