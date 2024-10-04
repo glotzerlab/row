@@ -1,5 +1,11 @@
 # Release notes
 
+## 0.3.1 (2024-10-04)
+
+*Changed:*
+
+* Improved the documentation.
+
 ## 0.3.0 (2024-08-21)
 
 *Highlights:*
