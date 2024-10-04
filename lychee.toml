@@ -1,0 +1,8 @@
+require_https = true
+exclude = [
+  'https://github.com/glotzerlab/row'
+]
+
+# Many of the OnDemand services report 500 when lychee attempts to connect.
+# Many sites use cloudflare to prevent bot access. These URLs return 403.
+accept = ["200", "429", "500", "403"]
