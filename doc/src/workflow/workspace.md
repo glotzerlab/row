@@ -1,6 +1,6 @@
 # workspace
 
-The `worksapce` table describes the layout of your *workspace*.
+The `workspace` table describes the layout of your *workspace*.
 
 Example:
 ```toml
