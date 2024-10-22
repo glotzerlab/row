@@ -4,6 +4,7 @@
 use log::{debug, error, trace};
 use nix::sys::signal::{self, Signal};
 use nix::unistd::Pid;
+use serde_json::Value;
 use std::collections::{HashMap, HashSet};
 use std::env;
 use std::fmt::Write as _;
@@ -29,6 +30,8 @@ pub(crate) struct BashScriptBuilder<'a> {
     cluster_name: &'a str,
     action: &'a Action,
     directories: &'a [PathBuf],
+    workspace_path: &'a Path,
+    directory_values: &'a HashMap<PathBuf, Value>,
     preamble: &'a str,
     launchers: &'a HashMap<String, Launcher>,
 }
@@ -39,6 +42,8 @@ impl<'a> BashScriptBuilder<'a> {
         cluster_name: &'a str,
         action: &'a Action,
         directories: &'a [PathBuf],
+        workspace_path: &'a Path,
+        directory_values: &'a HashMap<PathBuf, Value>,
         launchers: &'a HashMap<String, Launcher>,
     ) -> Self {
         let walltime_in_minutes = action
@@ -53,6 +58,8 @@ impl<'a> BashScriptBuilder<'a> {
             cluster_name,
             action,
             directories,
+            workspace_path,
+            directory_values,
             preamble: "",
             launchers,
         }
@@ -91,11 +98,15 @@ impl<'a> BashScriptBuilder<'a> {
         let _ = write!(
             result,
             r#"
+export ACTION_WORKSPACE_PATH="{}"
 export ACTION_CLUSTER="{}"
 export ACTION_NAME="{}"
 export ACTION_PROCESSES="{}"
 export ACTION_WALLTIME_IN_MINUTES="{}"
 "#,
+            self.workspace_path
+                .to_str()
+                .ok_or_else(|| Error::NonUTF8DirectoryName(self.workspace_path.into()))?,
             self.cluster_name,
             self.action.name(),
             self.total_processes,
@@ -158,8 +169,10 @@ trap 'printf %s\\n "${{directories[@]}}" | {row_executable} scan --no-progress -
     }
 
     fn execution(&self) -> Result<String, Error> {
-        let contains_directory = self.action.command().contains("{directory}");
-        let contains_directories = self.action.command().contains("{directories}");
+        let command = self.action.command();
+
+        let contains_directory = command.contains("{directory}");
+        let contains_directories = command.contains("{directories}");
         if contains_directory && contains_directories {
             return Err(Error::ActionContainsMultipleTemplates(
                 self.action.name().into(),
@@ -191,7 +204,7 @@ trap 'printf %s\\n "${{directories[@]}}" | {row_executable} scan --no-progress -
         }
 
         if contains_directory {
-            let command = self.action.command().replace("{directory}", "$directory");
+            let command = command.replace("{directory}", "$directory");
             Ok(format!(
                 r#"
 for directory in "${{directories[@]}}"
@@ -201,10 +214,7 @@ done
 "#
             ))
         } else if contains_directories {
-            let command = self
-                .action
-                .command()
-                .replace("{directories}", r#""${directories[@]}""#);
+            let command = command.replace("{directories}", r#""${directories[@]}""#);
             Ok(format!(
                 r#"
 {launcher_prefix}{command} || {{ >&2 echo "[row] Error executing command."; exit 1; }}
@@ -236,8 +246,22 @@ impl Bash {
 pub struct ActiveBashJobs {}
 
 impl Scheduler for Bash {
-    fn make_script(&self, action: &Action, directories: &[PathBuf]) -> Result<String, Error> {
-        BashScriptBuilder::new(&self.cluster.name, action, directories, &self.launchers).build()
+    fn make_script(
+        &self,
+        action: &Action,
+        directories: &[PathBuf],
+        workspace_path: &Path,
+        directory_values: &HashMap<PathBuf, Value>,
+    ) -> Result<String, Error> {
+        BashScriptBuilder::new(
+            &self.cluster.name,
+            action,
+            directories,
+            workspace_path,
+            directory_values,
+            &self.launchers,
+        )
+        .build()
     }
 
     fn submit(
@@ -245,10 +269,12 @@ impl Scheduler for Bash {
         workflow_root: &Path,
         action: &Action,
         directories: &[PathBuf],
+        workspace_path: &Path,
+        directory_values: &HashMap<PathBuf, Value>,
         should_terminate: Arc<AtomicBool>,
     ) -> Result<Option<u32>, Error> {
         debug!("Executing '{}' in bash.", action.name());
-        let script = self.make_script(action, directories)?;
+        let script = self.make_script(action, directories, workspace_path, directory_values)?;
 
         let mut child = Command::new("bash")
             .stdin(Stdio::piped())
@@ -347,9 +373,16 @@ mod tests {
     #[parallel]
     fn header() {
         let (action, directories, launchers) = setup();
-        let script = BashScriptBuilder::new("cluster", &action, &directories, &launchers)
-            .build()
-            .expect("Valid script.");
+        let script = BashScriptBuilder::new(
+            "cluster",
+            &action,
+            &directories,
+            &PathBuf::default(),
+            &HashMap::new(),
+            &launchers,
+        )
+        .build()
+        .expect("Valid script.");
         println!("{script}");
 
         assert!(script.starts_with("#!/bin/bash"));
@@ -359,10 +392,17 @@ mod tests {
     #[parallel]
     fn preamble() {
         let (action, directories, launchers) = setup();
-        let script = BashScriptBuilder::new("cluster", &action, &directories, &launchers)
-            .with_preamble("#preamble")
-            .build()
-            .expect("Valid script.");
+        let script = BashScriptBuilder::new(
+            "cluster",
+            &action,
+            &directories,
+            &PathBuf::default(),
+            &HashMap::new(),
+            &launchers,
+        )
+        .with_preamble("#preamble")
+        .build()
+        .expect("Valid script.");
         println!("{script}");
 
         assert!(script.contains("#preamble\n"));
@@ -372,9 +412,16 @@ mod tests {
     #[parallel]
     fn no_setup() {
         let (action, directories, launchers) = setup();
-        let script = BashScriptBuilder::new("cluster", &action, &directories, &launchers)
-            .build()
-            .expect("Valid script.");
+        let script = BashScriptBuilder::new(
+            "cluster",
+            &action,
+            &directories,
+            &PathBuf::default(),
+            &HashMap::new(),
+            &launchers,
+        )
+        .build()
+        .expect("Valid script.");
         println!("{script}");
 
         assert!(!script.contains("test $? -eq 0 ||"));
@@ -388,16 +435,30 @@ mod tests {
             .submit_options
             .insert("cluster".to_string(), SubmitOptions::default());
 
-        let script = BashScriptBuilder::new("cluster", &action, &directories, &launchers)
-            .build()
-            .expect("Valid script.");
+        let script = BashScriptBuilder::new(
+            "cluster",
+            &action,
+            &directories,
+            &PathBuf::default(),
+            &HashMap::new(),
+            &launchers,
+        )
+        .build()
+        .expect("Valid script.");
         println!("{script}");
         assert!(!script.contains("test $? -eq 0 ||"));
 
         action.submit_options.get_mut("cluster").unwrap().setup = Some("my setup".to_string());
-        let script = BashScriptBuilder::new("cluster", &action, &directories, &launchers)
-            .build()
-            .expect("Valid script.");
+        let script = BashScriptBuilder::new(
+            "cluster",
+            &action,
+            &directories,
+            &PathBuf::default(),
+            &HashMap::new(),
+            &launchers,
+        )
+        .build()
+        .expect("Valid script.");
         println!("{script}");
         assert!(script.contains("my setup"));
         assert!(script.contains("test $? -eq 0 ||"));
@@ -407,9 +468,16 @@ mod tests {
     #[parallel]
     fn execution_directory() {
         let (action, directories, launchers) = setup();
-        let script = BashScriptBuilder::new("cluster", &action, &directories, &launchers)
-            .build()
-            .expect("Valid script.");
+        let script = BashScriptBuilder::new(
+            "cluster",
+            &action,
+            &directories,
+            &PathBuf::default(),
+            &HashMap::new(),
+            &launchers,
+        )
+        .build()
+        .expect("Valid script.");
         println!("{script}");
 
         assert!(script.contains("command $directory"));
@@ -421,9 +489,16 @@ mod tests {
         let (mut action, directories, launchers) = setup();
         action.command = Some("command {directories}".to_string());
 
-        let script = BashScriptBuilder::new("cluster", &action, &directories, &launchers)
-            .build()
-            .expect("Valid script.");
+        let script = BashScriptBuilder::new(
+            "cluster",
+            &action,
+            &directories,
+            &PathBuf::default(),
+            &HashMap::new(),
+            &launchers,
+        )
+        .build()
+        .expect("Valid script.");
         println!("{script}");
 
         assert!(script.contains("command \"${directories[@]}\""));
@@ -437,9 +512,16 @@ mod tests {
         action.launchers = Some(vec!["openmp".into()]);
         action.command = Some("command {directories}".to_string());
 
-        let script = BashScriptBuilder::new("cluster", &action, &directories, &launchers)
-            .build()
-            .expect("Valid script.");
+        let script = BashScriptBuilder::new(
+            "cluster",
+            &action,
+            &directories,
+            &PathBuf::default(),
+            &HashMap::new(),
+            &launchers,
+        )
+        .build()
+        .expect("Valid script.");
         println!("{script}");
 
         assert!(script.contains("OMP_NUM_THREADS=4 command \"${directories[@]}\""));
@@ -452,9 +534,16 @@ mod tests {
         action.launchers = Some(vec!["mpi".into()]);
         action.command = Some("command {directories}".to_string());
 
-        let script = BashScriptBuilder::new("cluster", &action, &directories, &launchers)
-            .build()
-            .expect("Valid script.");
+        let script = BashScriptBuilder::new(
+            "cluster",
+            &action,
+            &directories,
+            &PathBuf::default(),
+            &HashMap::new(),
+            &launchers,
+        )
+        .build()
+        .expect("Valid script.");
         println!("{script}");
 
         assert!(script.contains(
@@ -468,7 +557,15 @@ mod tests {
         let (mut action, directories, launchers) = setup();
         action.command = Some("command {directory} {directories}".to_string());
 
-        let result = BashScriptBuilder::new("cluster", &action, &directories, &launchers).build();
+        let result = BashScriptBuilder::new(
+            "cluster",
+            &action,
+            &directories,
+            &PathBuf::default(),
+            &HashMap::new(),
+            &launchers,
+        )
+        .build();
 
         assert!(matches!(
             result,
@@ -477,7 +574,15 @@ mod tests {
 
         action.command = Some("command".to_string());
 
-        let result = BashScriptBuilder::new("cluster", &action, &directories, &launchers).build();
+        let result = BashScriptBuilder::new(
+            "cluster",
+            &action,
+            &directories,
+            &PathBuf::default(),
+            &HashMap::new(),
+            &launchers,
+        )
+        .build();
 
         assert!(matches!(
             result,
@@ -489,9 +594,16 @@ mod tests {
     #[parallel]
     fn variables() {
         let (action, directories, launchers) = setup();
-        let script = BashScriptBuilder::new("cluster", &action, &directories, &launchers)
-            .build()
-            .expect("Valid script.");
+        let script = BashScriptBuilder::new(
+            "cluster",
+            &action,
+            &directories,
+            &PathBuf::default(),
+            &HashMap::new(),
+            &launchers,
+        )
+        .build()
+        .expect("Valid script.");
 
         println!("{script}");
 
@@ -515,9 +627,16 @@ mod tests {
         action.resources.threads_per_process = None;
         action.resources.gpus_per_process = None;
 
-        let script = BashScriptBuilder::new("cluster", &action, &directories, &launchers)
-            .build()
-            .expect("Valid script.");
+        let script = BashScriptBuilder::new(
+            "cluster",
+            &action,
+            &directories,
+            &PathBuf::default(),
+            &HashMap::new(),
+            &launchers,
+        )
+        .build()
+        .expect("Valid script.");
 
         println!("{script}");
 
@@ -542,7 +661,7 @@ mod tests {
             submit_options: Vec::new(),
         };
         let script = Bash::new(cluster, launchers)
-            .make_script(&action, &directories)
+            .make_script(&action, &directories, &PathBuf::default(), &HashMap::new())
             .expect("Valid script");
         println!("{script}");
 
@@ -556,7 +675,15 @@ mod tests {
         action.launchers = Some(vec![]);
         action.command = Some("command {directories}".to_string());
 
-        let result = BashScriptBuilder::new("cluster", &action, &directories, &launchers).build();
+        let result = BashScriptBuilder::new(
+            "cluster",
+            &action,
+            &directories,
+            &PathBuf::default(),
+            &HashMap::new(),
+            &launchers,
+        )
+        .build();
 
         assert!(matches!(result, Err(Error::NoProcessLauncher(_, _))));
     }
@@ -569,7 +696,15 @@ mod tests {
         action.launchers = Some(vec!["mpi".into(), "mpi".into()]);
         action.command = Some("command {directories}".to_string());
 
-        let result = BashScriptBuilder::new("cluster", &action, &directories, &launchers).build();
+        let result = BashScriptBuilder::new(
+            "cluster",
+            &action,
+            &directories,
+            &PathBuf::default(),
+            &HashMap::new(),
+            &launchers,
+        )
+        .build();
 
         assert!(matches!(result, Err(Error::TooManyProcessLaunchers(_))));
     }
