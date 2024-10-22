@@ -29,7 +29,7 @@ pub trait Scheduler {
     /// Submit a job to the scheduler.
     ///
     /// # Arguments
-    /// * `working_directory`: The working directory the action should be submitted from.
+    /// * `workflow_root`: The working directory the action should be submitted from.
     /// * `action`: The action to submit.
     /// * `directories`: The directories to include in the submission.
     /// * `should_terminate`: Set to true when the user terminates the process.
@@ -49,7 +49,7 @@ pub trait Scheduler {
     ///
     fn submit(
         &self,
-        working_directory: &Path,
+        workflow_root: &Path,
         action: &Action,
         directories: &[PathBuf],
         should_terminate: Arc<AtomicBool>,

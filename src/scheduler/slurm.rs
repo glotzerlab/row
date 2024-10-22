@@ -141,7 +141,7 @@ impl Scheduler for Slurm {
 
     fn submit(
         &self,
-        working_directory: &Path,
+        workflow_root: &Path,
         action: &Action,
         directories: &[PathBuf],
         should_terminate: Arc<AtomicBool>,
@@ -164,7 +164,7 @@ impl Scheduler for Slurm {
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .arg("--parsable")
-            .current_dir(working_directory)
+            .current_dir(workflow_root)
             .spawn()
             .map_err(|e| Error::SpawnProcess("sbatch".into(), e))?;
 

@@ -242,7 +242,7 @@ impl Scheduler for Bash {
 
     fn submit(
         &self,
-        working_directory: &Path,
+        workflow_root: &Path,
         action: &Action,
         directories: &[PathBuf],
         should_terminate: Arc<AtomicBool>,
@@ -252,7 +252,7 @@ impl Scheduler for Bash {
 
         let mut child = Command::new("bash")
             .stdin(Stdio::piped())
-            .current_dir(working_directory)
+            .current_dir(workflow_root)
             .spawn()
             .map_err(|e| Error::SpawnProcess("bash".into(), e))?;
 
