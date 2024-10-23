@@ -170,7 +170,12 @@ pub fn submit<W: Write>(
         info!("Execute without --dry-run to submit the following scripts...");
         for (index, (action, directories)) in action_directories.iter().enumerate() {
             info!("Script {}/{}:", index + 1, action_directories.len());
-            let script = scheduler.make_script(action, directories)?;
+            let script = scheduler.make_script(
+                action,
+                directories,
+                &project.workflow().workspace.path,
+                project.state().values(),
+            )?;
 
             write!(output, "{script}")?;
             output.flush()?;
@@ -264,6 +269,8 @@ pub fn submit<W: Write>(
             &project.workflow().root,
             action,
             directories,
+            &project.workflow().workspace.path,
+            project.state().values(),
             Arc::clone(&should_terminate),
         );
 
