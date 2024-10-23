@@ -2,49 +2,30 @@
 
 ## Overview
 
-This section shows how you can assign a **value** to each directory and use that
-**value** to form **groups** of directories. Each **job** executes an action's command
-on a **group** of directories.
+This section shows how you can use **values** to form **groups** of directories. Each
+**job** executes an action's command on a **group** of directories.
 
-## Directory values
+## Initialize a workspace with values
 
-So far, this tutorial has demonstrated small toy examples. In practice, any workflow
-that you need to execute on a cluster likely has hundreds or thousands of directories -
-each with different parameters. You could try to encode these parameters into the
-directory names, but *please don't* - it quickly becomes unmanageable. Instead, you
-should include a [JSON](https://www.json.org) file in each directory that identifies
-its **value**.
+To demonstrate the capabilities of **groups**, create a workspace with multiple types of
+values. The following script follows the same process used in the previous section:
 
-> Note: For pedagogical reasons, this next code block manually creates directory names
-> and value files. In practice, you will likely find [signac](../python/signac.md) more
-> convenient to work with - it will create the JSON files and directories for you with
-> a cleaner syntax. This tutorial will cover **row** ↔ **signac** interoperation in a
-> later section.
-
-Create a new workflow project and place JSON files in each directory:
 ```bash
 {{#include group.sh:init}}
 ```
-The JSON files must all have the same name. Instruct **row** to read these files
-with the `workspace.value_file` key in `workflow.toml`:
 
-```toml
-{{#include group-workflow1.toml}}
-```
+As mentioned previously, `echo` is used here to create a _minimal_ script that you can
+execute to follow along. For any serious production work you will likely find [signac]
+more convenient to work with.
 
-Once you create a directory with a **value** file, that value **MUST NOT CHANGE**. Think
-of it this way: The results of your computations (the final contents of the directory)
-are a mathematical *function* of the **value**. When you want to know the results for
-another value, *create a new directory with that value!*. **row** assumes this data
-model and [caches](../concepts/cache.md) all value files so that it does not need to
-read thousands of files every time you execute a **row** command.
+[signac]: ../python/signac.md
 
 ## Grouping by value
 
-Now that your workspace directories have **values**, you can use those to form
-**groups**. Every action in your workflow operates on **groups**. Add entries to the
-`action.group.include` array in an action to select which directories to include by
-**value**. To see how this works, replace the contents of `workflow.toml` with:
+You can use **values** those to form **groups** of **directories**. Every action in
+your workflow operates on **groups**. Add entries to the `action.group.include` array
+in an action to select which directories to include by **value**. To see how this works,
+replace the contents of `workflow.toml` with:
 
 ```toml
 {{#include group-workflow2.toml}}
