@@ -1,5 +1,23 @@
 # Release notes
 
+## 0.4.0 (not yet released)
+
+*Highlights:*
+
+*Added:*
+
+* In job scripts, set the environment variable `ACTION_WORKSPACE_PATH` to the _relative_
+  path to the current workspace.
+* `{workspace_path}` template parameter in `action.command` - replaced with the
+  _relative_ path to the current workspace.
+* `{/JSON pointer}` template parameter in `action.command` - replaced with the portion
+  of the directory's value referenced by the given JSON pointer.
+
+*Fixed:*
+
+* All user-provided content (directories, action names, cluster names, and values) are
+  properly escaped in the bash script output.
+
 ## 0.3.1 (2024-10-04)
 
 *Changed:*
