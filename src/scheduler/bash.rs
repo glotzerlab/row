@@ -280,7 +280,6 @@ done
     */
     fn substitute(&self, command: &str, directory: &Path) -> Result<String, Error> {
         let replacement = |caps: &Captures| -> Result<String, Error> {
-            println!("Matching {}", &caps[0]);
             match &caps[0] {
                 "{workspace_path}" => Ok(shell_quote::Bash::quote(
                     self.workspace_path
