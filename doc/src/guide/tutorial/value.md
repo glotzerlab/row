@@ -49,7 +49,7 @@ Now that your workspace directories have **values**, you can pass them to your
 commands using **template parameters**. You have already used one template parameter:
 `{directory}`. Each **template parameter** name is surrounded by curly braces.
 
-[JSON] files store a (possibly nested) key/value mapping. Use a [*JSON pointer*] to 
+[JSON] files store a (possibly nested) key/value mapping. Use a [*JSON pointer*] to
 reference a portion of the directory's value by placing the [*JSON pointer*] between
 curly braces. Add the following section to `workflow.toml` that uses **template
 parameters** in the action's `command`:
