@@ -12,7 +12,7 @@ def action_implementation(job, communicator):
     """Implement the action on a single job."""
     # Your HOOMD-blue simulation goes here. Use the given communicator. For example:
     # cpu = hoomd.device.CPU(communicator=communicator)
-    # simulation = hoomd.Simulation(devices=cpu)
+    # simulation = hoomd.Simulation(device=cpu)
 
 
 def action(*jobs):
