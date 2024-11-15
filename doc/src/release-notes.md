@@ -1,5 +1,11 @@
 # Release notes
 
+## 0.4.0 (not yet released)
+
+*Fixed:*
+
+* Typographical errors in the documentation.
+
 ## 0.3.1 (2024-10-04)
 
 *Changed:*
