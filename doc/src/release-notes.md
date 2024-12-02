@@ -17,6 +17,7 @@
 
 * All user-provided content (directories, action names, cluster names, and values) are
   properly escaped in the bash script output.
+* Typographical errors in the documentation.
 
 ## 0.3.1 (2024-10-04)
 
