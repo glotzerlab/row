@@ -13,25 +13,25 @@ keywords = ["workflow", "slurm", "queue", "hpc", "cluster"]
 categories = ["command-line-utilities", "science"]
 
 [dependencies]
-clap = { version = "4.5.20", features = ["derive", "env"] }
+clap = { version = "4.5.21", features = ["derive", "env"] }
 clap-verbosity-flag = "2.2.2"
 console = "0.15.8"
 env_logger = "0.11.5"
 home = "0.5.9"
 human_format = "1.1.0"
-indicatif = "0.17.8"
+indicatif = "0.17.9"
 indicatif-log-bridge = "0.2.3"
 log = "0.4.22"
 memchr = "2.7.4"
 nix = { version = "0.29.0", features = ["signal"] }
 path-absolutize = "3.1.1"
-postcard = { version = "1.0.10", default-features = false, features = ["use-std"] }
+postcard = { version = "1.1.1", default-features = false, features = ["use-std"] }
 regex = "1.11.0"
-serde = { version = "1.0.214", features = ["derive"] }
-serde_json = "1.0.132"
+serde = { version = "1.0.215", features = ["derive"] }
+serde_json = "1.0.133"
 shell-quote = { version = "0.7.1", default-features = false, features = ["bash"] }
 signal-hook = { version = "0.3.17", default-features = false }
-speedate = "0.14.4"
+speedate = "0.15.0"
 thiserror = "1.0.66"
 toml = "0.8.19"
 uuid = { version = "1.11.0", features = ["v4"] }
@@ -41,4 +41,4 @@ wildmatch = "2.4.0"
 assert_cmd = "2.0.15"
 assert_fs = "1.1.2"
 predicates = { version = "3.1.2", features = ["regex"] }
-serial_test = "3.1.1"
+serial_test = "3.2.0"
