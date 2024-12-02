@@ -94,8 +94,10 @@ impl Scheduler for Slurm {
             let _ = writeln!(preamble, "#SBATCH --gpus-per-task={gpus_per_process}");
 
             if let Some(ref gpus_per_node) = partition.gpus_per_node {
-                let n_nodes = (action.resources.total_gpus(directories.len()) + gpus_per_node - 1)
-                    / gpus_per_node;
+                let n_nodes = action
+                    .resources
+                    .total_gpus(directories.len())
+                    .div_ceil(*gpus_per_node);
                 let _ = writeln!(preamble, "#SBATCH --nodes={n_nodes}");
             }
 
@@ -104,8 +106,10 @@ impl Scheduler for Slurm {
             }
         } else {
             if let Some(ref cpus_per_node) = partition.cpus_per_node {
-                let n_nodes = (action.resources.total_cpus(directories.len()) + cpus_per_node - 1)
-                    / cpus_per_node;
+                let n_nodes = action
+                    .resources
+                    .total_cpus(directories.len())
+                    .div_ceil(*cpus_per_node);
                 let _ = writeln!(preamble, "#SBATCH --nodes={n_nodes}");
             }
 
