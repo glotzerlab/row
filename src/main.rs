@@ -4,6 +4,7 @@
 #![warn(clippy::pedantic)]
 
 use clap::Parser;
+use clap_verbosity_flag::log::LevelFilter;
 use indicatif::{MultiProgress, ProgressDrawTarget};
 use indicatif_log_bridge::LogWrapper;
 use log::{error, info};
@@ -40,13 +41,13 @@ fn main_detail() -> Result<(), Box<dyn Error>> {
     }
 
     let log_level = match options.verbose.log_level_filter() {
-        clap_verbosity_flag::LevelFilter::Off => "off",
-        clap_verbosity_flag::LevelFilter::Error => "error",
-        clap_verbosity_flag::LevelFilter::Warn => "warn",
+        LevelFilter::Off => "off",
+        LevelFilter::Error => "error",
+        LevelFilter::Warn => "warn",
 
-        clap_verbosity_flag::LevelFilter::Info => "info",
-        clap_verbosity_flag::LevelFilter::Debug => "debug",
-        clap_verbosity_flag::LevelFilter::Trace => "trace",
+        LevelFilter::Info => "info",
+        LevelFilter::Debug => "debug",
+        LevelFilter::Trace => "trace",
     };
 
     let multi_progress = if options.global.no_progress {
