@@ -1542,7 +1542,7 @@ third_party_libraries:
          limitations under the License.
 
 - package_name: clap-verbosity-flag
-  package_version: 2.2.2
+  package_version: 3.0.1
   repository: https://github.com/clap-rs/clap-verbosity-flag
   license: MIT OR Apache-2.0
   licenses:
