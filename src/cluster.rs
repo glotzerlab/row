@@ -267,7 +267,7 @@ impl Cluster {
             self.partition
                 .iter()
                 .find(|p| p.matches(resources, n_directories, &mut reason))
-                .ok_or_else(|| Error::PartitionNotFound(reason))?
+                .ok_or(Error::PartitionNotFound(reason))?
         };
 
         Ok(partition)
