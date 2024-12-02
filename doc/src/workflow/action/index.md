@@ -65,6 +65,27 @@ or chain the steps with `&&`. For example:
 command = "echo Message && python action.py {directory}"
 ```
 
+### Template parameters
+
+`action.command` will expand any template parameter contained within curly braces:
+`{template_parameter}`.
+
+* `{directory}` and `{directories}` are described above.
+* `{workspace_path}` will be replaced with the _relative_ path from the project root
+  (the directory containing `workflow.toml`) to the currently selected workspace.
+* `{/JSON pointer}` will be replaced by a portion of the directory's value referenced
+  by the given [JSON pointer]. Must be used with `{directory}`.
+* `{}` will be replaced by the entire directory value formatted in JSON as a single
+  command line argument. Must be used with `{directory}`
+* All other template parameters are invalid.
+
+For example:
+```toml
+command = "application -p {/pressure} -s {/seed} -o {workspace_path}/{directory}/out"
+```
+
+[JSON pointer]: ../../guide/concepts/json-pointers.md
+
 ## launchers
 
 `action.launchers`: **array** of **strings** - The launchers to apply when executing a

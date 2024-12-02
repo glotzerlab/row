@@ -2,6 +2,7 @@
 // Part of row, released under the BSD 3-Clause License.
 
 use log::{debug, error, trace};
+use serde_json::Value;
 use std::collections::{HashMap, HashSet};
 use std::fmt::Write as _;
 use std::io::Write;
@@ -41,7 +42,13 @@ pub struct ActiveSlurmJobs {
 }
 
 impl Scheduler for Slurm {
-    fn make_script(&self, action: &Action, directories: &[PathBuf]) -> Result<String, Error> {
+    fn make_script(
+        &self,
+        action: &Action,
+        directories: &[PathBuf],
+        workspace_path: &Path,
+        directory_values: &HashMap<PathBuf, Value>,
+    ) -> Result<String, Error> {
         let mut preamble = String::with_capacity(512);
         let mut user_partition = &None;
 
@@ -134,16 +141,25 @@ impl Scheduler for Slurm {
             }
         }
 
-        BashScriptBuilder::new(&self.cluster.name, action, directories, &self.launchers)
-            .with_preamble(&preamble)
-            .build()
+        BashScriptBuilder::new(
+            &self.cluster.name,
+            action,
+            directories,
+            workspace_path,
+            directory_values,
+            &self.launchers,
+        )
+        .with_preamble(&preamble)
+        .build()
     }
 
     fn submit(
         &self,
-        working_directory: &Path,
+        workflow_root: &Path,
         action: &Action,
         directories: &[PathBuf],
+        workspace_path: &Path,
+        directory_values: &HashMap<PathBuf, Value>,
         should_terminate: Arc<AtomicBool>,
     ) -> Result<Option<u32>, Error> {
         debug!("Submtitting '{}' with sbatch.", action.name());
@@ -158,13 +174,13 @@ impl Scheduler for Slurm {
             return Err(Error::Interrupted);
         }
 
-        let script = self.make_script(action, directories)?;
+        let script = self.make_script(action, directories, workspace_path, directory_values)?;
 
         let mut child = Command::new("sbatch")
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .arg("--parsable")
-            .current_dir(working_directory)
+            .current_dir(workflow_root)
             .spawn()
             .map_err(|e| Error::SpawnProcess("sbatch".into(), e))?;
 
@@ -316,7 +332,7 @@ mod tests {
     fn default() {
         let (action, directories, slurm) = setup();
         let script = slurm
-            .make_script(&action, &directories)
+            .make_script(&action, &directories, &PathBuf::default(), &HashMap::new())
             .expect("valid script");
         println!("{script}");
 
@@ -336,7 +352,7 @@ mod tests {
         slurm.cluster.submit_options = vec!["--option=value".to_string()];
 
         let script = slurm
-            .make_script(&action, &directories)
+            .make_script(&action, &directories, &PathBuf::default(), &HashMap::new())
             .expect("valid script");
         println!("{script}");
 
@@ -358,7 +374,7 @@ mod tests {
         action.resources.processes = Some(Processes::PerDirectory(3));
 
         let script = slurm
-            .make_script(&action, &directories)
+            .make_script(&action, &directories, &PathBuf::default(), &HashMap::new())
             .expect("valid script");
         println!("{script}");
 
@@ -379,7 +395,7 @@ mod tests {
         );
 
         let script = slurm
-            .make_script(&action, &directories)
+            .make_script(&action, &directories, &PathBuf::default(), &HashMap::new())
             .expect("valid script");
         println!("{script}");
 
@@ -400,7 +416,7 @@ mod tests {
         );
 
         let script = slurm
-            .make_script(&action, &directories)
+            .make_script(&action, &directories, &PathBuf::default(), &HashMap::new())
             .expect("valid script");
         println!("{script}");
 
@@ -416,7 +432,7 @@ mod tests {
         action.resources.threads_per_process = Some(5);
 
         let script = slurm
-            .make_script(&action, &directories)
+            .make_script(&action, &directories, &PathBuf::default(), &HashMap::new())
             .expect("valid script");
         println!("{script}");
 
@@ -431,7 +447,7 @@ mod tests {
         action.resources.gpus_per_process = Some(5);
 
         let script = slurm
-            .make_script(&action, &directories)
+            .make_script(&action, &directories, &PathBuf::default(), &HashMap::new())
             .expect("valid script");
         println!("{script}");
 
@@ -458,7 +474,7 @@ mod tests {
         let slurm = Slurm::new(cluster, launchers.by_cluster("cluster"));
 
         let script = slurm
-            .make_script(&action, &directories)
+            .make_script(&action, &directories, &PathBuf::default(), &HashMap::new())
             .expect("valid script");
         println!("{script}");
 
@@ -487,7 +503,7 @@ mod tests {
         action.resources.gpus_per_process = Some(1);
 
         let script = slurm
-            .make_script(&action, &directories)
+            .make_script(&action, &directories, &PathBuf::default(), &HashMap::new())
             .expect("valid script");
         println!("{script}");
 
@@ -516,7 +532,7 @@ mod tests {
         action.resources.processes = Some(Processes::PerSubmission(81));
 
         let script = slurm
-            .make_script(&action, &directories)
+            .make_script(&action, &directories, &PathBuf::default(), &HashMap::new())
             .expect("valid script");
         println!("{script}");
 
@@ -546,7 +562,7 @@ mod tests {
         action.resources.gpus_per_process = Some(1);
 
         let script = slurm
-            .make_script(&action, &directories)
+            .make_script(&action, &directories, &PathBuf::default(), &HashMap::new())
             .expect("valid script");
         println!("{script}");
 

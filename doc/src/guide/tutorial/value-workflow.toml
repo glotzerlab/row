@@ -1,0 +1,10 @@
+# ANCHOR: workspace
+[workspace]
+value_file = "value.json"
+# ANCHOR_END: workspace
+
+# ANCHOR: action
+[[action]]
+name = "show"
+command = 'echo {directory}, seed: {/seed}, pressure: {/pressure}'
+# ANCHOR_END: action

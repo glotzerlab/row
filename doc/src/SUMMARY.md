@@ -8,6 +8,7 @@
 - [Tutorial](guide/tutorial/index.md)
   - [Hello, workflow!](guide/tutorial/hello.md)
   - [Managing multiple actions](guide/tutorial/multiple.md)
+  - [Assigning values to directories](guide/tutorial/value.md)
   - [Grouping directories](guide/tutorial/group.md)
   - [Submitting jobs manually](guide/tutorial/scheduler.md)
   - [Requesting resources with row](guide/tutorial/resources.md)

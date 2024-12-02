@@ -6,6 +6,7 @@
 
 | Environment variable | Value |
 |----------------------|-------|
+| `ACTION_WORKSPACE_PATH` | Path to the workspace, relative to the path containing `workflow.toml`. |
 | `ACTION_CLUSTER` | Name of the cluster the action is executing on. |
 | `ACTION_NAME` | The name of the action that is executing. |
 | `ACTION_PROCESSES` | The total number of processes that this action uses. |

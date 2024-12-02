@@ -293,5 +293,3 @@ status may take a long time, so it should display a progress bar.
 - **whole group**: A **submission group** that is identical to the **group** found
   without applying the additional submission filters.
 - **workspace**: The location on the file system that contains **directories**.
-
-# TODO: logo

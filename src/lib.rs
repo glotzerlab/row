@@ -148,6 +148,14 @@ pub enum Error {
     #[error("Duplicate actions '{0}' must have the same `previous_actions`.")]
     DuplicateActionsDifferentPreviousActions(String),
 
+    #[error(
+        r"Action '{0}' must use {{directory}} instead of {{directories}} with {{\JSON pointer}}."
+    )]
+    DirectoriesUsedWithJSONPointer(String),
+
+    #[error("Unable to parse template '{1}' for action '{0}'.")]
+    InvalidTemplate(String, String),
+
     // submission errors
     #[error("Error encountered while executing action '{0}': {1}.")]
     ExecuteAction(String, String),
