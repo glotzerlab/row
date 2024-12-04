@@ -12,6 +12,7 @@ pub mod status;
 pub mod submit;
 
 use clap::{Args, Parser, Subcommand, ValueEnum};
+use clap_complete::ArgValueCandidates;
 use clap_verbosity_flag::{Verbosity, WarnLevel};
 use log::trace;
 use std::io;
@@ -51,7 +52,8 @@ pub struct GlobalOptions {
     /// Check the job submission status on the given cluster.
     ///
     /// Autodetected by default.
-    #[arg(long, global = true, env = "ROW_CLUSTER", display_order = 2)]
+    #[arg(long, global = true, env = "ROW_CLUSTER", display_order = 2,
+        add=ArgValueCandidates::new(autocomplete::get_cluster_candidates))]
     cluster: Option<String>,
 }
 
