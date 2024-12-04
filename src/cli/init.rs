@@ -2,6 +2,7 @@
 // Part of row, released under the BSD 3-Clause License.
 
 use clap::Args;
+use clap_complete::ValueHint;
 use log::{debug, info, trace, warn};
 use path_absolutize::Absolutize;
 use std::fmt::Write as _;
@@ -23,7 +24,7 @@ pub struct Arguments {
     workspace: String,
 
     /// Directory to initialize.
-    #[arg(display_order = 0)]
+    #[arg(display_order = 0, value_hint=ValueHint::DirPath)]
     directory: PathBuf,
 }
 
