@@ -4,6 +4,18 @@
 
 *Highlights:*
 
+**Row** 0.4 expands the `command` templating functionality to improve support for
+command line applications as actions. This removes the need for _shim_ scripts that
+access the workspace path and/or directory values before invoking a subprocess.
+`{workspace_path}` expands to the current project's workspace path and `{/JSON pointer}`
+expands to the value of the given JSON pointer for the directory acted on.
+
+**Row** 0.4 also adds _shell autocompletion_. To enable, execute the appropriate
+command in your shell's profile:
+* Bash: `source <(COMPLETE=bash your_program)`
+* Fish: `source (COMPLETE=fish your_program | psub)`
+* Zsh: `source <(COMPLETE=zsh your_program)`
+
 *Added:*
 
 * In job scripts, set the environment variable `ACTION_WORKSPACE_PATH` to the _relative_
@@ -12,6 +24,7 @@
   _relative_ path to the current workspace.
 * `{/JSON pointer}` template parameter in `action.command` - replaced with the portion
   of the directory's value referenced by the given JSON pointer.
+* Shell autocomplete.
 
 *Fixed:*
 
