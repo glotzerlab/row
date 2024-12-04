@@ -23,11 +23,12 @@ use row::MultiProgressContainer;
 use ui::MultiProgressWriter;
 
 fn main_detail() -> Result<(), Box<dyn Error>> {
+    let instant = Instant::now();
+
     // Autocomplete
     CompleteEnv::with_factory(Options::command).complete();
 
     // Normal execution
-    let instant = Instant::now();
     let options = Options::parse();
 
     let log_style;
