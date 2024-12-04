@@ -30,6 +30,7 @@ pub struct Arguments {
     no_header: bool,
 
     /// Select directories to summarize (defaults to all). Use 'status -' to read from stdin.
+    #[arg(add=ArgValueCandidates::new(autocomplete::get_directory_candidates))]
     directories: Vec<PathBuf>,
 
     /// Show actions with completed directories.

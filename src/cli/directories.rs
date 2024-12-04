@@ -19,6 +19,7 @@ use row::MultiProgressContainer;
 #[allow(clippy::struct_excessive_bools)]
 pub struct Arguments {
     /// Select directories to summarize (defaults to all). Use 'show directories -' to read from stdin.
+    #[arg(add=ArgValueCandidates::new(autocomplete::get_directory_candidates))]
     directories: Vec<PathBuf>,
 
     /// Select directories that are included by the provided action.

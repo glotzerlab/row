@@ -24,6 +24,7 @@ pub struct Arguments {
     action: Option<String>,
 
     /// Select directories to scan (defaults to all). Use 'scan -' to read from stdin.
+    #[arg(add=ArgValueCandidates::new(autocomplete::get_directory_candidates))]
     directories: Vec<PathBuf>,
 }
 

@@ -32,6 +32,7 @@ pub struct Arguments {
     action: String,
 
     /// Select directories to summarize (defaults to all).
+    #[arg(add=ArgValueCandidates::new(autocomplete::get_directory_candidates))]
     directories: Vec<PathBuf>,
 
     /// Skip confirmation check.
