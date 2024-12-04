@@ -1,6 +1,7 @@
 // Copyright (c) 2024 The Regents of the University of Michigan.
 // Part of row, released under the BSD 3-Clause License.
 
+pub mod autocomplete;
 pub mod clean;
 pub mod cluster;
 pub mod directories;

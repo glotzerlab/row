@@ -2,6 +2,7 @@
 // Part of row, released under the BSD 3-Clause License.
 
 use clap::Args;
+use clap_complete::ArgValueCandidates;
 use console::Style;
 use indicatif::HumanCount;
 use log::{debug, trace, warn};
@@ -10,7 +11,7 @@ use std::io::Write;
 use std::path::PathBuf;
 use wildmatch::WildMatch;
 
-use crate::cli::{self, GlobalOptions};
+use crate::cli::{self, autocomplete, GlobalOptions};
 use crate::ui::{Alignment, Item, Row, Table};
 use row::project::{Project, Status};
 use row::workflow::ResourceCost;
@@ -20,7 +21,8 @@ use row::MultiProgressContainer;
 #[derive(Args, Debug)]
 pub struct Arguments {
     /// Select the actions to summarize with a wildcard pattern.
-    #[arg(short, long, value_name = "pattern", default_value_t=String::from("*"), display_order=0)]
+    #[arg(short, long, value_name = "pattern", default_value_t=String::from("*"), display_order=0,
+        add=ArgValueCandidates::new(autocomplete::get_action_candidates))]
     action: String,
 
     /// Hide the table header.

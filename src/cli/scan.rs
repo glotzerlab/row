@@ -2,6 +2,7 @@
 // Part of row, released under the BSD 3-Clause License.
 
 use clap::Args;
+use clap_complete::ArgValueCandidates;
 use log::{debug, info, trace, warn};
 use postcard;
 use std::fs::{self, File};
@@ -9,7 +10,7 @@ use std::io::prelude::*;
 use std::path::PathBuf;
 use uuid::Uuid;
 
-use crate::cli::{self, GlobalOptions};
+use crate::cli::{self, autocomplete, GlobalOptions};
 use row::workflow::Workflow;
 use row::{
     workspace, Error, MultiProgressContainer, COMPLETED_DIRECTORY_NAME, DATA_DIRECTORY_NAME,
@@ -18,7 +19,8 @@ use row::{
 #[derive(Args, Debug)]
 pub struct Arguments {
     /// Select the action to scan (defaults to all).
-    #[arg(short, long, display_order = 0)]
+    #[arg(short, long, display_order = 0,
+        add=ArgValueCandidates::new(autocomplete::get_action_candidates))]
     action: Option<String>,
 
     /// Select directories to scan (defaults to all). Use 'scan -' to read from stdin.

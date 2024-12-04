@@ -24,8 +24,7 @@ use ui::MultiProgressWriter;
 
 fn main_detail() -> Result<(), Box<dyn Error>> {
     // Autocomplete
-    CompleteEnv::with_factory(Options::command)
-        .complete();
+    CompleteEnv::with_factory(Options::command).complete();
 
     // Normal execution
     let instant = Instant::now();
