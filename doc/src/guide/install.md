@@ -58,3 +58,22 @@ cargo install --path row --locked
 ```
 
 Ensure that `$HOME/.cargo/bin` is on your `$PATH`.
+
+## Configuring shell autocompletion
+
+Execute the appropriate command in your shell's profile:
+* Bash:
+   ```shell
+   source <(COMPLETE=bash your_program)
+   ```
+* Fish:
+    ```shell
+    source (COMPLETE=fish your_program | psub)
+    ```
+* Zsh:
+    ```shell
+    source <(COMPLETE=zsh your_program)
+    ```
+For additional shell configurations, see [clap-complete's documentation].
+
+[clap-complete's documentation]: https://docs.rs/clap_complete/latest/clap_complete/env/index.html
