@@ -13,7 +13,7 @@ or directory values before invoking a subprocess. `{workspace_path}` expands to 
 current project's workspace path and `{/JSON pointer}` expands to the value of the given
 JSON pointer for the directory acted on.
 
-_Shell autocompletion_ allows users to autocomplete all parameter names and 
+_Shell autocompletion_ allows users to autocomplete all parameter names and
 workspace dependent values for `cluster`, `action`, and `directories`. To enable,
 execute the appropriate command in your shell's profile:
 * Bash: `source <(COMPLETE=bash row)`
