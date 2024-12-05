@@ -15,7 +15,7 @@ def action_implementation(job):
 
 def action(*jobs):
     """Process any number of jobs in parallel with the multiprocessing package."""
-    processes = os.environ.get('ACTION_THREADS_PER_PROCESS', multiprocessing.cpu_count())
+    processes = int(os.environ.get('ACTION_THREADS_PER_PROCESS', multiprocessing.cpu_count()))
     if hasattr(os, 'sched_getaffinity'):
         processes = len(os.sched_getaffinity(0))
 
