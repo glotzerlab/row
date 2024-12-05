@@ -894,3 +894,25 @@ fn init() -> Result<(), Box<dyn std::error::Error>> {
 
     Ok(())
 }
+
+#[test]
+#[parallel]
+fn show_jobs() -> Result<(), Box<dyn std::error::Error>> {
+    let temp = TempDir::new()?;
+    let _ = setup_sample_workflow(&temp, 4);
+
+    Command::cargo_bin("row")?
+        .args(["show", "jobs"])
+        .args(["--cluster", "none"])
+        .env_remove("ROW_COLOR")
+        .env_remove("CLICOLOR")
+        .env("ROW_HOME", "/not/a/path")
+        .current_dir(temp.path())
+        .assert()
+        .success();
+
+    // It is not possible to automatically check the output of show jobs. This unit test
+    // must run on systems that do not have SLURM or where developers have no SLURM account.
+
+    Ok(())
+}
