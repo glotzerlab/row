@@ -7,3 +7,4 @@ The following people have contributed to the development of **row**:
 * Joseph Burkhart, University of Michigan
 * Kate Jensen, University of Michigan
 * Tim Moore, University of Michigan
+* Corwin Kerr, University of Michigan
