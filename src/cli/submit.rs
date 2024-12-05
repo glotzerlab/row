@@ -2,6 +2,7 @@
 // Part of row, released under the BSD 3-Clause License.
 
 use clap::Args;
+use clap_complete::ArgValueCandidates;
 use console::style;
 use indicatif::HumanCount;
 use log::{debug, info, trace, warn};
@@ -17,7 +18,7 @@ use std::sync::Arc;
 use std::time::Instant;
 use wildmatch::WildMatch;
 
-use crate::cli::GlobalOptions;
+use crate::cli::{autocomplete, GlobalOptions};
 use row::format::HumanDuration;
 use row::project::Project;
 use row::workflow::{Action, ResourceCost};
@@ -26,10 +27,12 @@ use row::MultiProgressContainer;
 #[derive(Args, Debug)]
 pub struct Arguments {
     /// Select the actions to summarize with a wildcard pattern.
-    #[arg(short, long, value_name = "pattern", default_value_t=String::from("*"), display_order=0)]
+    #[arg(short, long, value_name = "pattern", default_value_t=String::from("*"), display_order=0,
+        add=ArgValueCandidates::new(autocomplete::get_action_candidates))]
     action: String,
 
     /// Select directories to summarize (defaults to all).
+    #[arg(add=ArgValueCandidates::new(autocomplete::get_directory_candidates))]
     directories: Vec<PathBuf>,
 
     /// Skip confirmation check.

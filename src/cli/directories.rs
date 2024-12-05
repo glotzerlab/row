@@ -2,6 +2,7 @@
 // Part of row, released under the BSD 3-Clause License.
 
 use clap::Args;
+use clap_complete::ArgValueCandidates;
 use console::Style;
 use log::{debug, warn};
 use std::collections::HashSet;
@@ -9,7 +10,7 @@ use std::error::Error;
 use std::io::Write;
 use std::path::PathBuf;
 
-use crate::cli::{self, GlobalOptions};
+use crate::cli::{self, autocomplete, GlobalOptions};
 use crate::ui::{Alignment, Item, Row, Table};
 use row::project::Project;
 use row::MultiProgressContainer;
@@ -18,10 +19,12 @@ use row::MultiProgressContainer;
 #[allow(clippy::struct_excessive_bools)]
 pub struct Arguments {
     /// Select directories to summarize (defaults to all). Use 'show directories -' to read from stdin.
+    #[arg(add=ArgValueCandidates::new(autocomplete::get_directory_candidates))]
     directories: Vec<PathBuf>,
 
     /// Select directories that are included by the provided action.
-    #[arg(long, short, display_order = 0)]
+    #[arg(long, short, display_order = 0,
+        add=ArgValueCandidates::new(autocomplete::get_action_candidates))]
     action: Option<String>,
 
     /// Hide the table header.

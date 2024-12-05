@@ -3,7 +3,8 @@
 
 #![warn(clippy::pedantic)]
 
-use clap::Parser;
+use clap::{CommandFactory, Parser};
+use clap_complete::env::CompleteEnv;
 use clap_verbosity_flag::log::LevelFilter;
 use indicatif::{MultiProgress, ProgressDrawTarget};
 use indicatif_log_bridge::LogWrapper;
@@ -23,6 +24,11 @@ use ui::MultiProgressWriter;
 
 fn main_detail() -> Result<(), Box<dyn Error>> {
     let instant = Instant::now();
+
+    // Autocomplete
+    CompleteEnv::with_factory(Options::command).complete();
+
+    // Normal execution
     let options = Options::parse();
 
     let log_style;
