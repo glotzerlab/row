@@ -16,9 +16,9 @@ JSON pointer for the directory acted on.
 _Shell autocompletion_ allows users to autocomplete all parameter names and 
 workspace dependent values for `cluster`, `action`, and `directories`. To enable,
 execute the appropriate command in your shell's profile:
-* Bash: `source <(COMPLETE=bash your_program)`
-* Fish: `source (COMPLETE=fish your_program | psub)`
-* Zsh: `source <(COMPLETE=zsh your_program)`
+* Bash: `source <(COMPLETE=bash row)`
+* Fish: `source (COMPLETE=fish row | psub)`
+* Zsh: `source <(COMPLETE=zsh row)`
 
 `show jobs` prints a table summarizing all currently submitted jobs that match given
 action and directory criteria.
@@ -39,6 +39,8 @@ action and directory criteria.
 * All user-provided content (directories, action names, cluster names, and values) are
   properly escaped in the bash script output.
 * Typographical errors in the documentation.
+* The documentation now builds correctly with mdbook 0.4.43.
+* Example code converts environment variables to ints where needed.
 
 ## 0.3.1 (2024-10-04)
 
