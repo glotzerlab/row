@@ -69,10 +69,10 @@ pub struct Arguments {
     short: bool,
 }
 
-/// Show directories that match an action.
-///
-/// Print a human-readable list of directories, their status, job ID, and value(s).
-///
+/** Show directories that match an action.
+
+Print a human-readable list of directories, their status, job ID, and value(s).
+*/
 pub fn directories<W: Write>(
     options: &GlobalOptions,
     args: Arguments,

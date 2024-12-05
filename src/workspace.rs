@@ -16,11 +16,11 @@ use std::time::Duration;
 use crate::workflow::Workflow;
 use crate::{progress_styles, Error, MultiProgressContainer, MIN_PROGRESS_BAR_SIZE};
 
-/// List all directories in the workspace as found on the filesystem.
-///
-/// # Errors
-/// Returns `Err<row::Error>` when the workspace directory cannot be accessed.
-///
+/** List all directories in the workspace as found on the filesystem.
+
+# Errors
+Returns `Err<row::Error>` when the workspace directory cannot be accessed.
+*/
 pub fn list_directories(
     workflow: &Workflow,
     multi_progress: &mut MultiProgressContainer,
@@ -59,10 +59,10 @@ pub fn list_directories(
     Ok(directories)
 }
 
-/// Directories that have completed actions.
-///
-/// Call `get()` to wait for all pending threads to complete and return the result.
-///
+/** Directories that have completed actions.
+
+Call `get()` to wait for all pending threads to complete and return the result.
+*/
 pub struct CompletedDirectories {
     /// Threads scanning the directories.
     threads: Vec<JoinHandle<Result<(), Error>>>,
@@ -74,20 +74,20 @@ pub struct CompletedDirectories {
     progress: ProgressBar,
 }
 
-/// Find directories that have completed actions.
-///
-/// `find_completed_directories` spawns threads to scan the workspace and then
-/// returns immediately. Calling `get` on the result will wait for the threads
-/// to complete and then provides the list of completions.
-///
-/// # Arguments
-/// * `workflow` - The `Workflow` to scan for completed directories.
-/// * `directories` - The directories to scan. Must be present in the workspace.
-/// * `io_threads` - Number of threads to use while scanning directories.
-///
-/// # Panics
-/// When unable to spawn threads.
-///
+/** Find directories that have completed actions.
+
+`find_completed_directories` spawns threads to scan the workspace and then
+returns immediately. Calling `get` on the result will wait for the threads
+to complete and then provides the list of completions.
+
+# Arguments
+* `workflow` - The `Workflow` to scan for completed directories.
+* `directories` - The directories to scan. Must be present in the workspace.
+* `io_threads` - Number of threads to use while scanning directories.
+
+# Panics
+When unable to spawn threads.
+*/
 pub fn find_completed_directories(
     workflow: &Workflow,
     directories: Vec<PathBuf>,
@@ -185,14 +185,14 @@ pub fn find_completed_directories(
 }
 
 impl CompletedDirectories {
-    /// Get the directories that have been completed for each action.
-    ///
-    /// # Errors
-    /// Returns `Err<row::Error>` when the workspace directories cannot be accessed.
-    ///
-    /// # Panics
-    /// This method should not panic.
-    ///
+    /** Get the directories that have been completed for each action.
+
+    # Errors
+    Returns `Err<row::Error>` when the workspace directories cannot be accessed.
+
+    # Panics
+    This method should not panic.
+    */
     pub fn get(self) -> Result<HashMap<String, HashSet<PathBuf>>, Error> {
         let mut result = HashMap::new();
         for (directory, action) in &self.receiver {
@@ -212,10 +212,10 @@ impl CompletedDirectories {
     }
 }
 
-/// JSON values of directories.
-///
-/// Call `get()` to wait for all pending threads to complete and return the result.
-///
+/** JSON values of directories.
+
+Call `get()` to wait for all pending threads to complete and return the result.
+*/
 pub(crate) struct DirectoryValues {
     /// Threads reading the values.
     threads: Vec<JoinHandle<Result<(), Error>>>,
@@ -227,17 +227,17 @@ pub(crate) struct DirectoryValues {
     progress: ProgressBar,
 }
 
-/// Read value files from directories.
-///
-/// `read_values` spawns threads that read the JSON value files and
-/// returns immediately. Calling `get` on the result will wait for the threads
-/// to complete and then provides the map of directory names to values.
-///
-/// # Arguments
-/// * `workflow` - The `Workflow` to read from.
-/// * `directories` - The directories to read. Must be present in the workspace.
-/// * `io_threads` - Number of threads to use while scanning directories.
-///
+/** Read value files from directories.
+
+`read_values` spawns threads that read the JSON value files and
+returns immediately. Calling `get` on the result will wait for the threads
+to complete and then provides the map of directory names to values.
+
+# Arguments
+* `workflow` - The `Workflow` to read from.
+* `directories` - The directories to read. Must be present in the workspace.
+* `io_threads` - Number of threads to use while scanning directories.
+*/
 pub(crate) fn read_values(
     workflow: &Workflow,
     directories: Vec<PathBuf>,

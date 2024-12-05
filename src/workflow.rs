@@ -18,10 +18,10 @@ use std::str::FromStr;
 
 use crate::Error;
 
-/// The workflow definition.
-///
-/// `Workflow` is the in-memory realization of the user provided `workflow.toml`.
-///
+/** The workflow definition.
+
+`Workflow` is the in-memory realization of the user provided `workflow.toml`.
+*/
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Eq)]
 #[serde(deny_unknown_fields)]
 pub struct Workflow {
@@ -42,10 +42,10 @@ pub struct Workflow {
     pub action: Vec<Action>,
 }
 
-/// The workspace definition.
-///
-/// `Workspace` stores the user-provided options defining the workspace.
-///
+/** The workspace definition.
+
+`Workspace` stores the user-provided options defining the workspace.
+*/
 #[derive(Clone, Debug, Deserialize, PartialEq, Eq)]
 #[serde(deny_unknown_fields)]
 pub struct Workspace {
@@ -57,11 +57,11 @@ pub struct Workspace {
     pub value_file: Option<PathBuf>,
 }
 
-/// The submission options
-///
-/// `SubmitOPtions` stores the user-provided cluster specific submission options for a workflow or
-/// action.
-///
+/** The submission options
+
+`SubmitOPtions` stores the user-provided cluster specific submission options for a workflow or
+action.
+*/
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Eq)]
 #[serde(deny_unknown_fields)]
 pub struct SubmitOptions {
@@ -79,10 +79,10 @@ pub struct SubmitOptions {
     pub partition: Option<String>,
 }
 
-/// The action definition.
-///
-/// `Action` stores the user-provided options for a given action.
-///
+/** The action definition.
+
+`Action` stores the user-provided options for a given action.
+*/
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Eq)]
 #[serde(deny_unknown_fields)]
 pub struct Action {
@@ -120,10 +120,10 @@ pub struct Action {
     pub from: Option<String>,
 }
 
-/// Default tables
-///
-/// Store default options for other tables in the file.
-///
+/** Default tables
+
+Store default options for other tables in the file.
+*/
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Eq)]
 #[serde(deny_unknown_fields)]
 pub struct DefaultTables {
@@ -299,11 +299,11 @@ impl Add for ResourceCost {
 }
 
 impl Resources {
-    /// Determine the total number of processes this action will use.
-    ///
-    /// # Arguments
-    /// `n_directories`: Number of directories in the submission.
-    ///
+    /** Determine the total number of processes this action will use.
+
+    # Arguments
+    `n_directories`: Number of directories in the submission.
+    */
     pub fn total_processes(&self, n_directories: usize) -> usize {
         match self.processes() {
             Processes::PerDirectory(p) => p * n_directories,
@@ -311,32 +311,32 @@ impl Resources {
         }
     }
 
-    /// Determine the total number of CPUs this action will use.
-    ///
-    /// # Arguments
-    /// `n_directories`: Number of directories in the submission.
-    ///
+    /** Determine the total number of CPUs this action will use.
+
+    # Arguments
+    `n_directories`: Number of directories in the submission.
+    */
     pub fn total_cpus(&self, n_directories: usize) -> usize {
         self.total_processes(n_directories) * self.threads_per_process.unwrap_or(1)
     }
 
-    /// Determine the total number of GPUs this action will use.
-    ///
-    /// # Arguments
-    /// `n_directories`: Number of directories in the submission.
-    ///
+    /** Determine the total number of GPUs this action will use.
+
+    # Arguments
+    `n_directories`: Number of directories in the submission.
+    */
     pub fn total_gpus(&self, n_directories: usize) -> usize {
         self.total_processes(n_directories) * self.gpus_per_process.unwrap_or(0)
     }
 
-    /// Determine the total walltime this action will use.
-    ///
-    /// # Arguments
-    /// `n_directories`: Number of directories in the submission.
-    ///
-    /// # Panics
-    /// When the resulting walltime cannot be represented.
-    ///
+    /** Determine the total walltime this action will use.
+
+    # Arguments
+    `n_directories`: Number of directories in the submission.
+
+    # Panics
+    When the resulting walltime cannot be represented.
+    */
     pub fn total_walltime(&self, n_directories: usize) -> Duration {
         match self.walltime() {
             Walltime::PerDirectory(ref w) => Duration::new(
@@ -350,11 +350,11 @@ impl Resources {
         }
     }
 
-    /// Compute the total resource usage of an action execution.
-    ///
-    /// The cost is computed assuming that every job is executed to the full
-    /// requested walltime.
-    ///
+    /** Compute the total resource usage of an action execution.
+
+    The cost is computed assuming that every job is executed to the full
+    requested walltime.
+    */
     pub fn cost(&self, n_directories: usize) -> ResourceCost {
         let process_hours = ((self.total_processes(n_directories) as i64)
             * self.total_walltime(n_directories).signed_total_seconds())
@@ -539,15 +539,15 @@ impl Group {
 }
 
 impl Workflow {
-    /// Open the workflow
-    ///
-    /// Find `workflow.toml` in the current working directory or any parent directory. Open the
-    /// file, parse it, and return a `Workflow`.
-    ///
-    /// # Errors
-    /// Returns `Err(row::Error)` when the file is not found, cannot be read, or there is a parse
-    /// error.
-    ///
+    /** Open the workflow
+
+    Find `workflow.toml` in the current working directory or any parent directory. Open the
+    file, parse it, and return a `Workflow`.
+
+    # Errors
+    Returns `Err(row::Error)` when the file is not found, cannot be read, or there is a parse
+    error.
+    */
     pub fn open() -> Result<Self, Error> {
         let (path, file) = find_and_open_workflow()?;
         let mut buffer = BufReader::new(file);
@@ -560,14 +560,14 @@ impl Workflow {
         Self::open_str(&path, &workflow_string)
     }
 
-    /// Build a workflow from a given path and toml string.
-    ///
-    /// Parse the contents of the given string as if it were `workflow.toml` at the given `path`.
-    ///
-    /// # Errors
-    /// Returns `Err(row::Error)` when the file is not found, cannot be read, or there is a parse
-    /// error.
-    ///
+    /** Build a workflow from a given path and toml string.
+
+    Parse the contents of the given string as if it were `workflow.toml` at the given `path`.
+
+    # Errors
+    Returns `Err(row::Error)` when the file is not found, cannot be read, or there is a parse
+    error.
+    */
     pub(crate) fn open_str(path: &Path, toml: &str) -> Result<Self, Error> {
         let mut workflow: Workflow =
             toml::from_str(toml).map_err(|e| Error::TOMLParse(path.join("workflow.toml"), e))?;
@@ -584,12 +584,12 @@ impl Workflow {
         }
     }
 
-    /// Validate a `Workflow` and populate defaults.
-    ///
-    /// Resolve each action to a fully defined struct with defaults populated
-    /// from: The current action, the action named by "from", and the default
-    /// action (in that order).
-    ///
+    /** Validate a `Workflow` and populate defaults.
+
+    Resolve each action to a fully defined struct with defaults populated
+    from: The current action, the action named by "from", and the default
+    action (in that order).
+    */
     fn validate_and_set_defaults(mut self) -> Result<Self, Error> {
         let mut action_names = HashSet::with_capacity(self.action.len());
 
@@ -684,16 +684,16 @@ where
     Ok(duration)
 }
 
-/// Finds and opens the file `workflow.toml`.
-///
-/// Looks in the current working directory and all parent directories.
-///
-/// # Errors
-/// Returns `Err(row::Error)` when the file is not found or cannot be opened.
-///
-/// # Returns
-/// `Ok(PathBuf, File)` including the path where the file was found and the open file handle.
-///
+/** Finds and opens the file `workflow.toml`.
+
+Looks in the current working directory and all parent directories.
+
+# Errors
+Returns `Err(row::Error)` when the file is not found or cannot be opened.
+
+# Returns
+`Ok(PathBuf, File)` including the path where the file was found and the open file handle.
+*/
 fn find_and_open_workflow() -> Result<(PathBuf, File), Error> {
     let mut path = env::current_dir()?;
 

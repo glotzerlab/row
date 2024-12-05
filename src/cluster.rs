@@ -14,11 +14,11 @@ use crate::builtin::BuiltIn;
 use crate::workflow::Resources;
 use crate::Error;
 
-/// Cluster configuration
-///
-/// `Configuration` stores the cluster configuration for each defined
-/// cluster.
-///
+/** Cluster configuration
+
+`Configuration` stores the cluster configuration for each defined
+cluster.
+*/
 #[derive(Clone, Debug, Default, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(deny_unknown_fields)]
 pub struct Configuration {
@@ -27,17 +27,14 @@ pub struct Configuration {
     pub cluster: Vec<Cluster>,
 }
 
-/// Cluster
-///
-/// `Cluster` stores everything needed to define a single cluster. It is read
-/// from the `clusters.toml` file.
-///
+/** Cluster
+`Cluster` stores everything needed to define a single cluster. It is readom the `clusters.toml` file.
+*/
 #[derive(Clone, Debug, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct Cluster {
     /// The cluster's name.
     pub name: String,
-
     /// The method used to automatically identify this cluster.
     pub identify: IdentificationMethod,
 
@@ -121,16 +118,16 @@ pub struct Partition {
 }
 
 impl Configuration {
-    /// Identify the cluster.
-    ///
-    /// Identifying the current cluster consumes the `Configuration`.
-    ///
-    /// # Errors
-    /// * `row::Error::ClusterNameNotFound` when a cluster by the given name
-    ///   is not present in the configuration (when `name = Some(_)`).
-    /// * `row::Error::ClusterNotFound` when the automatic identification
-    ///   fails to find a cluster in the configuration.
-    ///
+    /** Identify the cluster.
+
+    Identifying the current cluster consumes the `Configuration`.
+
+    # Errors
+    * `row::Error::ClusterNameNotFound` when a cluster by the given name
+      is not present in the configuration (when `name = Some(_)`).
+    * `row::Error::ClusterNotFound` when the automatic identification
+      fails to find a cluster in the configuration.
+    */
     pub fn identify(self, name: Option<&str>) -> Result<Cluster, Error> {
         let cluster = if let Some(name) = name {
             self.cluster
@@ -148,15 +145,15 @@ impl Configuration {
         Ok(cluster)
     }
 
-    /// Open the cluster configuration
-    ///
-    /// Open `$HOME/.config/row/clusters.toml` if it exists and merge it with
-    /// the built-in configuration.
-    ///
-    /// # Errors
-    /// Returns `Err(row::Error)` when the file cannot be read or if there is
-    /// as parse error.
-    ///
+    /** Open the cluster configuration
+
+    Open `$HOME/.config/row/clusters.toml` if it exists and merge it with
+    the built-in configuration.
+
+    # Errors
+    Returns `Err(row::Error)` when the file cannot be read or if there is
+    as parse error.
+    */
     pub fn open() -> Result<Self, Error> {
         let home = match env::var("ROW_HOME") {
             Ok(row_home) => PathBuf::from(row_home),
@@ -195,21 +192,21 @@ impl Configuration {
         Ok(clusters)
     }
 
-    /// Parse a `Configuration` from a TOML string
-    ///
-    /// Does *NOT* merge with the built-in configuration.
-    ///
+    /** Parse a `Configuration` from a TOML string
+
+    Does *NOT* merge with the built-in configuration.
+    */
     pub(crate) fn parse_str(path: &Path, toml: &str) -> Result<Self, Error> {
         let cluster: Configuration =
             toml::from_str(toml).map_err(|e| Error::TOMLParse(path.join("clusters.toml"), e))?;
         Ok(cluster)
     }
 
-    /// Merge keys from another configuration into this one.
-    ///
-    /// Merging adds new keys from `b` into self. It also overrides any keys in
-    /// both with the value in `b`.
-    ///
+    /** Merge keys from another configuration into this one.
+
+    Merging adds new keys from `b` into self. It also overrides any keys in
+    both with the value in `b`.
+    */
     fn merge(&mut self, b: &Self) {
         let mut new_cluster = b.cluster.clone();
         new_cluster.extend(self.cluster.clone());
@@ -233,11 +230,11 @@ impl Cluster {
         }
     }
 
-    /// Find the partition to use for the given job.
-    ///
-    /// # Errors
-    /// Returns `Err<row::Error>` when the partition is not found.
-    ///
+    /** Find the partition to use for the given job.
+
+    # Errors
+    Returns `Err<row::Error>` when the partition is not found.
+    */
     pub fn find_partition(
         &self,
         partition_name: Option<&str>,

@@ -13,11 +13,11 @@ fn elapsed(state: &ProgressState, w: &mut dyn Write) {
     let _ = write!(w, "{:#}", HumanDuration(state.elapsed()));
 }
 
-/// Create a named spinner.
-///
-/// # Panics
-/// When the progress style is invalid.
-///
+/** Create a named spinner.
+
+# Panics
+When the progress style is invalid.
+*/
 pub fn uncounted_spinner() -> ProgressStyle {
     ProgressStyle::with_template("{spinner:.green.bold} {msg:.bold}... ({elapsed:.dim})")
         .expect("Valid template")
@@ -25,11 +25,11 @@ pub fn uncounted_spinner() -> ProgressStyle {
         .tick_strings(&["◐", "◓", "◑", "◒", "⊙"])
 }
 
-/// Create a spinner that displays the current counted position.
-///
-/// # Panics
-/// When the progress style is invalid.
-///
+/** Create a spinner that displays the current counted position.
+
+# Panics
+When the progress style is invalid.
+*/
 pub fn counted_spinner() -> ProgressStyle {
     ProgressStyle::with_template("{spinner:.green.bold} {msg:.bold}: {human_pos} ({elapsed:.dim})")
         .expect("Valid template")
@@ -37,11 +37,11 @@ pub fn counted_spinner() -> ProgressStyle {
         .tick_strings(&["◐", "◓", "◑", "◒", "⊙"])
 }
 
-/// Create a progress bar that displays the current counted position.
-///
-/// # Panics
-/// When the progress style is invalid.
-///
+/** Create a progress bar that displays the current counted position.
+
+# Panics
+When the progress style is invalid.
+*/
 pub fn counted_bar() -> ProgressStyle {
     ProgressStyle::with_template(
         "|{bar:32.green}| {msg:.bold}: {human_pos}/{human_len} ({elapsed:.dim})",

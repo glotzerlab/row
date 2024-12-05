@@ -73,28 +73,28 @@ pub trait Scheduler {
         should_terminate: Arc<AtomicBool>,
     ) -> Result<Option<u32>, Error>;
 
-    /// Query the scheduler and determine which jobs remain active.
-    ///
-    /// # Arguments
-    /// * `jobs`: Identifiers to query
-    ///
-    /// `active_jobs` returns a `ActiveJobs` object, which provides the final
-    /// result via a method. This allows implementations to be asynchronous so
-    /// that long-running subprocesses can complete in the background while the
-    /// collar performs other work.
-    ///
-    /// # Errors
-    /// Returns `Err<row::Error>` when the job queue query cannot be executed.
-    ///
+    /** Query the scheduler and determine which jobs remain active.
+
+    # Arguments
+    * `jobs`: Identifiers to query
+
+    `active_jobs` returns a `ActiveJobs` object, which provides the final
+    result via a method. This allows implementations to be asynchronous so
+    that long-running subprocesses can complete in the background while the
+    collar performs other work.
+
+    # Errors
+    Returns `Err<row::Error>` when the job queue query cannot be executed.
+    */
     fn active_jobs(&self, jobs: &[u32]) -> Result<Box<dyn ActiveJobs>, Error>;
 }
 
 /// Deferred result containing jobs that are still active on the cluster.
 pub trait ActiveJobs {
-    /// Complete the operation and return the currently active jobs.
-    ///
-    /// # Errors
-    /// Returns `Err<row::Error>` when the job queue query cannot be executed.
-    ///
+    /** Complete the operation and return the currently active jobs.
+
+    # Errors
+    Returns `Err<row::Error>` when the job queue query cannot be executed.
+    */
     fn get(self: Box<Self>) -> Result<HashSet<u32>, Error>;
 }

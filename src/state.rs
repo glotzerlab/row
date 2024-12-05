@@ -21,10 +21,10 @@ use crate::{
 
 type SubmittedJobs = HashMap<String, HashMap<PathBuf, (String, u32)>>;
 
-/// Directory cache
-///
-/// Cache the directory values and store the last modified time.
-///
+/** Directory cache
+
+Cache the directory values and store the last modified time.
+*/
 #[derive(Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct DirectoryCache {
     /// File system modification time of the workspace.
@@ -34,17 +34,17 @@ pub struct DirectoryCache {
     values: HashMap<PathBuf, Value>,
 }
 
-/// The state of the project.
-///
-/// `State` collects the following information on the workspace and manages cache files
-/// on the filesystem for these (separately):
-/// * JSON values for each directory
-/// * Completed directories for each action.
-/// * Scheduled jobs by action, directory, (and cluster?).
-///
-/// `State` implements methods that synchronize a state with the workspace on disk and
-/// to interface with the scheduler's queue.
-///
+/** The state of the project.
+
+`State` collects the following information on the workspace and manages cache files
+on the filesystem for these (separately):
+* JSON values for each directory
+* Completed directories for each action.
+* Scheduled jobs by action, directory, (and cluster?).
+
+`State` implements methods that synchronize a state with the workspace on disk and
+to interface with the scheduler's queue.
+*/
 #[derive(Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct State {
     /// The directory cache.
@@ -126,10 +126,10 @@ impl State {
         self.submitted_modified = true;
     }
 
-    /// Remove inactive jobs on the given cluster.
-    ///
-    /// Note: The argument lists the *active* jobs to keep!
-    ///
+    /** Remove inactive jobs on the given cluster.
+
+    Note: The argument lists the *active* jobs to keep!
+    */
     pub fn remove_inactive_submitted(&mut self, cluster_name: &str, active_job_ids: &HashSet<u32>) {
         trace!("Removing inactive jobs from the submitted cache.");
         self.submitted_modified = true;
@@ -162,11 +162,11 @@ impl State {
         result
     }
 
-    /// Read the state cache from disk.
-    ///
-    /// # Errors
-    /// Returns `Err<row::Error>` when the cache files cannot be read or parsed.
-    ///
+    /** Read the state cache from disk.
+
+    # Errors
+    Returns `Err<row::Error>` when the cache files cannot be read or parsed.
+    */
     pub fn from_cache(workflow: &Workflow) -> Result<State, Error> {
         let mut state = State {
             directory_cache: Self::read_directory_cache(workflow)?,
@@ -275,11 +275,11 @@ impl State {
         }
     }
 
-    /// Save the state cache to the filesystem.
-    ///
-    /// # Errors
-    /// Returns `Err<row::Error>` when a cache file cannot be saved.
-    ///
+    /** Save the state cache to the filesystem.
+
+    # Errors
+    Returns `Err<row::Error>` when a cache file cannot be saved.
+    */
     pub fn save_cache(
         &mut self,
         workflow: &Workflow,
@@ -395,20 +395,20 @@ impl State {
         Ok(())
     }
 
-    /// Synchronize a workspace on disk with a `State`.
-    ///
-    /// * Remove directories from the state that are no longer present on the filesystem.
-    /// * Make no changes to directories in the state that remain.
-    /// * When new directories are present on the filesystem, add them to the state -
-    ///   which includes reading the value file and checking which actions are completed.
-    /// * Remove actions that are no longer present from the completed and submitted caches.
-    /// * Remove directories that are no longer present from the completed and submitted caches.
-    ///
-    /// # Errors
-    ///
-    /// * Returns `Error<row::Error>` when there is an I/O error reading the
-    ///   workspace directory
-    ///
+    /** Synchronize a workspace on disk with a `State`.
+
+    * Remove directories from the state that are no longer present on the filesystem.
+    * Make no changes to directories in the state that remain.
+    * When new directories are present on the filesystem, add them to the state -
+      which includes reading the value file and checking which actions are completed.
+    * Remove actions that are no longer present from the completed and submitted caches.
+    * Remove directories that are no longer present from the completed and submitted caches.
+
+    # Errors
+
+    * Returns `Error<row::Error>` when there is an I/O error reading the
+      workspace directory
+    */
     pub(crate) fn synchronize_workspace(
         &mut self,
         workflow: &Workflow,

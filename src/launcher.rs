@@ -15,21 +15,21 @@ use crate::builtin::BuiltIn;
 use crate::workflow::Resources;
 use crate::Error;
 
-/// Launcher configuration
-///
-/// `Configuration` stores the launcher configuration for each defined
-/// launcher/cluster.
-///
+/** Launcher configuration
+
+`Configuration` stores the launcher configuration for each defined
+launcher/cluster.
+*/
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct Configuration {
     /// The launcher configurations.
     pub(crate) launchers: HashMap<String, HashMap<String, Launcher>>,
 }
 
-/// Launcher
-///
-/// `Launcher` is one element of the launcher configuration.
-///
+/** Launcher
+
+`Launcher` is one element of the launcher configuration.
+*/
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct Launcher {
@@ -90,15 +90,15 @@ impl Launcher {
 }
 
 impl Configuration {
-    /// Open the launcher configuration
-    ///
-    /// Open `$HOME/.config/row/launchers.toml` if it exists and merge it with
-    /// the built-in configuration.
-    ///
-    /// # Errors
-    /// Returns `Err(row::Error)` when the file cannot be read or if there is
-    /// as parse error.
-    ///
+    /** Open the launcher configuration
+
+    Open `$HOME/.config/row/launchers.toml` if it exists and merge it with
+    the built-in configuration.
+
+    # Errors
+    Returns `Err(row::Error)` when the file cannot be read or if there is
+    as parse error.
+    */
     pub fn open() -> Result<Self, Error> {
         let home = match env::var("ROW_HOME") {
             Ok(row_home) => PathBuf::from(row_home),
@@ -138,10 +138,10 @@ impl Configuration {
         Ok(launchers)
     }
 
-    /// Parse a `Configuration` from a TOML string
-    ///
-    /// Does *NOT* merge with the built-in configuration.
-    ///
+    /** Parse a `Configuration` from a TOML string
+
+    Does *NOT* merge with the built-in configuration.
+    */
     pub(crate) fn parse_str(path: &Path, toml: &str) -> Result<Self, Error> {
         Ok(Configuration {
             launchers: toml::from_str(toml)
@@ -149,11 +149,11 @@ impl Configuration {
         })
     }
 
-    /// Merge keys from another configuration into this one.
-    ///
-    /// Merging adds new keys from `b` into self. It also overrides any keys in
-    /// both with the value in `b`.
-    ///
+    /** Merge keys from another configuration into this one.
+
+    Merging adds new keys from `b` into self. It also overrides any keys in
+    both with the value in `b`.
+    */
     fn merge(&mut self, b: Self) {
         for (launcher_name, launcher_clusters) in b.launchers {
             self.launchers
@@ -163,10 +163,11 @@ impl Configuration {
         }
     }
 
-    /// Validate that the configuration is correct.
-    ///
-    /// Valid launcher configurations have a `default` cluster for all
-    /// launchers.
+    /** Validate that the configuration is correct.
+
+    Valid launcher configurations have a `default` cluster for all
+    launchers.
+    */
     fn validate(&self) -> Result<(), Error> {
         for (launcher_name, launcher_clusters) in &self.launchers {
             if !launcher_clusters.contains_key("default") {
@@ -177,11 +178,11 @@ impl Configuration {
         Ok(())
     }
 
-    /// Get all launchers for a specific cluster.
-    ///
-    /// # Panics
-    /// When a given launcher has no default.
-    ///
+    /** Get all launchers for a specific cluster.
+
+    # Panics
+    When a given launcher has no default.
+    */
     pub fn by_cluster(&self, cluster_name: &str) -> HashMap<String, Launcher> {
         let mut result = HashMap::with_capacity(self.launchers.len());
 

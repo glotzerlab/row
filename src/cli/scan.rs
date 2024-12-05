@@ -28,10 +28,10 @@ pub struct Arguments {
     directories: Vec<PathBuf>,
 }
 
-/// Scan directories and determine whether a given action (or all actions) have completed.
-///
-/// Write the resulting list of completed directories to a completion pack file.
-///
+/** Scan directories and determine whether a given action (or all actions) have completed.
+
+Write the resulting list of completed directories to a completion pack file.
+*/
 pub fn scan(
     options: &GlobalOptions,
     args: Arguments,
