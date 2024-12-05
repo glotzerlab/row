@@ -4,17 +4,24 @@
 
 *Highlights:*
 
-**Row** 0.4 expands the `command` templating functionality to improve support for
-command line applications as actions. This removes the need for _shim_ scripts that
-access the workspace path and/or directory values before invoking a subprocess.
-`{workspace_path}` expands to the current project's workspace path and `{/JSON pointer}`
-expands to the value of the given JSON pointer for the directory acted on.
+**Row** 0.4 expands the `command` templating functionality, adds shell autocompletion,
+and the `show jobs` subcommand.
 
-**Row** 0.4 also adds _shell autocompletion_. To enable, execute the appropriate
-command in your shell's profile:
+The expanded _templating_ functionality improves support for command line applications
+as actions. This removes the need for _shim_ scripts that access the workspace path and/
+or directory values before invoking a subprocess. `{workspace_path}` expands to the
+current project's workspace path and `{/JSON pointer}` expands to the value of the given
+JSON pointer for the directory acted on.
+
+_Shell autocompletion_ allows users to autocomplete all parameter names and 
+workspace dependent values for `cluster`, `action`, and `directories`. To enable,
+execute the appropriate command in your shell's profile:
 * Bash: `source <(COMPLETE=bash your_program)`
 * Fish: `source (COMPLETE=fish your_program | psub)`
 * Zsh: `source <(COMPLETE=zsh your_program)`
+
+`show jobs` prints a table summarizing all currently submitted jobs that match given
+action and directory criteria.
 
 *Added:*
 
@@ -25,6 +32,7 @@ command in your shell's profile:
 * `{/JSON pointer}` template parameter in `action.command` - replaced with the portion
   of the directory's value referenced by the given JSON pointer.
 * Shell autocomplete.
+* `show jobs` subcommand.
 
 *Fixed:*
 
