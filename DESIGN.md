@@ -48,10 +48,7 @@ Row is yet another workflow engine that automates the process of executing **act
   * **Waiting** on previous actions.
 * List directories and show completion status, submitted job ID, and user-defined keys from the
   value.
-
-Ideas:
-* List scheduler jobs and show useful information.
-* Cancel scheduler jobs specific to actions and/or directories.
+* List submitted jobs.
 
 ## Overview
 
