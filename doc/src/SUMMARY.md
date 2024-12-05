@@ -36,6 +36,7 @@
   - [show](row/show/index.md)
     - [show status](row/show/status.md)
     - [show directories](row/show/directories.md)
+    - [show jobs](row/show/jobs.md)
     - [show cluster](row/show/cluster.md)
     - [show launchers](row/show/launchers.md)
   - [scan](row/scan.md)

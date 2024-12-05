@@ -24,7 +24,7 @@ the entire workspace.
 
 (also: `-a`)
 
-Set `--action <pattern>` to choose which actions to display by name. By default, **row**
+Set `--action <pattern>` to choose which actions to submit by name. By default, **row**
 submits the eligible jobs of all actions. `<pattern>` is a wildcard pattern.
 
 ### `--dry-run`

@@ -194,7 +194,30 @@ pub enum ShowCommands {
 
     /** Show submitted jobs.
 
-    TODO.
+    `row show jobs` lists submitted jobs that execute a matching action on
+    any of the provided directories.
+
+    EXAMPLES
+
+    * Show all jobs:
+
+      row show jobs
+
+    * Show jobs that execute actions on any of the given directories:
+
+      row show jobs directory1 directory
+
+    * Show jobs that execute the action 'one':
+
+      row show jobs --action one
+
+    * Show jobs that execute an action starting with 'analyze':
+
+      row show jobs --action 'analyze*'
+
+    * Cancel SLURM jobs executing action 'two':
+
+      row show jobs --action two --short | xargs scancel
     */
     Jobs(jobs::Arguments),
 }
