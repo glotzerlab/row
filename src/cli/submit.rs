@@ -10,6 +10,7 @@ use signal_hook::consts::{SIGINT, SIGTERM};
 use signal_hook::flag;
 use std::collections::HashSet;
 use std::error::Error;
+use std::fmt::Write as _;
 use std::io::prelude::*;
 use std::io::{self, IsTerminal};
 use std::path::PathBuf;
@@ -265,7 +266,11 @@ pub fn submit<W: Write>(
                 .italic()
                 .to_string();
         }
-        message += &format!(" ({:#}).", style(HumanDuration(instant.elapsed())).dim());
+        let _ = write!(
+            message,
+            " ({:#}).",
+            style(HumanDuration(instant.elapsed())).dim()
+        );
         println!("{message}");
 
         let result = scheduler.submit(
