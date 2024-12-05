@@ -17,7 +17,7 @@ def action_implementation(job, communicator):
 
 def action(*jobs):
     """Execute actions on directories in parallel using HOOMD-blue."""
-    processes_per_directory = os.environ['ACTION_PROCESSES_PER_DIRECTORY']
+    processes_per_directory = int(os.environ['ACTION_PROCESSES_PER_DIRECTORY'])
     communicator = hoomd.communicator.Communicator(ranks_per_partition=processes_per_directory)
     action_implementation(jobs[communicator.partition], communicator)
     # ANCHOR_END: action
