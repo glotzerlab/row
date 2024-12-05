@@ -1,14 +1,6 @@
 // Copyright (c) 2024 The Regents of the University of Michigan.
 // Part of row, released under the BSD 3-Clause License.
 
-#![warn(clippy::pedantic)]
-#![allow(clippy::cast_precision_loss)]
-#![allow(clippy::cast_possible_wrap)]
-#![allow(clippy::cast_possible_truncation)]
-#![allow(clippy::cast_sign_loss)]
-#![allow(clippy::must_use_candidate)]
-#![warn(clippy::format_push_string)]
-
 pub(crate) mod builtin;
 pub mod cluster;
 mod expr;
