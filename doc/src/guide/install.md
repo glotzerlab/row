@@ -64,15 +64,15 @@ Ensure that `$HOME/.cargo/bin` is on your `$PATH`.
 Execute the appropriate command in your shell's profile:
 * Bash:
    ```shell
-   source <(COMPLETE=bash your_program)
+   source <(COMPLETE=bash row)
    ```
 * Fish:
     ```shell
-    source (COMPLETE=fish your_program | psub)
+    source (COMPLETE=fish row | psub)
     ```
 * Zsh:
     ```shell
-    source <(COMPLETE=zsh your_program)
+    source <(COMPLETE=zsh row)
     ```
 For additional shell configurations, see [clap-complete's documentation].
 

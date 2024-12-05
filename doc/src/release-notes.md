@@ -12,9 +12,9 @@ expands to the value of the given JSON pointer for the directory acted on.
 
 **Row** 0.4 also adds _shell autocompletion_. To enable, execute the appropriate
 command in your shell's profile:
-* Bash: `source <(COMPLETE=bash your_program)`
-* Fish: `source (COMPLETE=fish your_program | psub)`
-* Zsh: `source <(COMPLETE=zsh your_program)`
+* Bash: `source <(COMPLETE=bash row)`
+* Fish: `source (COMPLETE=fish row | psub)`
+* Zsh: `source <(COMPLETE=zsh row)`
 
 *Added:*
 
