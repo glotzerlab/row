@@ -99,6 +99,14 @@ fn main_detail() -> Result<(), Box<dyn Error>> {
             ShowCommands::Launchers(args) => {
                 cli::launchers::launchers(&options.global, &args, &mut output)?;
             }
+            ShowCommands::Jobs(args) => {
+                cli::jobs::show(
+                    &options.global,
+                    args,
+                    &mut multi_progress_container,
+                    &mut output,
+                )?;
+            }
         },
         Some(Commands::Scan(args)) => {
             cli::scan::scan(&options.global, args, &mut multi_progress_container)?;

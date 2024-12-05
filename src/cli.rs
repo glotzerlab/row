@@ -6,6 +6,7 @@ pub mod clean;
 pub mod cluster;
 pub mod directories;
 pub mod init;
+pub mod jobs;
 pub mod launchers;
 pub mod scan;
 pub mod status;
@@ -190,6 +191,12 @@ pub enum ShowCommands {
     ///
     ///  row show launchers --all --short
     Launchers(launchers::Arguments),
+
+    /** Show submitted jobs.
+
+    TODO.
+    */
+    Jobs(jobs::Arguments),
 }
 
 #[derive(Subcommand, Debug)]

@@ -153,6 +153,11 @@ impl Project {
         &self.state
     }
 
+    /// Get the currently active cluster name.
+    pub fn cluster_name(&self) -> &String {
+        &self.cluster_name
+    }
+
     /// Find the directories that are included by the action.
     ///
     /// # Parameters:
