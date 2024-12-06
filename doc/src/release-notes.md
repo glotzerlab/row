@@ -7,11 +7,11 @@
 **Row** 0.4 expands the `command` templating functionality, adds shell autocompletion,
 and the `show jobs` subcommand.
 
-The expanded _templating_ functionality improves support for command line applications
-as actions. This removes the need for _shim_ scripts that access the workspace path and/
-or directory values before invoking a subprocess. `{workspace_path}` expands to the
-current project's workspace path and `{/JSON pointer}` expands to the value of the given
-JSON pointer for the directory acted on.
+The new _template arguments_ allow direct use of command line applications as actions,
+removing the need for _shim_ scripts that access the workspace path and/or directory
+values before invoking a subprocess. `{workspace_path}` expands to the current project's
+workspace path and `{/JSON pointer}` expands to the value of the given JSON pointer for
+the directory acted on.
 
 _Shell autocompletion_ allows users to autocomplete all parameter names and
 workspace dependent values for `cluster`, `action`, and `directories`. To enable,
@@ -39,8 +39,8 @@ action and directory criteria.
 * All user-provided content (directories, action names, cluster names, and values) are
   properly escaped in the bash script output.
 * Typographical errors in the documentation.
-* The documentation now builds correctly with mdbook 0.4.43.
-* Example code converts environment variables to ints where needed.
+* The documentation now builds correctly with _mdbook_ 0.4.43.
+* Example code converts environment variables to integers where needed.
 
 ## 0.3.1 (2024-10-04)
 
