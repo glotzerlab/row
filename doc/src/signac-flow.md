@@ -33,8 +33,13 @@ Commands:
 | `project.py submit --bundle <N> --parallel` | A command *may* execute [group members][group] in [parallel]. |
 | `project.py submit -o <PATTERN>` | [`row submit --action <PATTERN>`](row/submit.md) |
 | `project.py <command> -j [JOB_ID1] [JOB_ID2] ...` | `row <command> [JOB_ID1] [JOB_ID2] ...` |
-| `project.py <command> -j a1234` | `cd workspace; row <command> a1234*` |
 | `project.py <command> -f <FILTER>` | `row <command> $(signac find <FILTER>)` |
+| `project.py <command> -j a1234` | `row <command> a1234`_TAB_ |
+
+> Note: [Enable tab completion] before attempting to use _TAB_ to complete action or
+> directory names.
+
+[Enable tab completion]: install.md#configuring-shell-autocompletion
 
 Conditions:
 | flow | row |
