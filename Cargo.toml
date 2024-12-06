@@ -33,7 +33,7 @@ serde_json = "1.0.133"
 shell-quote = { version = "0.7.1", default-features = false, features = ["bash"] }
 signal-hook = { version = "0.3.17", default-features = false }
 speedate = "0.15.0"
-thiserror = "1.0.66"
+thiserror = "2.0.4"
 toml = "0.8.19"
 uuid = { version = "1.11.0", features = ["v4"] }
 wildmatch = "2.4.0"
