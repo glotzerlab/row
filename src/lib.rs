@@ -1,14 +1,6 @@
 // Copyright (c) 2024 The Regents of the University of Michigan.
 // Part of row, released under the BSD 3-Clause License.
 
-#![warn(clippy::pedantic)]
-#![allow(clippy::cast_precision_loss)]
-#![allow(clippy::cast_possible_wrap)]
-#![allow(clippy::cast_possible_truncation)]
-#![allow(clippy::cast_sign_loss)]
-#![allow(clippy::must_use_candidate)]
-#![warn(clippy::format_push_string)]
-
 pub(crate) mod builtin;
 pub mod cluster;
 mod expr;
@@ -35,11 +27,11 @@ pub const DIRECTORY_CACHE_FILE_NAME: &str = "directories.json";
 pub const COMPLETED_CACHE_FILE_NAME: &str = "completed.postcard";
 pub const SUBMITTED_CACHE_FILE_NAME: &str = "submitted.postcard";
 
-/// Hold a `MultiProgress` and all of its progress bars.
-///
-/// This is necessary because a dropped `ProgressBar` will be automatically
-/// removed from [MultiProgress](https://github.com/console-rs/indicatif/issues/614)
-///
+/** Hold a `MultiProgress` and all of its progress bars.
+
+This is necessary because a dropped `ProgressBar` will be automatically
+removed from [MultiProgress](https://github.com/console-rs/indicatif/issues/614)
+*/
 pub struct MultiProgressContainer {
     progress_bars: Vec<ProgressBar>,
     multi_progress: MultiProgress,
@@ -260,10 +252,11 @@ impl MultiProgressContainer {
         self.multi_progress.add(progress_bar)
     }
 
-    /// Clear all progress bars
-    ///
-    /// # Errors
-    /// Forwards the error from `indicatif::MultiProgress::clear`.
+    /** Clear all progress bars
+
+    # Errors
+    Forwards the error from `indicatif::MultiProgress::clear`.
+    */
     pub fn clear(&mut self) -> Result<(), std::io::Error> {
         self.progress_bars.clear();
         self.multi_progress.clear()

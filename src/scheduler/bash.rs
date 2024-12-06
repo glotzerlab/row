@@ -410,10 +410,10 @@ impl Scheduler for Bash {
         Ok(None)
     }
 
-    /// Bash reports no active jobs.
-    ///
-    /// All jobs are executed immediately on submission.
-    ///
+    /** Bash reports no active jobs.
+
+    All jobs are executed immediately on submission.
+    */
     fn active_jobs(&self, _: &[u32]) -> Result<Box<dyn ActiveJobs>, Error> {
         Ok(Box::new(ActiveBashJobs {}))
     }

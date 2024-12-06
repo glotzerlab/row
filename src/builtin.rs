@@ -12,7 +12,6 @@ pub(crate) trait BuiltIn {
 
 impl BuiltIn for launcher::Configuration {
     /// Construct the built-in launchers
-    ///
     fn built_in() -> Self {
         let mut result = Self {
             launchers: HashMap::with_capacity(2),

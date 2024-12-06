@@ -33,9 +33,10 @@ impl Slurm {
     }
 }
 
-/// Track the running squeue process
-///
-/// Or `None` when no process was launched.
+/** Track the running squeue process
+
+Or `None` when no process was launched.
+*/
 pub struct ActiveSlurmJobs {
     squeue: Option<Child>,
     max_jobs: usize,
@@ -219,11 +220,11 @@ impl Scheduler for Slurm {
         }
     }
 
-    /// Use `squeue` to determine the jobs that are still present in the queue.
-    ///
-    /// Launch `squeue --jobs job0,job1,job2 -o "%A" --noheader` to determine which of
-    /// these jobs are still in the queue.
-    ///
+    /** Use `squeue` to determine the jobs that are still present in the queue.
+
+    Launch `squeue --jobs job0,job1,job2 -o "%A" --noheader` to determine which of
+    these jobs are still in the queue.
+    */
     fn active_jobs(&self, jobs: &[u32]) -> Result<Box<dyn ActiveJobs>, Error> {
         if jobs.is_empty() {
             return Ok(Box::new(ActiveSlurmJobs {

@@ -21,10 +21,10 @@ pub struct Arguments {
     short: bool,
 }
 
-/// Show the launchers.
-///
-/// Print the launchers to stdout in toml format.
-///
+/** Show the launchers.
+
+Print the launchers to stdout in toml format.
+*/
 pub fn launchers<W: Write>(
     options: &GlobalOptions,
     args: &Arguments,

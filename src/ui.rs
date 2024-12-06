@@ -10,11 +10,11 @@ use std::io::{self, Write};
 /// The default writer buffer size.
 const DEFAULT_BUFFER_SIZE: usize = 1024;
 
-/// Buffered writer that interoperates with a `MultiProgress`.
-///
-/// Use this writer to buffer writes to stdout/stderr. When flushed, the
-/// writer will suspend the `MultiProgress` and write the output.
-///
+/** Buffered writer that interoperates with a `MultiProgress`.
+
+Use this writer to buffer writes to stdout/stderr. When flushed, the
+writer will suspend the `MultiProgress` and write the output.
+*/
 pub struct MultiProgressWriter<T: Write> {
     inner: T,
     multi_progress: MultiProgress,
@@ -23,12 +23,12 @@ pub struct MultiProgressWriter<T: Write> {
 }
 
 impl<T: Write> MultiProgressWriter<T> {
-    /// Create a new writer.
-    ///
-    /// # Arguments
-    /// * `inner`: Writer to forward output to.
-    /// * `multi_progress`: The `MultiProgress` to suspend when writing.
-    ///
+    /** Create a new writer.
+
+    # Arguments
+    * `inner`: Writer to forward output to.
+    * `multi_progress`: The `MultiProgress` to suspend when writing.
+    */
     pub fn new(inner: T, multi_progress: MultiProgress) -> Self {
         Self {
             inner,

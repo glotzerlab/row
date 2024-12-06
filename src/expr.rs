@@ -7,11 +7,11 @@ use std::iter;
 
 use crate::workflow::Comparison;
 
-/// Compares two Values lexicographically.
-///
-/// # Returns
-/// `Some(Ordering)` when an ordering can be determined, otherwise `None`.
-///
+/** Compares two Values lexicographically.
+
+# Returns
+`Some(Ordering)` when an ordering can be determined, otherwise `None`.
+*/
 pub(crate) fn partial_cmp_json_values(a: &Value, b: &Value) -> Option<Ordering> {
     match (a, b) {
         (Value::String(a_str), Value::String(b_str)) => Some(a_str.cmp(b_str)),
@@ -49,11 +49,11 @@ pub(crate) fn partial_cmp_json_values(a: &Value, b: &Value) -> Option<Ordering> 
     }
 }
 
-/// Compares two Values lexicographically with the given comparison operator.
-///
-/// # Returns
-/// `Some(Ordering)` when an ordering can be determined, otherwise `None`.
-///
+/** Compares two Values lexicographically with the given comparison operator.
+
+# Returns
+`Some(Ordering)` when an ordering can be determined, otherwise `None`.
+*/
 pub(crate) fn evaluate_json_comparison(
     comparison: &Comparison,
     a: &Value,

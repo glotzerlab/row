@@ -97,10 +97,10 @@ fn make_row(action_name: &str, status: &Status, cost: &ResourceCost) -> Vec<Item
     result
 }
 
-/// Show the current state of the workflow.
-///
-/// Print a human-readable summary of the workflow.
-///
+/** Show the current state of the workflow.
+
+Print a human-readable summary of the workflow.
+*/
 pub fn status<W: Write>(
     options: &GlobalOptions,
     args: Arguments,
