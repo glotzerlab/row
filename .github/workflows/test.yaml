@@ -33,7 +33,7 @@ jobs:
           - macos-14
         rust:
           # Oldest supported version of rust
-          - 1.77.2
+          - 1.81.0
           - 1.83.0
         mode:
          - debug
