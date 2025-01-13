@@ -20,7 +20,7 @@ pre-commit==4.0.1
     # via -r pre-commit-requirements.in
 pyyaml==6.0.1
     # via pre-commit
-virtualenv==20.26.0
+virtualenv==20.26.6
     # via pre-commit
 
 # The following packages are considered to be unsafe in a requirements file:
