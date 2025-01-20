@@ -20,7 +20,7 @@ env:
   CARGO_TERM_COLOR: always
   ROW_COLOR: always
   CLICOLOR: 1
-  RUST_LATEST_VERSION: 1.83.0
+  RUST_LATEST_VERSION: 1.84.0
 
 jobs:
   unit_test:
@@ -29,19 +29,19 @@ jobs:
     strategy:
       matrix:
         os:
-          - ubuntu-22.04
+          - ubuntu-24.04
           - macos-14
         rust:
           # Oldest supported version of rust
           - 1.81.0
-          - 1.83.0
+          - 1.84.0
         mode:
          - debug
 
         include:
         # Add a release build on linux with the latest version of rust
-        - os: ubuntu-22.04
-          rust: 1.83.0
+        - os: ubuntu-24.04
+          rust: 1.84.0
           mode: release
 
     steps:
@@ -66,7 +66,7 @@ jobs:
 
   execute_tutorials:
     name: Execute tutorials
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
     - name: Checkout
       uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -111,7 +111,7 @@ jobs:
 
   build_documentation:
     name: Build documentation
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
     - name: Checkout
       uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -129,7 +129,7 @@ jobs:
 
   check_licenses:
     name: Check licenses
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
     - name: Checkout
       uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
