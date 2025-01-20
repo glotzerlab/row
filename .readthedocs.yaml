@@ -1,6 +1,6 @@
 version: 2
 build:
-  os: "ubuntu-22.04"
+  os: "ubuntu-24.04"
   commands:
     - mkdir -p bin
     - curl -sSL "https://github.com/rust-lang/mdBook/releases/download/v0.4.43/mdbook-v0.4.43-x86_64-unknown-linux-gnu.tar.gz" | tar -xvz --directory "bin"
