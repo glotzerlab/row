@@ -27,4 +27,4 @@ Set
 ```toml
 workspace.value_file = "signac_statepoint.json"
 ```
-to use **row** with [signac](https://signac.io) workspaces.
+to use **row** with [signac](https://signac.readthedocs.io/) workspaces.

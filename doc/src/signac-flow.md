@@ -1,7 +1,7 @@
 # Migrating from signac-flow
 
 **Row** is a spiritual successor to
-[signac-flow](https://docs.signac.io/projects/flow/en/latest/). Many concepts and
+[signac-flow](https://signac.readthedocs.io/projects/flow). Many concepts and
 common usage patters map directly from **signac-flow** to **row**.
 
 Concepts:

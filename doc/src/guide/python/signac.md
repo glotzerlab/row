@@ -1,6 +1,6 @@
 # Working with signac projects
 
-[signac](https://signac.io) is a Python library that helps you manage your workspace
+[signac](https://signac.readthedocs.io/) is a Python library that helps you manage your workspace
 directories. Define **values** as dictionaries, and **signac** will automatically create
 directories for you. **signac** also offers many APIs to iterate, search, and perform
 many other tasks.

@@ -42,7 +42,7 @@ to initialize the signac workspace and populate it with directories.
 > For extra credit, reimplement the **signac** tutorial workflow in **row** after you
 > finish reading this guide.
 
-[*basic* tutorial]: https://docs.signac.io/en/latest/tutorial.html#basics
+[*basic* tutorial]: https://signac.readthedocs.io/en/latest/tutorial.html#basics
 
 ## Write actions.py
 

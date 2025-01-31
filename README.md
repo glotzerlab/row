@@ -14,7 +14,7 @@ process your entire workflow to completion over many submissions.
 The name is **row** as in *"row, row, row your boat"*.
 
 Notable features:
-* Support arbitrary directories and [signac](https://signac.io) workspaces.
+* Support arbitrary directories and [signac](https://signac.readthedocs.io/) workspaces.
 * Define your workflow in a configuration file.
 * Execute actions via user-defined shell commands.
 * Flexible group definitions:
@@ -71,11 +71,11 @@ dir19     eligible                   691
   Tutorial, command line interface documentation, and configuration file specifications.
 - [Row discussion board](https://github.com/glotzerlab/row/discussions/):
   Ask the **row** user community for help.
-- [signac](https://signac.io):
+- [signac](https://signac.readthedocs.io/):
   Python package to help you manage your workspace.
 
 ## History
 
 **Row** is a spiritual successor to [signac-flow][flow].
 
-[flow]: https://docs.signac.io/projects/flow/en/latest/.
+[flow]: https://signac.readthedocs.io/projects/flow/en/latest/.
