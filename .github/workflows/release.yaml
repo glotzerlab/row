@@ -51,7 +51,7 @@ jobs:
     - name: Tar/zstd source
       run: tar --zstd -cvf "${name}-${ref}.tar.zst" "${name}-${ref}"
 
-    - uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4.5.0
+    - uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
       with:
         name: source
         path: |
@@ -82,7 +82,7 @@ jobs:
         tee "${GITHUB_WORKSPACE}/release-notes.md"
       working-directory: code
 
-    - uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4.5.0
+    - uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
       with:
         name: release-notes
         path: |
@@ -125,7 +125,7 @@ jobs:
       run: file "target/${{ matrix.target }}/release/${name}"
     - name: Compress
       run: cp "target/${{ matrix.target }}/release/${name}" . && tar --zstd -cvf "${name}-${ref}-${{ matrix.target }}.tar.zst" "${name}"
-    - uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4.5.0
+    - uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
       with:
         name: ${{ matrix.target }}
         path: "${{ env.name }}-${{ env.ref }}-${{ matrix.target }}.tar.zst"
@@ -145,7 +145,7 @@ jobs:
       run: ls -lR
 
     - name: Create release
-      uses: softprops/action-gh-release@7b4da11513bf3f43f9999e90eabced41ab8bb048 # v2.2.0
+      uses: softprops/action-gh-release@c95fe1489396fe8a9eb87c0abf8aa5b2ef267fda # v2.2.1
       if: startsWith(github.ref, 'refs/tags/')
       with:
         files: |
