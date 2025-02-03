@@ -103,8 +103,8 @@ value_file = "signac_statepoint.json""#
     if args.workspace != "workspace" {
         let _ = writeln!(
             workflow,
-            r#"[workspace]
-path = '{}'"#,
+            r"[workspace]
+path = '{}'",
             args.workspace
         );
     }
