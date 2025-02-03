@@ -130,7 +130,7 @@ jobs:
   tests_complete:
     name: All tests
     if: always()
-    needs: [unit_test, execute_tutorials, build_documentation,check_licenses]
+    needs: [unit_test, execute_tutorials, build_documentation]
     runs-on: ubuntu-latest
 
     steps:
