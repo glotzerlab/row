@@ -99,13 +99,13 @@ impl<'a> BashScriptBuilder<'a> {
 
         let _ = write!(
             result,
-            r#"
+            r"
 export ACTION_WORKSPACE_PATH={}
 export ACTION_CLUSTER={}
 export ACTION_NAME={}
 export ACTION_PROCESSES={}
 export ACTION_WALLTIME_IN_MINUTES={}
-"#,
+",
             <shell_quote::Bash as Quote<String>>::quote(
                 self.workspace_path
                     .to_str()

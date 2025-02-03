@@ -285,14 +285,13 @@ impl Partition {
             return false;
         }
 
-        if self.maximum_cpus_per_job.map_or(false, |x| total_cpus > x) {
+        if self.maximum_cpus_per_job.is_some_and(|x| total_cpus > x) {
             let _ = writeln!(reason, "{}: Too many CPUs ({}).", self.name, total_cpus);
             return false;
         }
 
         if self
-            .require_cpus_multiple_of
-            .map_or(false, |x| total_cpus % x != 0)
+            .require_cpus_multiple_of.is_some_and(|x| total_cpus % x != 0)
         {
             let _ = writeln!(
                 reason,
@@ -303,8 +302,7 @@ impl Partition {
         }
 
         if self
-            .warn_cpus_not_multiple_of
-            .map_or(false, |x| total_cpus % x != 0)
+            .warn_cpus_not_multiple_of.is_some_and(|x| total_cpus % x != 0)
         {
             warn!(
                 "{}: CPUs ({}) not a preferred multiple.",
@@ -313,12 +311,12 @@ impl Partition {
             return true; // Issuing this warning does not prevent use of the partition.
         }
 
-        if self.minimum_gpus_per_job.map_or(false, |x| total_gpus < x) {
+        if self.minimum_gpus_per_job.is_some_and(|x| total_gpus < x) {
             let _ = writeln!(reason, "{}: Not enough GPUs ({}).", self.name, total_gpus);
             return false;
         }
 
-        if self.maximum_gpus_per_job.map_or(false, |x| total_gpus > x) {
+        if self.maximum_gpus_per_job.is_some_and(|x| total_gpus > x) {
             let _ = writeln!(reason, "{}: Too many GPUs ({}).", self.name, total_gpus);
             return false;
         }
@@ -328,8 +326,7 @@ impl Partition {
             trace!("total_gpus % v = {}", total_gpus % v);
         }
         if self
-            .require_gpus_multiple_of
-            .map_or(false, |x| total_gpus == 0 || total_gpus % x != 0)
+            .require_gpus_multiple_of.is_some_and(|x| total_gpus == 0 || total_gpus % x != 0)
         {
             let _ = writeln!(
                 reason,
@@ -340,8 +337,7 @@ impl Partition {
         }
 
         if self
-            .warn_gpus_not_multiple_of
-            .map_or(false, |x| total_gpus == 0 || total_gpus % x != 0)
+            .warn_gpus_not_multiple_of.is_some_and(|x| total_gpus == 0 || total_gpus % x != 0)
         {
             warn!(
                 "{}: GPUs ({}) not a preferred multiple. ",
