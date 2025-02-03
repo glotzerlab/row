@@ -291,7 +291,8 @@ impl Partition {
         }
 
         if self
-            .require_cpus_multiple_of.is_some_and(|x| total_cpus % x != 0)
+            .require_cpus_multiple_of
+            .is_some_and(|x| total_cpus % x != 0)
         {
             let _ = writeln!(
                 reason,
@@ -302,7 +303,8 @@ impl Partition {
         }
 
         if self
-            .warn_cpus_not_multiple_of.is_some_and(|x| total_cpus % x != 0)
+            .warn_cpus_not_multiple_of
+            .is_some_and(|x| total_cpus % x != 0)
         {
             warn!(
                 "{}: CPUs ({}) not a preferred multiple.",
@@ -326,7 +328,8 @@ impl Partition {
             trace!("total_gpus % v = {}", total_gpus % v);
         }
         if self
-            .require_gpus_multiple_of.is_some_and(|x| total_gpus == 0 || total_gpus % x != 0)
+            .require_gpus_multiple_of
+            .is_some_and(|x| total_gpus == 0 || total_gpus % x != 0)
         {
             let _ = writeln!(
                 reason,
@@ -337,7 +340,8 @@ impl Partition {
         }
 
         if self
-            .warn_gpus_not_multiple_of.is_some_and(|x| total_gpus == 0 || total_gpus % x != 0)
+            .warn_gpus_not_multiple_of
+            .is_some_and(|x| total_gpus == 0 || total_gpus % x != 0)
         {
             warn!(
                 "{}: GPUs ({}) not a preferred multiple. ",
