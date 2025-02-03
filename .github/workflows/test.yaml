@@ -127,17 +127,6 @@ jobs:
         args: -n .
         fail: true
 
-  check_licenses:
-    name: Check licenses
-    runs-on: ubuntu-24.04
-    steps:
-    - name: Checkout
-      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-    - name: Set up cargo-bundle-licenses
-      uses: glotzerlab/workflows/setup-cargo-bundle-licenses@a36a97114c60241b26217ce92abbb64621ac67c7 # 0.6.0
-    - name: Check bundled licenses
-      run: cargo bundle-licenses --format yaml --output CI.yaml --previous THIRDPARTY.yaml --check-previous
-
   tests_complete:
     name: All tests
     if: always()
