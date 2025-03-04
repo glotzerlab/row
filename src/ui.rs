@@ -70,12 +70,14 @@ impl<T: Write> Drop for MultiProgressWriter<T> {
     }
 }
 
+#[derive(Clone, Debug, PartialEq)]
 pub(crate) enum Alignment {
     Left,
     Right,
 }
 
 /// One item in a table.
+#[derive(Clone, Debug, PartialEq)]
 pub(crate) struct Item {
     text: String,
     style: Style,
@@ -83,12 +85,14 @@ pub(crate) struct Item {
 }
 
 /// A table row is either a separator or a vector of items.
+#[derive(Clone, Debug, PartialEq)]
 pub(crate) enum Row {
     Separator,
     Items(Vec<Item>),
 }
 
 /// The table
+#[derive(Clone, Debug, PartialEq)]
 pub(crate) struct Table {
     // The header row.
     pub header: Vec<Item>,
@@ -154,6 +158,11 @@ impl Table {
     }
 
     pub(crate) fn write<W: Write>(&self, writer: &mut W) -> io::Result<()> {
+        if self.rows.is_empty() || self.rows.len() == 1 && self.rows[0] == Row::Separator {
+            writeln!(writer, "No matches.")?;
+            return Ok(());
+        }
+
         let mut column_width: Vec<usize> = self
             .header
             .iter()

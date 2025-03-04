@@ -1,5 +1,20 @@
 # Release notes
 
+## 0.5.0 (not yet released)
+
+*Highlights:*
+
+**Row** 0.5 improves the user interface and updates the code to meet modern
+Rust standards.
+
+The subcommands `show directories`, `show jobs`, and `show status` now report
+`No matches.` when there are no results to show.
+
+*Changed:*
+
+* Writing tabular output with no rows now results in the output `No matches.`.
+* Build executables on Ubuntu 22.04.
+
 ## 0.4.0 (2024-12-06)
 
 *Highlights:*
