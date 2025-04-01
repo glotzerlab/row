@@ -101,9 +101,6 @@ pub enum Error {
     #[error("Previous action '{0}' not found in action '{1}'.")]
     PreviousActionNotFound(String, String),
 
-    #[error("Define 'processes' or 'processes_per_directory', not both in action '{0}'.")]
-    DuplicateProcesses(String),
-
     #[error("Use '{{directory}}' or '{{directories}}', not both in the command of action '{0}'.")]
     ActionContainsMultipleTemplates(String),
 
@@ -147,6 +144,17 @@ pub enum Error {
 
     #[error("Unable to parse template '{1}' for action '{0}'.")]
     InvalidTemplate(String, String),
+
+    #[error("Action '{0}' must request more than 0 processes or omit `resources.processes`.")]
+    ZeroProcesses(String),
+
+    #[error(
+        "Action '{0}' must request more than 0 threads or omit `resources.threads_per_process`."
+    )]
+    ZeroThreads(String),
+
+    #[error("Action '{0}' must request more than 0 GPUs or omit `resources.gpus_per_process`.")]
+    ZeroGpus(String),
 
     // submission errors
     #[error("Error encountered while executing action '{0}': {1}.")]

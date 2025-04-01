@@ -630,6 +630,24 @@ impl Workflow {
                     warn!("The JSON pointer '{pointer}' does not appear valid. Did you mean '/{pointer}'?");
                 }
             }
+
+            // Users must request more than 0 resources, or omit the relevant key to request none.
+            if matches!(action.resources.processes, Some(Processes::PerDirectory(0)))
+                || matches!(
+                    action.resources.processes,
+                    Some(Processes::PerSubmission(0))
+                )
+            {
+                return Err(Error::ZeroProcesses(action.name().into()));
+            }
+
+            if action.resources.threads_per_process == Some(0) {
+                return Err(Error::ZeroThreads(action.name().into()));
+            }
+
+            if action.resources.gpus_per_process == Some(0) {
+                return Err(Error::ZeroGpus(action.name().into()));
+            }
         }
 
         for action in &self.action {
@@ -1184,6 +1202,102 @@ processes.per_directory = 2
         assert!(
             err.contains("wanted exactly 1 element"),
             "Expected 'wanted exactly 1 element', got {err:?}"
+        );
+    }
+
+    #[test]
+    #[parallel]
+    fn zero_processes_submission() {
+        let temp = TempDir::new().unwrap();
+        let workflow = r#"
+[[action]]
+name = "b"
+command = "c"
+[action.resources]
+processes.per_submission = 0
+"#;
+        let result = Workflow::open_str(temp.path(), workflow);
+        assert!(
+            matches!(result, Err(Error::ZeroProcesses(..))),
+            "Expected zero processes error, but got {result:?}"
+        );
+
+        let err = result.unwrap_err().to_string();
+        assert!(
+            err.contains("must request more than 0 processes"),
+            "Expected 'must request more than 0 processes', got {err:?}"
+        );
+    }
+
+    #[test]
+    #[parallel]
+    fn zero_processes_directory() {
+        let temp = TempDir::new().unwrap();
+        let workflow = r#"
+[[action]]
+name = "b"
+command = "c"
+[action.resources]
+processes.per_directory = 0
+"#;
+        let result = Workflow::open_str(temp.path(), workflow);
+        assert!(
+            matches!(result, Err(Error::ZeroProcesses(..))),
+            "Expected zero processes error, but got {result:?}"
+        );
+
+        let err = result.unwrap_err().to_string();
+        assert!(
+            err.contains("must request more than 0 processes"),
+            "Expected 'must request more than 0 processes', got {err:?}"
+        );
+    }
+
+    #[test]
+    #[parallel]
+    fn zero_threads() {
+        let temp = TempDir::new().unwrap();
+        let workflow = r#"
+[[action]]
+name = "b"
+command = "c"
+[action.resources]
+threads_per_process = 0
+"#;
+        let result = Workflow::open_str(temp.path(), workflow);
+        assert!(
+            matches!(result, Err(Error::ZeroThreads(..))),
+            "Expected zero threads error, but got {result:?}"
+        );
+
+        let err = result.unwrap_err().to_string();
+        assert!(
+            err.contains("must request more than 0 threads"),
+            "Expected 'must request more than 0 threads', got {err:?}"
+        );
+    }
+
+    #[test]
+    #[parallel]
+    fn zero_gpus() {
+        let temp = TempDir::new().unwrap();
+        let workflow = r#"
+[[action]]
+name = "b"
+command = "c"
+[action.resources]
+gpus_per_process = 0
+"#;
+        let result = Workflow::open_str(temp.path(), workflow);
+        assert!(
+            matches!(result, Err(Error::ZeroGpus(..))),
+            "Expected zero GPUs error, but got {result:?}"
+        );
+
+        let err = result.unwrap_err().to_string();
+        assert!(
+            err.contains("must request more than 0 GPUs"),
+            "Expected 'must request more than 0 GPUs', got {err:?}"
         );
     }
 
