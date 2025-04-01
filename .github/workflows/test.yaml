@@ -51,7 +51,7 @@ jobs:
       run: rustup install ${{ matrix.rust }} --no-self-update && rustup default ${{ matrix.rust }}
     - name: Check rust installation
       run: rustc -vV
-    - uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
+    - uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
       with:
         path: |
           ~/.cargo/registry/index/
@@ -74,7 +74,7 @@ jobs:
       run: rustup install "$RUST_LATEST_VERSION" --no-self-update && rustup default "$RUST_LATEST_VERSION"
     - name: Check rust installation
       run: rustc -vV
-    - uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
+    - uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
       with:
         path: |
           ~/.cargo/registry/index/
@@ -96,7 +96,7 @@ jobs:
         ROW_YES: "true"
     # The signac test requires python
     - name: Set up Python
-      uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38 # v5.4.0
+      uses: actions/setup-python@8d9ed9ac5c53483de85588cdf95a591a75ab9f55 # v5.5.0
       with:
         python-version: "3.12"
     - name: Set up Python environment
@@ -122,7 +122,7 @@ jobs:
       env:
         RUST_LOG: "mdbook=info"
     - name: Check links
-      uses: lycheeverse/lychee-action@f613c4a64e50d792e0b31ec34bbcbba12263c6a6  # v2.3.0
+      uses: lycheeverse/lychee-action@1d97d84f0bc547f7b25f4c2170d87d810dc2fb2c  # v2.4.0
       with:
         args: -n .
         fail: true
