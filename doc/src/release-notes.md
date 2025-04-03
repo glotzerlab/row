@@ -14,6 +14,7 @@ The subcommands `show directories`, `show jobs`, and `show status` now report
 
 * Writing tabular output with no rows now results in the output `No matches.`.
 * Build executables on Ubuntu 22.04.
+* Report an error when the workflow requests 0 processes, GPUs, or threads.
 
 ## 0.4.0 (2024-12-06)
 

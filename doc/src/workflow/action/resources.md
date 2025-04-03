@@ -38,16 +38,16 @@ When omitted, `processes` defaults to `per_submission = 1`.
 
 ## threads_per_process
 
-`action.resources.threads_per_process`: **integer** - The number of CPU threads your
-action utilizes per process. When omitted, **row** does not make any specific request
-for threads from the scheduler. Most schedulers default to 1 thread per process in this
-case.
+`action.resources.threads_per_process`: **positive integer** - The number of CPU threads
+your action utilizes per process. When omitted, **row** does not make any specific
+request for threads from the scheduler. Most schedulers default to 1 thread per process
+in this case.
 
 ## gpus_per_process
 
-`action.resources.gpus_per_process`: **integer** - The number of GPUs your action
-utilizes per process. When omitted, **row** does not make any specific request for GPUs
-from the scheduler. Most schedulers default to 0 GPUs per process in this case.
+`action.resources.gpus_per_process`: **positive integer** - The number of GPUs your
+action utilizes per process. When omitted, **row** does not make any specific request
+for GPUs from the scheduler. Most schedulers default to 0 GPUs per process in this case.
 
 ## walltime
 
