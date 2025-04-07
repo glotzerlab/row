@@ -28,11 +28,11 @@ repos:
   - id: check-case-conflict
   - id: mixed-line-ending
 - repo: https://github.com/rhysd/actionlint
-  rev: v1.7.6
+  rev: v1.7.7
   hooks:
     - id: actionlint
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: 'v0.8.6'
+  rev: 'v0.11.4'
   hooks:
   - id: ruff-format
   - id: ruff
@@ -46,7 +46,7 @@ repos:
     - --license-file=LICENSE
     - --add=Part of row, released under the BSD 3-Clause License.
 - repo: https://github.com/crate-ci/typos
-  rev: dictgen-v0.3.1
+  rev: v1
   hooks:
     - id: typos
       exclude_types: [css]

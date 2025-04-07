@@ -93,7 +93,7 @@ def get_nvidia_gpus():
             message = 'Unexpected match {match.group(1)}.'
             raise RuntimeError(message)
 
-    if len(migs):
+    if len(migs) > 0:
         return migs
 
     return gpus
