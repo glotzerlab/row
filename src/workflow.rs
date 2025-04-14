@@ -402,10 +402,12 @@ impl Resources {
             self.walltime.clone_from(&template.walltime);
         }
         if self.memory_per_cpu_mb.is_none() {
-            self.memory_per_cpu_mb.clone_from(&template.memory_per_cpu_mb);
+            self.memory_per_cpu_mb
+                .clone_from(&template.memory_per_cpu_mb);
         }
         if self.memory_per_gpu_mb.is_none() {
-            self.memory_per_gpu_mb.clone_from(&template.memory_per_gpu_mb);
+            self.memory_per_gpu_mb
+                .clone_from(&template.memory_per_gpu_mb);
         }
     }
 

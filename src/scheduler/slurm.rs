@@ -32,29 +32,31 @@ impl Slurm {
         Self { cluster, launchers }
     }
 
-    fn write_mem_per(preamble: &mut String, action_mem: Option<usize>, partition_mem: Option<usize>, processor_type: &str, action_name: &str) -> Result<(), Error> {
-
-            match (
-                action_mem,
-                partition_mem,
-            ) {
-                (None, Some(mem)) | (Some(mem), None) => {
-                    let _ = writeln!(preamble, "#SBATCH --mem-per-{processor_type}={mem}M");
-                }
-                (Some(mem_action), Some(mem_partition)) => {
-                    if mem_action < mem_partition {
-                        warn!(
-                            "Omit `memory_per_{processor_type}_mb` in action '{action_name}' to request more memory at no cost."
-                        );
-                        let _ = writeln!(preamble, "#SBATCH --mem-per-{processor_type}={mem_action}M");
-                    } else {
-                        return Err(Error::TooMuchMemory(action_name.into(), mem_action));
-                    }
-                }
-                (None, None) => {}
+    fn write_mem_per(
+        preamble: &mut String,
+        action_mem: Option<usize>,
+        partition_mem: Option<usize>,
+        processor_type: &str,
+        action_name: &str,
+    ) -> Result<(), Error> {
+        match (action_mem, partition_mem) {
+            (None, Some(mem)) | (Some(mem), None) => {
+                let _ = writeln!(preamble, "#SBATCH --mem-per-{processor_type}={mem}M");
             }
+            (Some(mem_action), Some(mem_partition)) => {
+                if mem_action < mem_partition {
+                    warn!(
+                        "Omit `memory_per_{processor_type}_mb` in action '{action_name}' to request more memory at no cost."
+                    );
+                    let _ = writeln!(preamble, "#SBATCH --mem-per-{processor_type}={mem_action}M");
+                } else {
+                    return Err(Error::TooMuchMemory(action_name.into(), mem_action));
+                }
+            }
+            (None, None) => {}
+        }
 
-    Ok(())
+        Ok(())
     }
 }
 
@@ -68,7 +70,6 @@ pub struct ActiveSlurmJobs {
 }
 
 impl Scheduler for Slurm {
-
     fn make_script(
         &self,
         action: &Action,
@@ -128,7 +129,13 @@ impl Scheduler for Slurm {
                 let _ = writeln!(preamble, "#SBATCH --nodes={n_nodes}");
             }
 
-            Slurm::write_mem_per(&mut preamble, action.resources.memory_per_gpu_mb, partition.memory_per_gpu_mb, "gpu", action.name())?;
+            Slurm::write_mem_per(
+                &mut preamble,
+                action.resources.memory_per_gpu_mb,
+                partition.memory_per_gpu_mb,
+                "gpu",
+                action.name(),
+            )?;
         } else {
             if let Some(ref cpus_per_node) = partition.cpus_per_node {
                 let n_nodes = action
@@ -138,7 +145,13 @@ impl Scheduler for Slurm {
                 let _ = writeln!(preamble, "#SBATCH --nodes={n_nodes}");
             }
 
-            Slurm::write_mem_per(&mut preamble, action.resources.memory_per_cpu_mb, partition.memory_per_cpu_mb, "cpu", action.name())?;
+            Slurm::write_mem_per(
+                &mut preamble,
+                action.resources.memory_per_cpu_mb,
+                partition.memory_per_cpu_mb,
+                "cpu",
+                action.name(),
+            )?;
         }
 
         // Slurm doesn't store times in seconds, so round up to the nearest minute.

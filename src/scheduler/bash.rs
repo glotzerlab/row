@@ -469,7 +469,7 @@ mod tests {
             walltime: Some(Walltime::PerSubmission(
                 Duration::new(true, 0, 240, 0).expect("Valid duration."),
             )),
-            .. Resources::default()
+            ..Resources::default()
         };
 
         let action = Action {
