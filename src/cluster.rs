@@ -86,7 +86,7 @@ pub struct Partition {
     pub warn_cpus_not_multiple_of: Option<usize>,
 
     /// Memory per CPU.
-    pub memory_per_cpu: Option<String>,
+    pub memory_per_cpu_mb: Option<usize>,
 
     /// CPUs per node.
     pub cpus_per_node: Option<usize>,
@@ -104,7 +104,7 @@ pub struct Partition {
     pub warn_gpus_not_multiple_of: Option<usize>,
 
     /// Memory per GPU.
-    pub memory_per_gpu: Option<String>,
+    pub memory_per_gpu_mb: Option<usize>,
 
     /// GPUs per node.
     pub gpus_per_node: Option<usize>,
@@ -358,13 +358,13 @@ impl Default for Partition {
         Partition {
             name: "partition".into(),
             maximum_cpus_per_job: None,
-            memory_per_cpu: None,
+            memory_per_cpu_mb: None,
             cpus_per_node: None,
             require_cpus_multiple_of: None,
             warn_cpus_not_multiple_of: None,
             minimum_gpus_per_job: None,
             maximum_gpus_per_job: None,
-            memory_per_gpu: None,
+            memory_per_gpu_mb: None,
             gpus_per_node: None,
             require_gpus_multiple_of: None,
             warn_gpus_not_multiple_of: None,
@@ -771,12 +771,12 @@ name = "d"
 maximum_cpus_per_job = 2
 require_cpus_multiple_of = 4
 warn_cpus_not_multiple_of = 4
-memory_per_cpu = "e"
+memory_per_cpu_mb = 50
 minimum_gpus_per_job = 8
 maximum_gpus_per_job = 16
 require_gpus_multiple_of = 32
 warn_gpus_not_multiple_of = 32
-memory_per_gpu = "f"
+memory_per_gpu_mb = 100
 cpus_per_node = 10
 gpus_per_node = 11
 account_suffix = "-gpu"
@@ -803,12 +803,12 @@ account_suffix = "-gpu"
                 maximum_cpus_per_job: Some(2),
                 require_cpus_multiple_of: Some(4),
                 warn_cpus_not_multiple_of: Some(4),
-                memory_per_cpu: Some("e".into()),
+                memory_per_cpu_mb: Some(50),
                 minimum_gpus_per_job: Some(8),
                 maximum_gpus_per_job: Some(16),
                 require_gpus_multiple_of: Some(32),
                 warn_gpus_not_multiple_of: Some(32),
-                memory_per_gpu: Some("f".into()),
+                memory_per_gpu_mb: Some(100),
                 prevent_auto_select: false,
                 cpus_per_node: Some(10),
                 gpus_per_node: Some(11),

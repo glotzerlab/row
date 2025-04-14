@@ -102,8 +102,8 @@ impl Scheduler for Slurm {
                 let _ = writeln!(preamble, "#SBATCH --nodes={n_nodes}");
             }
 
-            if let Some(ref mem_per_gpu) = partition.memory_per_gpu {
-                let _ = writeln!(preamble, "#SBATCH --mem-per-gpu={mem_per_gpu}");
+            if let Some(ref mem_per_gpu_mb) = partition.memory_per_gpu_mb {
+                let _ = writeln!(preamble, "#SBATCH --mem-per-gpu={mem_per_gpu_mb}M");
             }
         } else {
             if let Some(ref cpus_per_node) = partition.cpus_per_node {
@@ -114,8 +114,8 @@ impl Scheduler for Slurm {
                 let _ = writeln!(preamble, "#SBATCH --nodes={n_nodes}");
             }
 
-            if let Some(ref mem_per_cpu) = partition.memory_per_cpu {
-                let _ = writeln!(preamble, "#SBATCH --mem-per-cpu={mem_per_cpu}");
+            if let Some(ref mem_per_cpu_mb) = partition.memory_per_cpu_mb {
+                let _ = writeln!(preamble, "#SBATCH --mem-per-cpu={mem_per_cpu_mb}M");
             }
         }
 
@@ -471,7 +471,7 @@ mod tests {
             scheduler: SchedulerType::Slurm,
             submit_options: Vec::new(),
             partition: vec![Partition {
-                memory_per_cpu: Some("a".into()),
+                memory_per_cpu_mb: Some(5),
                 ..Partition::default()
             }],
         };
@@ -483,7 +483,7 @@ mod tests {
             .expect("valid script");
         println!("{script}");
 
-        assert!(script.contains("#SBATCH --mem-per-cpu=a"));
+        assert!(script.contains("#SBATCH --mem-per-cpu=5M"));
     }
 
     #[test]
@@ -498,7 +498,7 @@ mod tests {
             scheduler: SchedulerType::Slurm,
             submit_options: Vec::new(),
             partition: vec![Partition {
-                memory_per_gpu: Some("b".into()),
+                memory_per_gpu_mb: Some(12),
                 ..Partition::default()
             }],
         };
@@ -512,7 +512,7 @@ mod tests {
             .expect("valid script");
         println!("{script}");
 
-        assert!(script.contains("#SBATCH --mem-per-gpu=b"));
+        assert!(script.contains("#SBATCH --mem-per-gpu=12M"));
     }
 
     #[test]
