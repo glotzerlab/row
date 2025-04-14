@@ -162,6 +162,12 @@ pub struct Resources {
 
     // Walltime.
     pub walltime: Option<Walltime>,
+
+    // Memory per CPU (in MB).
+    pub memory_per_cpu_mb: Option<usize>,
+
+    // Memory per GPU (in MB).
+    pub memory_per_gpu_mb: Option<usize>,
 }
 
 /// Comparison operations
@@ -394,6 +400,12 @@ impl Resources {
         }
         if self.walltime.is_none() {
             self.walltime.clone_from(&template.walltime);
+        }
+        if self.memory_per_cpu_mb.is_none() {
+            self.memory_per_cpu_mb.clone_from(&template.memory_per_cpu_mb);
+        }
+        if self.memory_per_gpu_mb.is_none() {
+            self.memory_per_gpu_mb.clone_from(&template.memory_per_gpu_mb);
         }
     }
 
@@ -900,6 +912,8 @@ command = "c"
         assert_eq!(action.resources.threads_per_process, None);
         assert_eq!(action.resources.gpus_per_process, None);
         assert_eq!(action.resources.walltime, None,);
+        assert_eq!(action.resources.memory_per_cpu_mb, None,);
+        assert_eq!(action.resources.memory_per_gpu_mb, None,);
         assert_eq!(
             action.resources.walltime(),
             Walltime::PerDirectory(Duration::new(true, 0, 3600, 0).unwrap())
@@ -1145,6 +1159,8 @@ processes.per_submission = 12
 threads_per_process = 8
 gpus_per_process = 1
 walltime.per_submission = "4d, 05:32:11"
+memory_per_cpu_mb = 18
+memory_per_gpu_mb = 26
 "#;
 
         let workflow = Workflow::open_str(temp.path(), workflow).unwrap();
@@ -1162,6 +1178,8 @@ walltime.per_submission = "4d, 05:32:11"
                     .expect("this should be a valid Duration"),
             )
         );
+        assert_eq!(action.resources.memory_per_cpu_mb, Some(18));
+        assert_eq!(action.resources.memory_per_gpu_mb, Some(26));
     }
 
     #[test]
@@ -1665,6 +1683,8 @@ processes.per_directory = 2
 threads_per_process = 3
 gpus_per_process = 4
 walltime.per_submission = "00:00:01"
+memory_per_cpu_mb = 34
+memory_per_gpu_mb = 87
 
 # submit_options is tested above
 
@@ -1700,6 +1720,8 @@ name = "d"
             action.resources.walltime(),
             Walltime::PerSubmission(Duration::new(true, 0, 1, 0).unwrap())
         );
+        assert_eq!(action.resources.memory_per_cpu_mb, Some(34));
+        assert_eq!(action.resources.memory_per_gpu_mb, Some(87));
         assert!(action.submit_options.is_empty());
         assert_eq!(
             action.group.include(),
@@ -1733,6 +1755,8 @@ processes.per_directory = 2
 threads_per_process = 3
 gpus_per_process = 4
 walltime.per_submission = "00:00:01"
+memory_per_cpu_mb = 34
+memory_per_gpu_mb = 87
 
 # submit_options is tested above
 
@@ -1757,6 +1781,8 @@ processes.per_directory = 4
 threads_per_process = 6
 gpus_per_process = 8
 walltime.per_submission = "00:00:02"
+memory_per_cpu_mb = 89
+memory_per_gpu_mb = 22
 
 # submit_options is tested above
 
@@ -1790,6 +1816,8 @@ name = "dd"
             action.resources.walltime(),
             Walltime::PerSubmission(Duration::new(true, 0, 2, 0).unwrap())
         );
+        assert_eq!(action.resources.memory_per_cpu_mb, Some(89));
+        assert_eq!(action.resources.memory_per_gpu_mb, Some(22));
         assert!(action.submit_options.is_empty());
         assert_eq!(
             action.group.include(),
@@ -1824,6 +1852,8 @@ processes.per_directory = 2
 threads_per_process = 3
 gpus_per_process = 4
 walltime.per_submission = "00:00:01"
+memory_per_cpu_mb = 34
+memory_per_gpu_mb = 87
 
 # submit_options is tested above
 
@@ -1861,6 +1891,8 @@ command = "e"
             action.resources.walltime(),
             Walltime::PerSubmission(Duration::new(true, 0, 1, 0).unwrap())
         );
+        assert_eq!(action.resources.memory_per_cpu_mb, Some(34));
+        assert_eq!(action.resources.memory_per_gpu_mb, Some(87));
         assert!(action.submit_options.is_empty());
         assert_eq!(
             action.group.include(),
@@ -1895,6 +1927,8 @@ processes.per_directory = 2
 threads_per_process = 3
 gpus_per_process = 4
 walltime.per_submission = "00:00:01"
+memory_per_cpu_mb = 34
+memory_per_gpu_mb = 87
 
 # submit_options is tested above
 
@@ -1921,6 +1955,8 @@ processes.per_directory = 4
 threads_per_process = 6
 gpus_per_process = 8
 walltime.per_submission = "00:00:02"
+memory_per_cpu_mb = 16
+memory_per_gpu_mb = 12
 
 # submit_options is tested above
 
@@ -1959,6 +1995,8 @@ command = "e"
             action.resources.walltime(),
             Walltime::PerSubmission(Duration::new(true, 0, 2, 0).unwrap())
         );
+        assert_eq!(action.resources.memory_per_cpu_mb, Some(16));
+        assert_eq!(action.resources.memory_per_gpu_mb, Some(12));
         assert!(action.submit_options.is_empty());
         assert_eq!(
             action.group.include(),
@@ -2155,6 +2193,7 @@ resources.processes.per_directory = 8
             )),
             threads_per_process: Some(4),
             gpus_per_process: Some(2),
+            ..Resources::default()
         };
 
         assert_eq!(r.cost(1), ResourceCost::with_values(0.0, 20.0));

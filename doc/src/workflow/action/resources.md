@@ -72,3 +72,17 @@ independent of the submission group size. Use `per_directory` when your action l
 over the directories and therefore the walltime scales with the number of directories.
 
 When omitted, `walltime` defaults to `per_directory = 01:00:00`.
+
+## memory_per_cpu_mb
+
+`action.resources.memory_per_cpu_mb`: **integer** - The number of megabytes of memory to
+request per CPU (thread). `memory_per_cpu_mb is used when `gpus_per_process` is unset.
+
+> Note: Most users should omit `memory_per_cpu_mb`. When omitted **row** will
+automatically select the maximum amount of memory possible without incurring
+extra charges on your HPC resources.
+
+## memory_per_gpu_mb
+
+Similar to `memory_per_cpu_mb`, but for GPUs. `memory_per_gpu_mb` is used when
+`gpus_per_process` is set.

@@ -1,7 +1,7 @@
 // Copyright (c) 2024-2025 The Regents of the University of Michigan.
 // Part of row, released under the BSD 3-Clause License.
 
-use log::{debug, error, trace};
+use log::{debug, error, trace, warn};
 use serde_json::Value;
 use std::collections::{HashMap, HashSet};
 use std::fmt::Write as _;
@@ -102,9 +102,17 @@ impl Scheduler for Slurm {
                 let _ = writeln!(preamble, "#SBATCH --nodes={n_nodes}");
             }
 
-            if let Some(ref mem_per_gpu_mb) = partition.memory_per_gpu_mb {
-                let _ = writeln!(preamble, "#SBATCH --mem-per-gpu={mem_per_gpu_mb}M");
-            }
+            match (action.resources.memory_per_gpu_mb, partition.memory_per_gpu_mb) {
+                (None, Some(mem)) | (Some(mem), None) => {let _ = writeln!(preamble, "#SBATCH --mem-per-gpu={mem}M");},
+                (Some(mem_action), Some(mem_partition)) => { if mem_action < mem_partition {
+                    warn!("Omit `memory_per_gpu_mb` in action '{}' to request more memory at no cost.", action.name());
+                    let _ = writeln!(preamble, "#SBATCH --mem-per-gpu={mem_action}M");
+                    } else {
+                        return Err(Error::TooMuchMemory(action.name().into(), mem_action));
+                        }
+                }
+                (None, None) => {}
+            }               
         } else {
             if let Some(ref cpus_per_node) = partition.cpus_per_node {
                 let n_nodes = action
@@ -114,8 +122,16 @@ impl Scheduler for Slurm {
                 let _ = writeln!(preamble, "#SBATCH --nodes={n_nodes}");
             }
 
-            if let Some(ref mem_per_cpu_mb) = partition.memory_per_cpu_mb {
-                let _ = writeln!(preamble, "#SBATCH --mem-per-cpu={mem_per_cpu_mb}M");
+            match (action.resources.memory_per_cpu_mb, partition.memory_per_cpu_mb) {
+                (None, Some(mem)) | (Some(mem), None) => {let _ = writeln!(preamble, "#SBATCH --mem-per-cpu={mem}M");},
+                (Some(mem_action), Some(mem_partition)) => { if mem_action < mem_partition {
+                    warn!("Omit `memory_per_cpu_mb` in action '{}' to request more memory at no cost.", action.name());
+                    let _ = writeln!(preamble, "#SBATCH --mem-per-cpu={mem_action}M");
+                    } else {
+                        return Err(Error::TooMuchMemory(action.name().into(), mem_action));
+                        }
+                }
+                (None, None) => {}
             }
         }
 
@@ -462,7 +478,7 @@ mod tests {
     #[test]
     #[parallel]
     fn mem_per_cpu() {
-        let (action, directories, _) = setup();
+        let (mut action, directories, _) = setup();
 
         let launchers = launcher::Configuration::built_in();
         let cluster = Cluster {
@@ -484,6 +500,21 @@ mod tests {
         println!("{script}");
 
         assert!(script.contains("#SBATCH --mem-per-cpu=5M"));
+
+        action.resources.memory_per_cpu_mb = Some(2);
+
+        let script = slurm
+            .make_script(&action, &directories, &PathBuf::default(), &HashMap::new())
+            .expect("valid script");
+        println!("{script}");
+
+        assert!(script.contains("#SBATCH --mem-per-cpu=2M"));
+
+        action.resources.memory_per_cpu_mb = Some(10);
+
+        assert!(matches!(slurm
+            .make_script(&action, &directories, &PathBuf::default(), &HashMap::new()),
+            Err(Error::TooMuchMemory(_, _))));
     }
 
     #[test]
@@ -513,6 +544,21 @@ mod tests {
         println!("{script}");
 
         assert!(script.contains("#SBATCH --mem-per-gpu=12M"));
+
+        action.resources.memory_per_gpu_mb = Some(4);
+
+        let script = slurm
+            .make_script(&action, &directories, &PathBuf::default(), &HashMap::new())
+            .expect("valid script");
+        println!("{script}");
+
+        assert!(script.contains("#SBATCH --mem-per-gpu=4M"));
+
+        action.resources.memory_per_gpu_mb = Some(20);
+
+        assert!(matches!(slurm
+            .make_script(&action, &directories, &PathBuf::default(), &HashMap::new()),
+            Err(Error::TooMuchMemory(_, _))));
     }
 
     #[test]
