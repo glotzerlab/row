@@ -31,6 +31,31 @@ impl Slurm {
     pub fn new(cluster: Cluster, launchers: HashMap<String, Launcher>) -> Self {
         Self { cluster, launchers }
     }
+
+    fn write_mem_per(preamble: &mut String, action_mem: Option<usize>, partition_mem: Option<usize>, processor_type: &str, action_name: &str) -> Result<(), Error> {
+
+            match (
+                action_mem,
+                partition_mem,
+            ) {
+                (None, Some(mem)) | (Some(mem), None) => {
+                    let _ = writeln!(preamble, "#SBATCH --mem-per-{processor_type}={mem}M");
+                }
+                (Some(mem_action), Some(mem_partition)) => {
+                    if mem_action < mem_partition {
+                        warn!(
+                            "Omit `memory_per_{processor_type}_mb` in action '{action_name}' to request more memory at no cost."
+                        );
+                        let _ = writeln!(preamble, "#SBATCH --mem-per-{processor_type}={mem_action}M");
+                    } else {
+                        return Err(Error::TooMuchMemory(action_name.into(), mem_action));
+                    }
+                }
+                (None, None) => {}
+            }
+
+    Ok(())
+    }
 }
 
 /** Track the running squeue process
@@ -43,6 +68,7 @@ pub struct ActiveSlurmJobs {
 }
 
 impl Scheduler for Slurm {
+
     fn make_script(
         &self,
         action: &Action,
@@ -102,17 +128,7 @@ impl Scheduler for Slurm {
                 let _ = writeln!(preamble, "#SBATCH --nodes={n_nodes}");
             }
 
-            match (action.resources.memory_per_gpu_mb, partition.memory_per_gpu_mb) {
-                (None, Some(mem)) | (Some(mem), None) => {let _ = writeln!(preamble, "#SBATCH --mem-per-gpu={mem}M");},
-                (Some(mem_action), Some(mem_partition)) => { if mem_action < mem_partition {
-                    warn!("Omit `memory_per_gpu_mb` in action '{}' to request more memory at no cost.", action.name());
-                    let _ = writeln!(preamble, "#SBATCH --mem-per-gpu={mem_action}M");
-                    } else {
-                        return Err(Error::TooMuchMemory(action.name().into(), mem_action));
-                        }
-                }
-                (None, None) => {}
-            }               
+            Slurm::write_mem_per(&mut preamble, action.resources.memory_per_gpu_mb, partition.memory_per_gpu_mb, "gpu", action.name())?;
         } else {
             if let Some(ref cpus_per_node) = partition.cpus_per_node {
                 let n_nodes = action
@@ -122,17 +138,7 @@ impl Scheduler for Slurm {
                 let _ = writeln!(preamble, "#SBATCH --nodes={n_nodes}");
             }
 
-            match (action.resources.memory_per_cpu_mb, partition.memory_per_cpu_mb) {
-                (None, Some(mem)) | (Some(mem), None) => {let _ = writeln!(preamble, "#SBATCH --mem-per-cpu={mem}M");},
-                (Some(mem_action), Some(mem_partition)) => { if mem_action < mem_partition {
-                    warn!("Omit `memory_per_cpu_mb` in action '{}' to request more memory at no cost.", action.name());
-                    let _ = writeln!(preamble, "#SBATCH --mem-per-cpu={mem_action}M");
-                    } else {
-                        return Err(Error::TooMuchMemory(action.name().into(), mem_action));
-                        }
-                }
-                (None, None) => {}
-            }
+            Slurm::write_mem_per(&mut preamble, action.resources.memory_per_cpu_mb, partition.memory_per_cpu_mb, "cpu", action.name())?;
         }
 
         // Slurm doesn't store times in seconds, so round up to the nearest minute.
@@ -512,9 +518,10 @@ mod tests {
 
         action.resources.memory_per_cpu_mb = Some(10);
 
-        assert!(matches!(slurm
-            .make_script(&action, &directories, &PathBuf::default(), &HashMap::new()),
-            Err(Error::TooMuchMemory(_, _))));
+        assert!(matches!(
+            slurm.make_script(&action, &directories, &PathBuf::default(), &HashMap::new()),
+            Err(Error::TooMuchMemory(_, _))
+        ));
     }
 
     #[test]
@@ -556,9 +563,10 @@ mod tests {
 
         action.resources.memory_per_gpu_mb = Some(20);
 
-        assert!(matches!(slurm
-            .make_script(&action, &directories, &PathBuf::default(), &HashMap::new()),
-            Err(Error::TooMuchMemory(_, _))));
+        assert!(matches!(
+            slurm.make_script(&action, &directories, &PathBuf::default(), &HashMap::new()),
+            Err(Error::TooMuchMemory(_, _))
+        ));
     }
 
     #[test]
