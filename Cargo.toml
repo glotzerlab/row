@@ -1,8 +1,8 @@
 [package]
 name = "row"
 version = "0.4.0"
-edition = "2021"
-rust-version = "1.81"
+edition = "2024"
+rust-version = "1.85"
 description = "Row is a command line tool that helps you manage workflows on HPC resources."
 homepage = "https://glotzerlab.engin.umich.edu"
 documentation = "https://row.readthedocs.io"
