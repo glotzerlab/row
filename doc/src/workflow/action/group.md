@@ -57,6 +57,15 @@ Compare by array:
 condition = ["/array", "==", [1, "string", 14.0]
 ```
 
+Add additional tables, combining conditions with a logical or:
+```toml
+[[action.group.include]]
+all = [["/value", ">", 0.2], ["/value", "<", 0.9]]
+
+[[action.group.include]]
+condition = ["/value", "==", 0.05]
+```
+
 > Note: **Row** compares arrays *lexicographically*.
 
 <div class="warning">
