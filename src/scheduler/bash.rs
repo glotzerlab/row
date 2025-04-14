@@ -391,7 +391,7 @@ impl Scheduler for Bash {
 
             match child.try_wait() {
                 Ok(Some(status)) => break status,
-                Ok(None) => continue,
+                Ok(None) => (),
                 Err(e) => return Err(Error::SpawnProcess("bash".into(), e)),
             }
         };

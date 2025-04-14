@@ -62,8 +62,7 @@ fn find(
     for (action_name, jobs_by_directory) in project.state().submitted() {
         if !action_matcher.matches(action_name) {
             trace!(
-                "Skipping action '{}'. It does not match the pattern '{}'.",
-                action_name, action
+                "Skipping action '{action_name}'. It does not match the pattern '{action}'."
             );
             continue;
         }

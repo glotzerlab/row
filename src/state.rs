@@ -195,7 +195,7 @@ impl State {
 
         match fs::read(&directory_file) {
             Ok(bytes) => {
-                debug!("Reading cache '{}'.", directory_file.display().to_string());
+                debug!("Reading cache '{}'.", directory_file.display());
 
                 let result = serde_json::from_slice(&bytes)
                     .map_err(|e| Error::JSONParse(directory_file, e))?;
@@ -206,7 +206,7 @@ impl State {
                 io::ErrorKind::NotFound => {
                     trace!(
                         "'{}' not found, initializing default values.",
-                        directory_file.display().to_string()
+                        directory_file.display()
                     );
                     Ok(DirectoryCache {
                         modified_time: (0, 0),
@@ -228,7 +228,7 @@ impl State {
 
         match fs::read(&completed_file) {
             Ok(bytes) => {
-                debug!("Reading cache '{}'.", completed_file.display().to_string());
+                debug!("Reading cache '{}'.", completed_file.display());
 
                 let result = postcard::from_bytes(&bytes)
                     .map_err(|e| Error::PostcardParse(completed_file, e))?;
@@ -238,7 +238,7 @@ impl State {
                 io::ErrorKind::NotFound => {
                     trace!(
                         "'{}' not found, initializing empty completions.",
-                        completed_file.display().to_string()
+                        completed_file.display()
                     );
                     Ok(HashMap::new())
                 }
@@ -255,7 +255,7 @@ impl State {
 
         match fs::read(&submitted_file) {
             Ok(bytes) => {
-                debug!("Reading cache '{}'.", submitted_file.display().to_string());
+                debug!("Reading cache '{}'.", submitted_file.display());
 
                 let result = postcard::from_bytes(&bytes)
                     .map_err(|e| Error::PostcardParse(submitted_file, e))?;
@@ -265,7 +265,7 @@ impl State {
                 io::ErrorKind::NotFound => {
                     debug!(
                         "'{}' not found, assuming no submitted jobs.",
-                        submitted_file.display().to_string()
+                        submitted_file.display()
                     );
                     Ok(HashMap::new())
                 }
@@ -310,7 +310,7 @@ impl State {
 
         debug!(
             "Saving directory cache: '{}'.",
-            directory_cache_file.display().to_string()
+            directory_cache_file.display()
         );
 
         let out_bytes: Vec<u8> = serde_json::to_vec(&self.directory_cache)
@@ -335,7 +335,7 @@ impl State {
 
         debug!(
             "Saving completed cache: '{}'.",
-            completed_file.display().to_string()
+            completed_file.display()
         );
 
         // Save the combined cache first.
@@ -361,7 +361,7 @@ impl State {
         progress.tick();
 
         for completed_file_name in &self.completed_file_names {
-            trace!("Removing '{}'.", completed_file_name.display().to_string());
+            trace!("Removing '{}'.", completed_file_name.display());
             fs::remove_file(completed_file_name)
                 .map_err(|e| Error::FileRemove(completed_file_name.clone(), e))?;
         }
@@ -378,7 +378,7 @@ impl State {
 
         debug!(
             "Saving submitted job cache: '{}'.",
-            submitted_file.display().to_string()
+            submitted_file.display()
         );
 
         let out_bytes: Vec<u8> = postcard::to_stdvec(&self.submitted)
@@ -538,8 +538,7 @@ impl State {
 
         for action_name in actions_to_remove {
             warn!(
-                "Removing action '{}' from the completed cache as it is no longer present in the workflow.",
-                action_name
+                "Removing action '{action_name}' from the completed cache as it is no longer present in the workflow."
             );
             self.completed.remove(&action_name);
             self.completed_modified = true;
@@ -577,8 +576,7 @@ impl State {
 
         for action_name in actions_to_remove {
             warn!(
-                "Removing action '{}' from the submitted cache as it is no longer present in the workflow.",
-                action_name
+                "Removing action '{action_name}' from the submitted cache as it is no longer present in the workflow."
             );
             self.submitted.remove(&action_name);
             self.submitted_modified = true;
@@ -617,7 +615,7 @@ impl State {
             .join(COMPLETED_DIRECTORY_NAME);
         debug!(
             "Reading completed files in '{}'.",
-            completed_path.display().to_string()
+            completed_path.display()
         );
 
         match completed_path.read_dir() {
@@ -629,12 +627,12 @@ impl State {
 
                     if let Some(extension) = path.extension() {
                         if extension == "postcard" {
-                            trace!("Reading '{}'", path.display().to_string());
+                            trace!("Reading '{}'", path.display());
                             self.completed_file_names.push(path);
                         } else {
                             trace!(
                                 "Ignoring non-postcard file '{}'",
-                                path.display().to_string()
+                                path.display()
                             );
                         }
                     }
@@ -643,13 +641,13 @@ impl State {
 
             Err(error) => match error.kind() {
                 io::ErrorKind::NotFound => {
-                    trace!("'{}' not found.", completed_path.display().to_string());
+                    trace!("'{}' not found.", completed_path.display());
                     return Ok(());
                 }
 
                 _ => return Err(Error::DirectoryRead(completed_path, error)),
             },
-        };
+        }
 
         if self.completed_file_names.is_empty() {
             return Ok(());
@@ -667,7 +665,7 @@ impl State {
         progress.tick();
 
         for completed_file_name in &self.completed_file_names {
-            trace!("Reading '{}'.", completed_file_name.display().to_string());
+            trace!("Reading '{}'.", completed_file_name.display());
             let bytes = fs::read(completed_file_name)
                 .map_err(|e| Error::FileRead(completed_file_name.clone(), e))?;
             let new_complete: HashMap<String, HashSet<PathBuf>> = postcard::from_bytes(&bytes)

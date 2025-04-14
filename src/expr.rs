@@ -40,7 +40,7 @@ pub(crate) fn partial_cmp_json_values(a: &Value, b: &Value) -> Option<Ordering> 
                         Some(Ordering::Greater) => return Some(Ordering::Greater),
                         None => return None,
                         Some(Ordering::Equal) => (),
-                    };
+                    }
                 }
                 Some(Ordering::Equal)
             }

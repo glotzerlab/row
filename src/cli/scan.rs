@@ -100,7 +100,7 @@ pub fn scan(
     trace!(
         "Writing {} bytes to '{}'.",
         bytes.len(),
-        tmp_filename.display().to_string()
+        tmp_filename.display()
     );
     let mut file =
         File::create_new(&tmp_filename).map_err(|e| Error::FileWrite(tmp_filename.clone(), e))?;

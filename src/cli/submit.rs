@@ -290,9 +290,8 @@ pub fn submit<W: Write>(
             Ok(Some(job_id)) => {
                 println!("Row submitted job {job_id}.");
                 project.add_submitted(action.name(), directories, job_id);
-                continue;
             }
-            Ok(None) => continue,
+            Ok(None) => (),
         }
     }
 
