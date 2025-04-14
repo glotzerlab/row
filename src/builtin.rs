@@ -236,7 +236,6 @@ fn greatlakes() -> Cluster {
             Partition {
                 name: "standard".into(),
                 maximum_gpus_per_job: Some(0),
-                cpus_per_node: Some(36),
                 memory_per_cpu_mb: Some(5 * 1024),
                 ..Partition::default()
             },
@@ -278,7 +277,6 @@ fn greatlakes() -> Cluster {
             Partition {
                 name: "standard-oc".into(),
                 maximum_gpus_per_job: Some(0),
-                cpus_per_node: Some(36),
                 memory_per_cpu_mb: Some(5 * 1024),
                 prevent_auto_select: true,
                 ..Partition::default()
@@ -286,7 +284,6 @@ fn greatlakes() -> Cluster {
             Partition {
                 name: "debug".into(),
                 maximum_gpus_per_job: Some(0),
-                cpus_per_node: Some(36),
                 memory_per_cpu_mb: Some(5 * 1024),
                 prevent_auto_select: true,
                 ..Partition::default()

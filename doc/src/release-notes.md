@@ -38,6 +38,10 @@ extra charges on your HPC resources.
 * Memory requests in `clusters.toml` must now be set in MB. The `memory_per_*`
   keys are renamed to `memory_per_*_mb`.
 
+*Fixed:*
+
+* Submit MPI jobs on Great Lakes without error.
+
 ## 0.4.0 (2024-12-06)
 
 *Highlights:*
