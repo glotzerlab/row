@@ -18,8 +18,8 @@ mod cli;
 mod ui;
 
 use cli::{ColorMode, Commands, Options, ShowCommands};
-use row::format::HumanDuration;
 use row::MultiProgressContainer;
+use row::format::HumanDuration;
 use ui::MultiProgressWriter;
 
 fn main_detail() -> Result<(), Box<dyn Error>> {

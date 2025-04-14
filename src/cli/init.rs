@@ -11,7 +11,7 @@ use std::io::Write;
 use std::path::{self, Path, PathBuf};
 
 use crate::cli::GlobalOptions;
-use row::{Error, DATA_DIRECTORY_NAME};
+use row::{DATA_DIRECTORY_NAME, Error};
 
 #[derive(Args, Debug)]
 pub struct Arguments {

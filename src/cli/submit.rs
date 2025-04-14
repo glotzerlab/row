@@ -14,16 +14,16 @@ use std::fmt::Write as _;
 use std::io::prelude::*;
 use std::io::{self, IsTerminal};
 use std::path::PathBuf;
-use std::sync::atomic::AtomicBool;
 use std::sync::Arc;
+use std::sync::atomic::AtomicBool;
 use std::time::Instant;
 use wildmatch::WildMatch;
 
-use crate::cli::{autocomplete, GlobalOptions};
+use crate::cli::{GlobalOptions, autocomplete};
+use row::MultiProgressContainer;
 use row::format::HumanDuration;
 use row::project::Project;
 use row::workflow::{Action, ResourceCost};
-use row::MultiProgressContainer;
 
 #[derive(Args, Debug)]
 pub struct Arguments {
@@ -290,9 +290,8 @@ pub fn submit<W: Write>(
             Ok(Some(job_id)) => {
                 println!("Row submitted job {job_id}.");
                 project.add_submitted(action.name(), directories, job_id);
-                continue;
             }
-            Ok(None) => continue,
+            Ok(None) => (),
         }
     }
 

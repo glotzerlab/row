@@ -10,10 +10,10 @@ use std::error::Error;
 use std::io::Write;
 use std::path::PathBuf;
 
-use crate::cli::{self, autocomplete, GlobalOptions};
+use crate::cli::{self, GlobalOptions, autocomplete};
 use crate::ui::{Alignment, Item, Row, Table};
-use row::project::Project;
 use row::MultiProgressContainer;
+use row::project::Project;
 
 #[derive(Args, Debug)]
 #[allow(clippy::struct_excessive_bools)]
@@ -216,7 +216,9 @@ pub fn print_matching<W: Write>(
 
                 for pointer in &args.value {
                     if !pointer.is_empty() && !pointer.starts_with('/') {
-                        warn!("The JSON pointer '{pointer}' does not appear valid. Did you mean '/{pointer}'?");
+                        warn!(
+                            "The JSON pointer '{pointer}' does not appear valid. Did you mean '/{pointer}'?"
+                        );
                     }
 
                     let value = project.state().values()[directory]

@@ -10,10 +10,10 @@ use std::io::prelude::*;
 use std::path::PathBuf;
 use uuid::Uuid;
 
-use crate::cli::{self, autocomplete, GlobalOptions};
+use crate::cli::{self, GlobalOptions, autocomplete};
 use row::workflow::Workflow;
 use row::{
-    workspace, Error, MultiProgressContainer, COMPLETED_DIRECTORY_NAME, DATA_DIRECTORY_NAME,
+    COMPLETED_DIRECTORY_NAME, DATA_DIRECTORY_NAME, Error, MultiProgressContainer, workspace,
 };
 
 #[derive(Args, Debug)]
@@ -100,7 +100,7 @@ pub fn scan(
     trace!(
         "Writing {} bytes to '{}'.",
         bytes.len(),
-        tmp_filename.display().to_string()
+        tmp_filename.display()
     );
     let mut file =
         File::create_new(&tmp_filename).map_err(|e| Error::FileWrite(tmp_filename.clone(), e))?;

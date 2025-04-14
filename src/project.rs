@@ -13,9 +13,9 @@ use crate::cluster::{self, SchedulerType};
 use crate::expr;
 use crate::launcher;
 use crate::progress_styles;
+use crate::scheduler::Scheduler;
 use crate::scheduler::bash::Bash;
 use crate::scheduler::slurm::Slurm;
-use crate::scheduler::Scheduler;
 use crate::state::State;
 use crate::workflow::{Action, Selector, Workflow};
 use crate::{Error, MultiProgressContainer};
@@ -410,8 +410,8 @@ impl Project {
 
 #[cfg(test)]
 mod tests {
-    use assert_fs::prelude::*;
     use assert_fs::TempDir;
+    use assert_fs::prelude::*;
     use indicatif::{MultiProgress, ProgressDrawTarget};
     use serde_json::Value;
     use serial_test::serial;

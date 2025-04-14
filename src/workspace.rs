@@ -14,7 +14,7 @@ use std::thread::{self, JoinHandle};
 use std::time::Duration;
 
 use crate::workflow::Workflow;
-use crate::{progress_styles, Error, MultiProgressContainer, MIN_PROGRESS_BAR_SIZE};
+use crate::{Error, MIN_PROGRESS_BAR_SIZE, MultiProgressContainer, progress_styles};
 
 /** List all directories in the workspace as found on the filesystem.
 
@@ -341,8 +341,8 @@ impl DirectoryValues {
 
 #[cfg(test)]
 mod tests {
-    use assert_fs::prelude::*;
     use assert_fs::TempDir;
+    use assert_fs::prelude::*;
     use indicatif::{MultiProgress, ProgressDrawTarget};
     use serial_test::parallel;
     use std::path::PathBuf;

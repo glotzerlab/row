@@ -9,16 +9,16 @@ use std::io::Write;
 use std::os::unix::process::ExitStatusExt;
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
-use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::{str, thread};
 
+use crate::Error;
 use crate::cluster::Cluster;
 use crate::launcher::Launcher;
 use crate::scheduler::bash::BashScriptBuilder;
 use crate::scheduler::{ActiveJobs, Scheduler};
 use crate::workflow::Action;
-use crate::Error;
 
 /// The `Slurm` scheduler constructs bash scripts and executes them with `sbatch`.
 pub struct Slurm {

@@ -11,11 +11,11 @@ use std::io::Write;
 use std::path::PathBuf;
 use wildmatch::WildMatch;
 
-use crate::cli::{self, autocomplete, GlobalOptions};
+use crate::cli::{self, GlobalOptions, autocomplete};
 use crate::ui::{Alignment, Item, Row, Table};
+use row::MultiProgressContainer;
 use row::project::{Project, Status};
 use row::workflow::ResourceCost;
-use row::MultiProgressContainer;
 
 #[allow(clippy::struct_excessive_bools)]
 #[derive(Args, Debug)]
