@@ -99,6 +99,7 @@ fn anvil() -> Cluster {
                 name: "shared".into(),
                 maximum_cpus_per_job: Some(127),
                 maximum_gpus_per_job: Some(0),
+                memory_per_cpu_mb: Some(1800),
                 ..Partition::default()
             },
             Partition {
@@ -125,6 +126,7 @@ fn anvil() -> Cluster {
                 name: "highmem".into(),
                 maximum_gpus_per_job: Some(0),
                 prevent_auto_select: true,
+                memory_per_cpu_mb: Some(7900),
                 ..Partition::default()
             },
             Partition {
