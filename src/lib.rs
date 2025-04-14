@@ -172,7 +172,9 @@ pub enum Error {
     #[error("Interrupted")]
     Interrupted,
 
-    #[error("'{0}' would be submitted multiple times in action '{1}'.\nCheck that duplicate actions include non-overlapping groups.")]
+    #[error(
+        "'{0}' would be submitted multiple times in action '{1}'.\nCheck that duplicate actions include non-overlapping groups."
+    )]
     WouldSubmitMultipleTimes(PathBuf, String),
 
     // launcher errors

@@ -7,8 +7,8 @@ use std::error::Error;
 use std::{fs, io};
 
 use crate::cli::GlobalOptions;
-use row::project::Project;
 use row::MultiProgressContainer;
+use row::project::Project;
 use row::{
     COMPLETED_CACHE_FILE_NAME, DATA_DIRECTORY_NAME, DIRECTORY_CACHE_FILE_NAME,
     SUBMITTED_CACHE_FILE_NAME,

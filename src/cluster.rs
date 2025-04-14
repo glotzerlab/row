@@ -10,9 +10,9 @@ use std::io::prelude::*;
 use std::io::{self, BufReader};
 use std::path::{Path, PathBuf};
 
+use crate::Error;
 use crate::builtin::BuiltIn;
 use crate::workflow::Resources;
-use crate::Error;
 
 /** Cluster configuration
 
@@ -219,8 +219,7 @@ impl Cluster {
     fn identity_matches(&self) -> bool {
         trace!(
             "Checking cluster '{}' via '{:?}'.",
-            self.name,
-            self.identify
+            self.name, self.identify
         );
         match &self.identify {
             IdentificationMethod::Always(condition) => *condition,
@@ -377,8 +376,8 @@ impl Default for Partition {
 
 #[cfg(test)]
 mod tests {
-    use assert_fs::prelude::*;
     use assert_fs::TempDir;
+    use assert_fs::prelude::*;
     use serial_test::{parallel, serial};
 
     use super::*;

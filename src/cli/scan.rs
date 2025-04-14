@@ -10,10 +10,10 @@ use std::io::prelude::*;
 use std::path::PathBuf;
 use uuid::Uuid;
 
-use crate::cli::{self, autocomplete, GlobalOptions};
+use crate::cli::{self, GlobalOptions, autocomplete};
 use row::workflow::Workflow;
 use row::{
-    workspace, Error, MultiProgressContainer, COMPLETED_DIRECTORY_NAME, DATA_DIRECTORY_NAME,
+    COMPLETED_DIRECTORY_NAME, DATA_DIRECTORY_NAME, Error, MultiProgressContainer, workspace,
 };
 
 #[derive(Args, Debug)]

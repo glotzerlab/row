@@ -14,16 +14,16 @@ use std::io::Write;
 use std::os::unix::process::ExitStatusExt;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
-use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::thread;
 use std::time::Duration;
 
+use crate::Error;
 use crate::cluster::Cluster;
 use crate::launcher::Launcher;
 use crate::scheduler::{ActiveJobs, Scheduler};
 use crate::workflow::{Action, Processes};
-use crate::Error;
 
 /// `BashScriptBuilder` builds `bash` scripts that execute row actions.
 pub(crate) struct BashScriptBuilder<'a> {

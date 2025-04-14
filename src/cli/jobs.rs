@@ -11,10 +11,10 @@ use std::io::Write;
 use std::path::PathBuf;
 use wildmatch::WildMatch;
 
-use crate::cli::{self, autocomplete, GlobalOptions};
+use crate::cli::{self, GlobalOptions, autocomplete};
 use crate::ui::{Alignment, Item, Row, Table};
-use row::project::Project;
 use row::MultiProgressContainer;
+use row::project::Project;
 
 #[derive(Args, Debug)]
 #[allow(clippy::struct_excessive_bools)]
@@ -63,8 +63,7 @@ fn find(
         if !action_matcher.matches(action_name) {
             trace!(
                 "Skipping action '{}'. It does not match the pattern '{}'.",
-                action_name,
-                action
+                action_name, action
             );
             continue;
         }

@@ -4,8 +4,8 @@
 use clap_complete::CompletionCandidate;
 use indicatif::{MultiProgress, ProgressDrawTarget};
 
-use row::workflow::Workflow;
 use row::MultiProgressContainer;
+use row::workflow::Workflow;
 use row::{cluster, workspace};
 
 /// List the actions in the current workflow.

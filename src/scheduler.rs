@@ -7,11 +7,11 @@ pub mod slurm;
 use serde_json::Value;
 use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
-use std::sync::atomic::AtomicBool;
 use std::sync::Arc;
+use std::sync::atomic::AtomicBool;
 
-use crate::workflow::Action;
 use crate::Error;
+use crate::workflow::Action;
 
 /// A `Scheduler` creates and submits job scripts.
 pub trait Scheduler {

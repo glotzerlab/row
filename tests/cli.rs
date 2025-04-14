@@ -2,8 +2,8 @@
 // Part of row, released under the BSD 3-Clause License.
 
 use assert_cmd::Command;
-use assert_fs::prelude::*;
 use assert_fs::TempDir;
+use assert_fs::prelude::*;
 use predicates::prelude::*;
 use serial_test::parallel;
 use std::fs;

@@ -11,9 +11,9 @@ use std::io::prelude::*;
 use std::io::{self, BufReader};
 use std::path::{Path, PathBuf};
 
+use crate::Error;
 use crate::builtin::BuiltIn;
 use crate::workflow::Resources;
-use crate::Error;
 
 /** Launcher configuration
 
@@ -211,8 +211,8 @@ impl Configuration {
 
 #[cfg(test)]
 mod tests {
-    use assert_fs::prelude::*;
     use assert_fs::TempDir;
+    use assert_fs::prelude::*;
     use serial_test::parallel;
 
     use super::*;

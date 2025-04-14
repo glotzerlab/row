@@ -627,7 +627,9 @@ impl Workflow {
             // Warn for apparently invalid sort_by.
             for pointer in action.group.sort_by() {
                 if !pointer.is_empty() && !pointer.starts_with('/') {
-                    warn!("The JSON pointer '{pointer}' does not appear valid. Did you mean '/{pointer}'?");
+                    warn!(
+                        "The JSON pointer '{pointer}' does not appear valid. Did you mean '/{pointer}'?"
+                    );
                 }
             }
 
@@ -742,8 +744,8 @@ fn find_and_open_workflow() -> Result<(PathBuf, File), Error> {
 
 #[cfg(test)]
 mod tests {
-    use assert_fs::prelude::*;
     use assert_fs::TempDir;
+    use assert_fs::prelude::*;
     use serial_test::{parallel, serial};
     use std::env;
 
@@ -761,10 +763,12 @@ mod tests {
             "Expected to find no workflow file, but got {result:?}"
         );
 
-        assert!(result
-            .unwrap_err()
-            .to_string()
-            .starts_with("workflow.toml not found in"));
+        assert!(
+            result
+                .unwrap_err()
+                .to_string()
+                .starts_with("workflow.toml not found in")
+        );
     }
 
     #[test]
@@ -940,10 +944,12 @@ name = "a"
         let result = Workflow::open_str(temp.path(), workflow);
         assert!(result.is_err());
 
-        assert!(result
-            .unwrap_err()
-            .to_string()
-            .contains("missing `command`"));
+        assert!(
+            result
+                .unwrap_err()
+                .to_string()
+                .contains("missing `command`")
+        );
     }
 
     #[test]
@@ -1009,10 +1015,12 @@ products = ["b"]
             Err(Error::DuplicateActionsDifferentProducts(_))
         ));
 
-        assert!(result
-            .unwrap_err()
-            .to_string()
-            .contains("must have the same `products`"));
+        assert!(
+            result
+                .unwrap_err()
+                .to_string()
+                .contains("must have the same `products`")
+        );
     }
 
     #[test]
@@ -1039,10 +1047,12 @@ command = "e"
             Err(Error::DuplicateActionsDifferentPreviousActions(_))
         ));
 
-        assert!(result
-            .unwrap_err()
-            .to_string()
-            .contains("must have the same `previous_actions`"));
+        assert!(
+            result
+                .unwrap_err()
+                .to_string()
+                .contains("must have the same `previous_actions`")
+        );
     }
 
     #[test]
@@ -1114,10 +1124,12 @@ previous_actions = ["a"]
             "Expected previous action error, but got {result:?}"
         );
 
-        assert!(result
-            .unwrap_err()
-            .to_string()
-            .starts_with("Previous action 'a' not found"));
+        assert!(
+            result
+                .unwrap_err()
+                .to_string()
+                .starts_with("Previous action 'a' not found")
+        );
     }
 
     #[test]
@@ -1596,10 +1608,12 @@ from = "a"
         let result = Workflow::open_str(temp.path(), workflow);
         assert!(result.is_err());
 
-        assert!(result
-            .unwrap_err()
-            .to_string()
-            .contains("must not set `from`"));
+        assert!(
+            result
+                .unwrap_err()
+                .to_string()
+                .contains("must not set `from`")
+        );
     }
 
     #[test]

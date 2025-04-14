@@ -14,9 +14,9 @@ use std::path::PathBuf;
 
 use crate::workflow::Workflow;
 use crate::{
-    progress_styles, workspace, Error, MultiProgressContainer, COMPLETED_CACHE_FILE_NAME,
-    COMPLETED_DIRECTORY_NAME, DATA_DIRECTORY_NAME, DIRECTORY_CACHE_FILE_NAME,
-    MIN_PROGRESS_BAR_SIZE, SUBMITTED_CACHE_FILE_NAME,
+    COMPLETED_CACHE_FILE_NAME, COMPLETED_DIRECTORY_NAME, DATA_DIRECTORY_NAME,
+    DIRECTORY_CACHE_FILE_NAME, Error, MIN_PROGRESS_BAR_SIZE, MultiProgressContainer,
+    SUBMITTED_CACHE_FILE_NAME, progress_styles, workspace,
 };
 
 type SubmittedJobs = HashMap<String, HashMap<PathBuf, (String, u32)>>;
@@ -537,7 +537,10 @@ impl State {
             .collect();
 
         for action_name in actions_to_remove {
-            warn!("Removing action '{}' from the completed cache as it is no longer present in the workflow.", action_name);
+            warn!(
+                "Removing action '{}' from the completed cache as it is no longer present in the workflow.",
+                action_name
+            );
             self.completed.remove(&action_name);
             self.completed_modified = true;
         }
@@ -550,7 +553,10 @@ impl State {
                 .collect();
 
             for directory_name in directories_to_remove {
-                trace!("Removing directory '{}' from the completed cache as it is no longer present in the workspace.", directory_name.display());
+                trace!(
+                    "Removing directory '{}' from the completed cache as it is no longer present in the workspace.",
+                    directory_name.display()
+                );
                 directories.remove(&directory_name);
                 self.completed_modified = true;
             }
@@ -570,7 +576,10 @@ impl State {
             .collect();
 
         for action_name in actions_to_remove {
-            warn!("Removing action '{}' from the submitted cache as it is no longer present in the workflow.", action_name);
+            warn!(
+                "Removing action '{}' from the submitted cache as it is no longer present in the workflow.",
+                action_name
+            );
             self.submitted.remove(&action_name);
             self.submitted_modified = true;
         }
@@ -583,7 +592,10 @@ impl State {
                 .collect();
 
             for directory_name in directories_to_remove {
-                trace!("Removing directory '{}' from the submitted cache as it is no longer present in the workspace.", directory_name.display());
+                trace!(
+                    "Removing directory '{}' from the submitted cache as it is no longer present in the workspace.",
+                    directory_name.display()
+                );
                 directory_map.remove(&directory_name);
                 self.submitted_modified = true;
             }
@@ -680,8 +692,8 @@ impl State {
 
 #[cfg(test)]
 mod tests {
-    use assert_fs::prelude::*;
     use assert_fs::TempDir;
+    use assert_fs::prelude::*;
     use indicatif::{MultiProgress, ProgressDrawTarget};
     use serial_test::parallel;
 
@@ -712,10 +724,12 @@ mod tests {
         let mut state = State::default();
         let result = state.synchronize_workspace(&workflow, 2, &mut multi_progress);
         assert!(result.is_err());
-        assert!(result
-            .unwrap_err()
-            .to_string()
-            .starts_with("Unable to read"));
+        assert!(
+            result
+                .unwrap_err()
+                .to_string()
+                .starts_with("Unable to read")
+        );
     }
 
     #[test]
