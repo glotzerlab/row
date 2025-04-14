@@ -333,10 +333,7 @@ impl State {
         let data_directory = workflow.root.join(DATA_DIRECTORY_NAME);
         let completed_file = data_directory.join(COMPLETED_CACHE_FILE_NAME);
 
-        debug!(
-            "Saving completed cache: '{}'.",
-            completed_file.display()
-        );
+        debug!("Saving completed cache: '{}'.", completed_file.display());
 
         // Save the combined cache first.
         let out_bytes: Vec<u8> = postcard::to_stdvec(&self.completed)
@@ -613,10 +610,7 @@ impl State {
             .root
             .join(DATA_DIRECTORY_NAME)
             .join(COMPLETED_DIRECTORY_NAME);
-        debug!(
-            "Reading completed files in '{}'.",
-            completed_path.display()
-        );
+        debug!("Reading completed files in '{}'.", completed_path.display());
 
         match completed_path.read_dir() {
             Ok(dirs) => {
@@ -630,10 +624,7 @@ impl State {
                             trace!("Reading '{}'", path.display());
                             self.completed_file_names.push(path);
                         } else {
-                            trace!(
-                                "Ignoring non-postcard file '{}'",
-                                path.display()
-                            );
+                            trace!("Ignoring non-postcard file '{}'", path.display());
                         }
                     }
                 }

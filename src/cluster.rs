@@ -449,19 +449,25 @@ mod tests {
         // The use of env vars is essential to testing the functionality of the cluster
         // auto-selection. These tests are run in serial to ensure that the env var modifications
         // are safe.
-        unsafe { env::remove_var("_row_select"); }
+        unsafe {
+            env::remove_var("_row_select");
+        }
         assert_eq!(
             cluster_configuration.clone().identify(None).unwrap(),
             cluster_configuration.cluster[3]
         );
 
-        unsafe { env::set_var("_row_select", "b"); }
+        unsafe {
+            env::set_var("_row_select", "b");
+        }
         assert_eq!(
             cluster_configuration.clone().identify(None).unwrap(),
             cluster_configuration.cluster[2]
         );
 
-        unsafe { env::set_var("_row_select", "a"); }
+        unsafe {
+            env::set_var("_row_select", "a");
+        }
         assert_eq!(
             cluster_configuration.clone().identify(None).unwrap(),
             cluster_configuration.cluster[1]
