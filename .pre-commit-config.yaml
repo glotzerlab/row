@@ -6,8 +6,8 @@ ci:
   skip: [fmt, check, clippy]
 
 repos:
-- repo: https://github.com/backplane/pre-commit-rust-hooks
-  rev: v1.1.0
+- repo: https://github.com/glotzerlab/pre-commit-rust-hooks
+  rev: 766490b4a83f979ad61bf6ee6fb03ba394fe4170
   hooks:
   - id: fmt
   - id: check
@@ -45,8 +45,3 @@ repos:
     args:
     - --license-file=LICENSE
     - --add=Part of row, released under the BSD 3-Clause License.
-- repo: https://github.com/crate-ci/typos
-  rev: v1
-  hooks:
-    - id: typos
-      exclude_types: [css]
