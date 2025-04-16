@@ -96,11 +96,11 @@ if total_cpus % warn_cpus_not_multiple_of != 0:
 This is a nonblocking variant of `require_cpus_multiple_of` that allows for submission
 of jobs that underutilize resources.
 
-### memory_per_cpu
+### memory_per_cpu_mb
 
-`cluster.partition.memory_per_cpu`: **string** - CPU Jobs submitted to this partition
+`cluster.partition.memory_per_cpu`: **integer** - CPU Jobs submitted to this partition
 will pass this option to the scheduler. For example SLURM schedulers will set
-`--mem-per-cpu=<memory_per_cpu>`.
+`--mem-per-cpu=<memory_per_cpu_mb>M`.
 
 ### cpus_per_node
 
@@ -153,11 +153,11 @@ if total_gpus % warn_gpus_not_multiple_of != 0:
 This is a nonblocking variant of `require_gpus_multiple_of` that allows for submission
 of jobs that underutilize resources.
 
-### memory_per_gpu
+### memory_per_gpu_mb
 
-`cluster.partition.memory_per_gpu`: **string** - GPU Jobs submitted to this partition
+`cluster.partition.memory_per_gpu_mb`: **integer** - GPU Jobs submitted to this partition
 will pass this option to the scheduler. For example SLURM schedulers will set
-`--mem-per-gpu=<memory_per_gpu>`.
+`--mem-per-gpu=<memory_per_gpu_mb>M`.
 
 ### gpus_per_node
 

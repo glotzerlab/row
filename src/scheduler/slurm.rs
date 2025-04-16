@@ -1,7 +1,7 @@
 // Copyright (c) 2024-2025 The Regents of the University of Michigan.
 // Part of row, released under the BSD 3-Clause License.
 
-use log::{debug, error, trace};
+use log::{debug, error, trace, warn};
 use serde_json::Value;
 use std::collections::{HashMap, HashSet};
 use std::fmt::Write as _;
@@ -30,6 +30,33 @@ impl Slurm {
     /// Construct a new Slurm scheduler.
     pub fn new(cluster: Cluster, launchers: HashMap<String, Launcher>) -> Self {
         Self { cluster, launchers }
+    }
+
+    fn write_mem_per(
+        preamble: &mut String,
+        action_mem: Option<usize>,
+        partition_mem: Option<usize>,
+        processor_type: &str,
+        action_name: &str,
+    ) -> Result<(), Error> {
+        match (action_mem, partition_mem) {
+            (None, Some(mem)) | (Some(mem), None) => {
+                let _ = writeln!(preamble, "#SBATCH --mem-per-{processor_type}={mem}M");
+            }
+            (Some(mem_action), Some(mem_partition)) => {
+                if mem_action < mem_partition {
+                    warn!(
+                        "Omit `memory_per_{processor_type}_mb` in action '{action_name}' to request more memory at no cost."
+                    );
+                    let _ = writeln!(preamble, "#SBATCH --mem-per-{processor_type}={mem_action}M");
+                } else {
+                    return Err(Error::TooMuchMemory(action_name.into(), mem_action));
+                }
+            }
+            (None, None) => {}
+        }
+
+        Ok(())
     }
 }
 
@@ -102,9 +129,13 @@ impl Scheduler for Slurm {
                 let _ = writeln!(preamble, "#SBATCH --nodes={n_nodes}");
             }
 
-            if let Some(ref mem_per_gpu) = partition.memory_per_gpu {
-                let _ = writeln!(preamble, "#SBATCH --mem-per-gpu={mem_per_gpu}");
-            }
+            Slurm::write_mem_per(
+                &mut preamble,
+                action.resources.memory_per_gpu_mb,
+                partition.memory_per_gpu_mb,
+                "gpu",
+                action.name(),
+            )?;
         } else {
             if let Some(ref cpus_per_node) = partition.cpus_per_node {
                 let n_nodes = action
@@ -114,9 +145,13 @@ impl Scheduler for Slurm {
                 let _ = writeln!(preamble, "#SBATCH --nodes={n_nodes}");
             }
 
-            if let Some(ref mem_per_cpu) = partition.memory_per_cpu {
-                let _ = writeln!(preamble, "#SBATCH --mem-per-cpu={mem_per_cpu}");
-            }
+            Slurm::write_mem_per(
+                &mut preamble,
+                action.resources.memory_per_cpu_mb,
+                partition.memory_per_cpu_mb,
+                "cpu",
+                action.name(),
+            )?;
         }
 
         // Slurm doesn't store times in seconds, so round up to the nearest minute.
@@ -462,7 +497,7 @@ mod tests {
     #[test]
     #[parallel]
     fn mem_per_cpu() {
-        let (action, directories, _) = setup();
+        let (mut action, directories, _) = setup();
 
         let launchers = launcher::Configuration::built_in();
         let cluster = Cluster {
@@ -471,7 +506,7 @@ mod tests {
             scheduler: SchedulerType::Slurm,
             submit_options: Vec::new(),
             partition: vec![Partition {
-                memory_per_cpu: Some("a".into()),
+                memory_per_cpu_mb: Some(5),
                 ..Partition::default()
             }],
         };
@@ -483,7 +518,23 @@ mod tests {
             .expect("valid script");
         println!("{script}");
 
-        assert!(script.contains("#SBATCH --mem-per-cpu=a"));
+        assert!(script.contains("#SBATCH --mem-per-cpu=5M"));
+
+        action.resources.memory_per_cpu_mb = Some(2);
+
+        let script = slurm
+            .make_script(&action, &directories, &PathBuf::default(), &HashMap::new())
+            .expect("valid script");
+        println!("{script}");
+
+        assert!(script.contains("#SBATCH --mem-per-cpu=2M"));
+
+        action.resources.memory_per_cpu_mb = Some(10);
+
+        assert!(matches!(
+            slurm.make_script(&action, &directories, &PathBuf::default(), &HashMap::new()),
+            Err(Error::TooMuchMemory(_, _))
+        ));
     }
 
     #[test]
@@ -498,7 +549,7 @@ mod tests {
             scheduler: SchedulerType::Slurm,
             submit_options: Vec::new(),
             partition: vec![Partition {
-                memory_per_gpu: Some("b".into()),
+                memory_per_gpu_mb: Some(12),
                 ..Partition::default()
             }],
         };
@@ -512,7 +563,23 @@ mod tests {
             .expect("valid script");
         println!("{script}");
 
-        assert!(script.contains("#SBATCH --mem-per-gpu=b"));
+        assert!(script.contains("#SBATCH --mem-per-gpu=12M"));
+
+        action.resources.memory_per_gpu_mb = Some(4);
+
+        let script = slurm
+            .make_script(&action, &directories, &PathBuf::default(), &HashMap::new())
+            .expect("valid script");
+        println!("{script}");
+
+        assert!(script.contains("#SBATCH --mem-per-gpu=4M"));
+
+        action.resources.memory_per_gpu_mb = Some(20);
+
+        assert!(matches!(
+            slurm.make_script(&action, &directories, &PathBuf::default(), &HashMap::new()),
+            Err(Error::TooMuchMemory(_, _))
+        ));
     }
 
     #[test]

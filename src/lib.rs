@@ -177,6 +177,9 @@ pub enum Error {
     )]
     WouldSubmitMultipleTimes(PathBuf, String),
 
+    #[error("Action '{0}' requests too much memory: {1}M.")]
+    TooMuchMemory(String, usize),
+
     // launcher errors
     #[error("Launcher '{0}' does not contain a default configuration")]
     LauncherMissingDefault(String),

@@ -99,6 +99,7 @@ fn anvil() -> Cluster {
                 name: "shared".into(),
                 maximum_cpus_per_job: Some(127),
                 maximum_gpus_per_job: Some(0),
+                memory_per_cpu_mb: Some(1800),
                 ..Partition::default()
             },
             Partition {
@@ -125,6 +126,7 @@ fn anvil() -> Cluster {
                 name: "highmem".into(),
                 maximum_gpus_per_job: Some(0),
                 prevent_auto_select: true,
+                memory_per_cpu_mb: Some(7900),
                 ..Partition::default()
             },
             Partition {
@@ -157,14 +159,14 @@ fn delta() -> Cluster {
                 name: "cpu".into(),
                 maximum_gpus_per_job: Some(0),
                 cpus_per_node: Some(128),
-                memory_per_cpu: Some("1970M".into()),
+                memory_per_cpu_mb: Some(1_970),
                 account_suffix: Some("-cpu".into()),
                 ..Partition::default()
             },
             Partition {
                 name: "gpuA100x4".into(),
                 minimum_gpus_per_job: Some(1),
-                memory_per_gpu: Some("62200M".into()),
+                memory_per_gpu_mb: Some(62_200),
                 gpus_per_node: Some(4),
                 account_suffix: Some("-gpu".into()),
                 ..Partition::default()
@@ -173,7 +175,7 @@ fn delta() -> Cluster {
             Partition {
                 name: "gpuA100x8".into(),
                 minimum_gpus_per_job: Some(1),
-                memory_per_gpu: Some("256000M".into()),
+                memory_per_gpu_mb: Some(256_000),
                 gpus_per_node: Some(8),
                 account_suffix: Some("-gpu".into()),
                 prevent_auto_select: true,
@@ -182,7 +184,7 @@ fn delta() -> Cluster {
             Partition {
                 name: "gpuA40x4".into(),
                 minimum_gpus_per_job: Some(1),
-                memory_per_gpu: Some("62200M".into()),
+                memory_per_gpu_mb: Some(62_200),
                 gpus_per_node: Some(4),
                 account_suffix: Some("-gpu".into()),
                 prevent_auto_select: true,
@@ -191,7 +193,7 @@ fn delta() -> Cluster {
             Partition {
                 name: "gpuMI100x8".into(),
                 minimum_gpus_per_job: Some(1),
-                memory_per_gpu: Some("256000M".into()),
+                memory_per_gpu_mb: Some(256_000),
                 gpus_per_node: Some(8),
                 account_suffix: Some("-gpu".into()),
                 prevent_auto_select: true,
@@ -234,21 +236,20 @@ fn greatlakes() -> Cluster {
             Partition {
                 name: "standard".into(),
                 maximum_gpus_per_job: Some(0),
-                cpus_per_node: Some(36),
-                memory_per_cpu: Some("5G".into()),
+                memory_per_cpu_mb: Some(5 * 1024),
                 ..Partition::default()
             },
             Partition {
                 name: "gpu_mig40,gpu".into(),
                 minimum_gpus_per_job: Some(1),
                 maximum_gpus_per_job: Some(1),
-                memory_per_gpu: Some("60G".into()),
+                memory_per_gpu_mb: Some(60 * 1024),
                 ..Partition::default()
             },
             Partition {
                 name: "gpu".into(),
                 minimum_gpus_per_job: Some(1),
-                memory_per_gpu: Some("60G".into()),
+                memory_per_gpu_mb: Some(60 * 1024),
                 // cannot set gpus_per_node, the partition is heterogeneous
                 ..Partition::default()
             },
@@ -256,14 +257,14 @@ fn greatlakes() -> Cluster {
             Partition {
                 name: "gpu_mig40".into(),
                 minimum_gpus_per_job: Some(1),
-                memory_per_gpu: Some("125G".into()),
+                memory_per_gpu_mb: Some(125 * 1024),
                 prevent_auto_select: true,
                 ..Partition::default()
             },
             Partition {
                 name: "spgpu".into(),
                 minimum_gpus_per_job: Some(1),
-                memory_per_gpu: Some("47000M".into()),
+                memory_per_gpu_mb: Some(47_000),
                 prevent_auto_select: true,
                 ..Partition::default()
             },
@@ -276,16 +277,14 @@ fn greatlakes() -> Cluster {
             Partition {
                 name: "standard-oc".into(),
                 maximum_gpus_per_job: Some(0),
-                cpus_per_node: Some(36),
-                memory_per_cpu: Some("5G".into()),
+                memory_per_cpu_mb: Some(5 * 1024),
                 prevent_auto_select: true,
                 ..Partition::default()
             },
             Partition {
                 name: "debug".into(),
                 maximum_gpus_per_job: Some(0),
-                cpus_per_node: Some(36),
-                memory_per_cpu: Some("5G".into()),
+                memory_per_cpu_mb: Some(5 * 1024),
                 prevent_auto_select: true,
                 ..Partition::default()
             },

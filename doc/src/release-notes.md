@@ -4,11 +4,30 @@
 
 *Highlights:*
 
-**Row** 0.5 improves the user interface and updates the code to meet modern
-Rust standards.
+In **Row** 0.5, the subcommands `show directories`, `show jobs`, and `show status` now
+report `No matches` when there are no results to show.
 
-The subcommands `show directories`, `show jobs`, and `show status` now report
-`No matches.` when there are no results to show.
+Users can also request an amount of memory specific to an action with
+`memory_per_cpu_mb` or `memory_per_gpu_mb`. For example:
+
+```toml
+[action.resources]
+memory_per_cpu_mb = 1024
+```
+
+When set, the given value will be passed to the SLURM option `--mem-per-cpu` or
+`--mem-per-gpu` if the partition has no memory request set or the action's value is
+smaller than the partition's. **Row** returns an error when the user requests more
+memory than the partition has available to prevent unexpected additional costs.
+
+> Note: Most users should omit the memory request. When omitted **row** will
+automatically select the maximum amount of memory possible without incurring
+extra charges on your HPC resources.
+
+*Added:*
+
+* Actions can request the following new resources: `memory_per_cpu_mb` or
+  `memory_per_gpu_mb`.
 
 *Changed:*
 
@@ -16,6 +35,12 @@ The subcommands `show directories`, `show jobs`, and `show status` now report
 * Build executables on Ubuntu 22.04.
 * Report an error when the workflow requests 0 processes, GPUs, or threads.
 * Require Rust 1.85 or newer to build.
+* Memory requests in `clusters.toml` must now be set in MB. The `memory_per_*`
+  keys are renamed to `memory_per_*_mb`.
+
+*Fixed:*
+
+* Submit MPI jobs on Great Lakes without error.
 
 ## 0.4.0 (2024-12-06)
 
