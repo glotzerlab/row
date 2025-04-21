@@ -1,6 +1,6 @@
 # Release notes
 
-## 0.5.0 (not yet released)
+## 0.5.0 (2025-04-21)
 
 *Highlights:*
 

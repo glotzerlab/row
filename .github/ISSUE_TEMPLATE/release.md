@@ -1,13 +1,14 @@
 ---
 name: Release checklist
 about: '[for maintainer use]'
-title: 'Release 0.4.0'
+title: 'Release 0.5.0'
 labels: ''
 assignees: 'joaander'
 
 ---
 
 - [ ] Run *bumpversion*.
+- [ ] Run `cargo check`
 - [ ] Run `cargo update`
 - [ ] Run `cargo bundle-licenses --format yaml --output THIRDPARTY.yaml`
 - [ ] Check for new or duplicate contributors since the last release:
