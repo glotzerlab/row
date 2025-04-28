@@ -70,6 +70,7 @@ pub struct ActiveSlurmJobs {
 }
 
 impl Scheduler for Slurm {
+    #[allow(clippy::too_many_lines)]
     fn make_script(
         &self,
         action: &Action,
@@ -95,25 +96,28 @@ impl Scheduler for Slurm {
         };
 
         // The output file directory and filename
-        let output_path = action
-        .submit_options
-        .get(&self.cluster.name)
-        .map(|submit_options| {
-            let mut path = submit_options.output_file_path.as_deref().unwrap_or("").to_string();
-            if !path.is_empty()  && !path.ends_with('/') {
-                path.push('/');
-            }
-
-            match submit_options.output_file_name {
-                None => format!("{path}{}-%j.out", action.name()),
-                Some(ref name) => {
-                    let replaced_name = name.replace("{action_name}", &action.name());
-                    format!("{path}{replaced_name}")
+        let output_path = action.submit_options.get(&self.cluster.name).map_or_else(
+            || format!("{}-%j.out", action.name()),
+            |submit_options| {
+                let mut path = submit_options
+                    .output_file_path
+                    .as_deref()
+                    .unwrap_or("")
+                    .to_string();
+                if !path.is_empty() && !path.ends_with('/') {
+                    path.push('/');
                 }
-            }
-        })
-        .unwrap_or_else(|| format!("{}-%j.out", action.name())); //If submit_options is None, use the default filename
-        let _ = writeln!(preamble, "#SBATCH --output={}", output_path);
+
+                match submit_options.output_file_name {
+                    None => format!("{path}{}-%j.out", action.name()),
+                    Some(ref name) => {
+                        let replaced_name = name.replace("{action_name}", action.name());
+                        format!("{path}{replaced_name}")
+                    }
+                }
+            },
+        );
+        let _ = writeln!(preamble, "#SBATCH --output={output_path}");
 
         if let Some(submit_options) = action.submit_options.get(&self.cluster.name) {
             user_partition = &submit_options.partition;
@@ -483,9 +487,13 @@ mod tests {
         assert!(script.contains("#SBATCH --output=dir/action-%j.out"));
 
         //With both directory and filename specified
-        action.submit_options.entry("cluster".into())
-            .and_modify(|submit_options| submit_options.output_file_name = Some("fname_{action_name}.out".into()));
-        
+        action
+            .submit_options
+            .entry("cluster".into())
+            .and_modify(|submit_options| {
+                submit_options.output_file_name = Some("fname_{action_name}.out".into());
+            });
+
         let script = slurm
             .make_script(&action, &directories, &PathBuf::default(), &HashMap::new())
             .expect("valid script");
@@ -493,10 +501,12 @@ mod tests {
 
         assert!(script.contains("#SBATCH --output=dir/fname_action.out"));
 
-         //With filename, but not file directory specified
-         action.submit_options.entry("cluster".into())
-         .and_modify(|submit_options| submit_options.output_file_path = None);
-     
+        //With filename, but not file directory specified
+        action
+            .submit_options
+            .entry("cluster".into())
+            .and_modify(|submit_options| submit_options.output_file_path = None);
+
         let script = slurm
             .make_script(&action, &directories, &PathBuf::default(), &HashMap::new())
             .expect("valid script");
@@ -505,15 +515,17 @@ mod tests {
         assert!(script.contains("#SBATCH --output=fname_action.out"));
 
         //With both filename and directory specified, directory ending in /
-        action.submit_options.entry("cluster".into())
-        .and_modify(|submit_options| submit_options.output_file_path = Some("dir/".into()));
-    
-       let script = slurm
-           .make_script(&action, &directories, &PathBuf::default(), &HashMap::new())
-           .expect("valid script");
-       println!("{script}");
+        action
+            .submit_options
+            .entry("cluster".into())
+            .and_modify(|submit_options| submit_options.output_file_path = Some("dir/".into()));
 
-       assert!(script.contains("#SBATCH --output=dir/fname_action.out"));
+        let script = slurm
+            .make_script(&action, &directories, &PathBuf::default(), &HashMap::new())
+            .expect("valid script");
+        println!("{script}");
+
+        assert!(script.contains("#SBATCH --output=dir/fname_action.out"));
     }
 
     #[test]

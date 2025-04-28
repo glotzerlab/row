@@ -77,7 +77,7 @@ pub struct SubmitOptions {
 
     /// The partition.
     pub partition: Option<String>,
-    
+
     /// Output file path.
     pub output_file_path: Option<String>,
 
@@ -897,8 +897,14 @@ output_file_name = "output.txt"
         );
         assert_eq!(submit_options.custom, vec!["--option1", "--option2"]);
         assert_eq!(submit_options.partition, Some(String::from("gpu")));
-        assert_eq!(submit_options.output_file_path, Some(String::from("path/to/output")));
-        assert_eq!(submit_options.output_file_name, Some(String::from("output.txt")));
+        assert_eq!(
+            submit_options.output_file_path,
+            Some(String::from("path/to/output"))
+        );
+        assert_eq!(
+            submit_options.output_file_name,
+            Some(String::from("output.txt"))
+        );
     }
 
     #[test]
