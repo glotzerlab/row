@@ -1,5 +1,6 @@
 # Release notes
-## 0.5.1 (2025-04-28)
+
+## 0.6.0 (not yet released)
 *Added:*
 
 * Users may now specify the desired name and directory for output files generated
