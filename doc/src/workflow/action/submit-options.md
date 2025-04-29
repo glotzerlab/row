@@ -18,6 +18,8 @@ partition = "shared"
 [action.submit_options.cluster2]
 account = "other_account"
 setup = "module load openmpi"
+output_file_path = "path/to/directory"
+output_file_name = "{action_name}-%j.out"
 ```
 
 > Note: You may omit `[submit_options]` entirely.
@@ -54,3 +56,19 @@ will automatically determine the correct partition based on the configuration in
 
 > Note: You should almost always omit `partition`. Set it *only* when your action
 > **requires** a *specialty* partition that is not automatically selected.
+
+
+## `<name>.output_file_path`
+`action.submit_options.<name>.output_file_path`: **string** - Set the directory
+in which to place the output file when submitting jobs to the queue on cluster `<name>`.
+When omitted, the file will be placed in the scheduler's default location (usually the
+location the action is run from).
+
+## `<name>.output_file_name`
+`action.submit_options.<name>.output_file_name`: **string** - Set the name of the output
+file created when submitting jobs to the queue on cluster `<name>`. The name of the
+action can be included in the file name by including '{action_name}' within the
+specified string. Additionally, information about the job known to slurm can be
+included using certain replacement symbols (c.f. the symbols documented in the
+[slurm documentation](https://slurm.schedmd.com/sbatch.html#SECTION_FILENAME-PATTERN)).
+When omitted, the file is set to a default value of '{action_name}-%j.out'.

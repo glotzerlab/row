@@ -1,5 +1,12 @@
 # Release notes
 
+## 0.6.0 (not yet released)
+*Added:*
+
+* Users may now specify the desired name and directory for output files generated
+  by the scheduler by specifying `output_file_path` and `output_file_name` as submission
+  options.
+
 ## 0.5.0 (2025-04-21)
 
 *Highlights:*

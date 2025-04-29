@@ -77,6 +77,12 @@ pub struct SubmitOptions {
 
     /// The partition.
     pub partition: Option<String>,
+
+    /// Output file path.
+    pub output_file_path: Option<String>,
+
+    /// Output file name.
+    pub output_file_name: Option<String>,
 }
 
 /** The action definition.
@@ -856,6 +862,8 @@ value_file = "s"
         assert_eq!(submit_options.setup, None);
         assert!(submit_options.custom.is_empty());
         assert_eq!(submit_options.partition, None);
+        assert_eq!(submit_options.output_file_name, None);
+        assert_eq!(submit_options.output_file_path, None);
     }
 
     #[test]
@@ -868,6 +876,8 @@ account = "my_account"
 setup = "module load openmpi"
 custom = ["--option1", "--option2"]
 partition = "gpu"
+output_file_path = "path/to/output"
+output_file_name = "output.txt"
 "#;
         let workflow = Workflow::open_str(temp.path(), workflow).unwrap();
 
@@ -887,6 +897,14 @@ partition = "gpu"
         );
         assert_eq!(submit_options.custom, vec!["--option1", "--option2"]);
         assert_eq!(submit_options.partition, Some(String::from("gpu")));
+        assert_eq!(
+            submit_options.output_file_path,
+            Some(String::from("path/to/output"))
+        );
+        assert_eq!(
+            submit_options.output_file_name,
+            Some(String::from("output.txt"))
+        );
     }
 
     #[test]
