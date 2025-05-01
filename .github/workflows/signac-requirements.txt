@@ -8,7 +8,7 @@ filelock==3.13.4
     # via signac
 packaging==24.0
     # via signac
-signac==2.2.0
+signac==2.3.0
     # via -r signac-requirements.in
 synced-collections==1.0.0
     # via signac
