@@ -18,7 +18,7 @@ partition = "shared"
 [action.submit_options.cluster2]
 account = "other_account"
 setup = "module load openmpi"
-output_file_path = "path/to/directory"
+output_file_path = "path/to/output"
 output_file_name = "{action_name}-%j.out"
 ```
 
