@@ -1,5 +1,11 @@
 # Release notes
 
+## 0.7.0 (not yet released)
+
+*Changed:*
+
+* Test with Rust 1.87.0.
+
 ## 0.6.0 (2025-05-02)
 
 *Highlights:*

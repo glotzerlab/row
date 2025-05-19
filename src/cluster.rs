@@ -157,7 +157,7 @@ impl Configuration {
     pub fn open() -> Result<Self, Error> {
         let home = match env::var("ROW_HOME") {
             Ok(row_home) => PathBuf::from(row_home),
-            Err(_) => home::home_dir().ok_or_else(Error::NoHome)?,
+            Err(_) => env::home_dir().ok_or_else(Error::NoHome)?,
         };
         let clusters_toml_path = home.join(".config").join("row").join("clusters.toml");
         Self::open_from_path(clusters_toml_path)
