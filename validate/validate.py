@@ -351,7 +351,7 @@ def check_mpi(directory, n_processes, n_threads, n_hosts, name, n_gpus=0, gpu_ar
 
     Ensure that each process has n_threads threads.
     """
-    from mpi4py import MPI
+    from mpi4py import MPI  # noqa: PLC0415
 
     action_cluster = os.environ['ACTION_CLUSTER']
 
