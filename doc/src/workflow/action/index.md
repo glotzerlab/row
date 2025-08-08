@@ -13,7 +13,7 @@ products = ["one.data"]
 name = "action_two"
 command = "python action_two.py {directories}"
 previous_actions = ["action_one"]
-products = ["two.data", "log.txt"]
+products = ["two.data", "output/log.txt"]
 launchers = ["openmp", "mpi"]
 [action.group]
 maximum_size = 8
@@ -110,6 +110,13 @@ must *all* be completed before this action may be executed. When omitted,
 action produces in the directory. When *all* products are present, that
 directory has *completed* the action. When omitted, `products` defaults
 to an empty array.
+
+A product file may be in a subdirectory under the directory. For example:
+```toml
+products = ["output/data.dcd", "a/long/path/to/data.h5"]
+```
+All elements in `products` must be relative paths and contain no parent
+directories (`../`).
 
 ## `[group]`
 
