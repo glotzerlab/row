@@ -2,16 +2,16 @@
 // Part of row, released under the BSD 3-Clause License.
 
 use indicatif::ProgressBar;
-use log::debug;
+use log::{debug, trace};
 use serde_json::Value;
 use std::collections::{HashMap, HashSet};
 use std::ffi::OsStr;
-use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::mpsc::{self, Receiver};
 use std::sync::{Arc, Mutex};
 use std::thread::{self, JoinHandle};
 use std::time::Duration;
+use std::{fs, io};
 
 use crate::workflow::Workflow;
 use crate::{Error, MIN_PROGRESS_BAR_SIZE, MultiProgressContainer, progress_styles};
@@ -108,10 +108,26 @@ pub fn find_completed_directories(
     let directories_mutex = Arc::new(Mutex::new(directories));
     let (sender, receiver) = mpsc::channel();
 
+    // It is extremely expensive to recursively traverse a directory tree.
+    // Doing so requires a stat() on every entry of every directory. To avoid
+    // this cost, build a list of subdirectories that *might* contain products
+    // and examine only those subdirectories via read_dir()..
+    let mut subdirectories = HashSet::new();
+
     let mut action_products: Vec<(String, Vec<String>)> = Vec::new();
     for action in &workflow.action {
         if !action.products().is_empty() {
             action_products.push((action.name().into(), action.products().into()));
+
+            for product in action.products() {
+                let subdirectory = PathBuf::from(product);
+                if let Some(parent) = subdirectory.parent()
+                    && parent != Path::new("")
+                {
+                    trace!("Scanning subdirectory `{}`.", parent.to_string_lossy());
+                    subdirectories.insert(PathBuf::from(parent));
+                }
+            }
         }
     }
 
@@ -123,6 +139,7 @@ pub fn find_completed_directories(
         let directories_mutex = directories_mutex.clone();
         let sender = sender.clone();
         let progress = progress.clone();
+        let subdirectories = subdirectories.clone();
 
         let thread_name = format!("find-completed-{i}");
         let handle =
@@ -158,6 +175,39 @@ pub fn find_completed_directories(
 
                             directory_contents.insert(entry_name);
                         }
+
+                        // Call read_dir only as many times as needed to scan
+                        // the subdirectories where products might be found.
+                        // Missing subdirectories is not an error.
+                        for subdirectory in &subdirectories {
+                            let subdirectory_path = directory_path.join(subdirectory);
+                            let read_dir = subdirectory_path.read_dir();
+
+                            if let Err(ref error) = read_dir
+                                && error.kind() == io::ErrorKind::NotFound
+                            {
+                                continue;
+                            }
+
+                            for entry in read_dir
+                                .map_err(|e| Error::DirectoryRead(subdirectory_path.clone(), e))?
+                            {
+                                let entry_name = entry
+                                    .map_err(|e| {
+                                        Error::DirectoryRead(subdirectory_path.clone(), e)
+                                    })?
+                                    .file_name();
+
+                                // directory_path (and by extension subdirectory_path)
+                                // are absolute. Use subdirectory joined with entry_name
+                                // to form a relative path matching what the user
+                                // provides in workflow.toml.
+                                let entry_path = subdirectory.join(entry_name);
+                                directory_contents.insert(entry_path.into_os_string());
+                            }
+                        }
+
+                        debug!("{directory_contents:?}");
 
                         for (action_name, products) in &action_products {
                             if products
