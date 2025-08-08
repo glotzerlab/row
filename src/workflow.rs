@@ -670,6 +670,23 @@ impl Workflow {
             if action.resources.gpus_per_process == Some(0) {
                 return Err(Error::ZeroGpus(action.name().into()));
             }
+
+            // To correctly find completed actions with produces in
+            // subdirectories, those products must not have absolute paths
+            // must use / not \, must not have '../' or './', and must not have
+            // repeated slashes '//'.
+            if let Some(products) = &action.products {
+                for product in products {
+                    let path = PathBuf::from(product.as_str());
+                    if path.has_root() || path.is_absolute() {
+                        return Err(Error::AbsoluteProduct(action.name().into(), product.into()));
+                    }
+
+                    if product.contains('\\') || product.contains("./") || product.contains("../") || product.contains("//") {
+                        return Err(Error::InvalidProduct(action.name().into(), product.into()));
+                    }
+                }
+            }
         }
 
         for action in &self.action {

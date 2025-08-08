@@ -156,6 +156,12 @@ pub enum Error {
     #[error("Action '{0}' must request more than 0 GPUs or omit `resources.gpus_per_process`.")]
     ZeroGpus(String),
 
+    #[error("Action '{0}' has an absolute product '{1}'. All products must be relative: `filename` or `some/dir/filename`.")]
+    AbsoluteProduct(String, String),
+
+    #[error("Invalid product product '{1}' in action '{0}'. Products must use '/' (not '\\') and must not contain './', '../', or '//'.")]
+    InvalidProduct(String, String),
+
     // submission errors
     #[error("Error encountered while executing action '{0}': {1}.")]
     ExecuteAction(String, String),
