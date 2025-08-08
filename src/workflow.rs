@@ -682,7 +682,11 @@ impl Workflow {
                         return Err(Error::AbsoluteProduct(action.name().into(), product.into()));
                     }
 
-                    if product.contains('\\') || product.contains("./") || product.contains("../") || product.contains("//") {
+                    if product.contains('\\')
+                        || product.contains("./")
+                        || product.contains("../")
+                        || product.contains("//")
+                    {
                         return Err(Error::InvalidProduct(action.name().into(), product.into()));
                     }
                 }
