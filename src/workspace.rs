@@ -88,6 +88,7 @@ to complete and then provides the list of completions.
 # Panics
 When unable to spawn threads.
 */
+#[allow(clippy::too_many_lines)]
 pub fn find_completed_directories(
     workflow: &Workflow,
     directories: Vec<PathBuf>,
@@ -206,8 +207,6 @@ pub fn find_completed_directories(
                                 directory_contents.insert(entry_path.into_os_string());
                             }
                         }
-
-                        debug!("{directory_contents:?}");
 
                         for (action_name, products) in &action_products {
                             if products
@@ -474,6 +473,16 @@ products = ["2"]
 name = "three"
 command = "c"
 products = ["3", "4"]
+
+[[action]]
+name = "four"
+command = "d"
+products = ["5", "long/sub/dir/6"]
+
+[[action]]
+name = "five"
+command = "e"
+products = ["62"]
 "#;
 
         temp.child("workspace")
@@ -511,6 +520,19 @@ products = ["3", "4"]
             .child("3")
             .touch()
             .unwrap();
+        temp.child("workspace")
+            .child("dir6")
+            .child("5")
+            .touch()
+            .unwrap();
+        temp.child("workspace")
+            .child("dir6")
+            .child("long")
+            .child("sub")
+            .child("dir")
+            .child("6")
+            .touch()
+            .unwrap();
 
         let workflow = Workflow::open_str(temp.path(), workflow).unwrap();
 
@@ -522,6 +544,7 @@ products = ["3", "4"]
                 PathBuf::from("dir3"),
                 PathBuf::from("dir4"),
                 PathBuf::from("dir5"),
+                PathBuf::from("dir6"),
             ],
             2,
             &mut multi_progress,
@@ -538,8 +561,10 @@ products = ["3", "4"]
         assert!(result["two"].contains(&PathBuf::from("dir2")));
         assert!(result["two"].contains(&PathBuf::from("dir3")));
         assert!(result["three"].contains(&PathBuf::from("dir4")));
+        assert_eq!(result["four"].len(), 1);
+        assert!(result["four"].contains(&PathBuf::from("dir6")));
 
-        assert!(!result.contains_key("four"));
+        assert!(!result.contains_key("five"));
     }
 
     #[test]
