@@ -163,11 +163,10 @@ pub fn print_matching<W: Write>(
         let groups = project.separate_into_groups(action, selected_directories)?;
 
         for (group_idx, group) in groups.iter().enumerate() {
-            if let Some(n) = args.n_groups {
-                if group_idx >= n {
+            if let Some(n) = args.n_groups
+                && group_idx >= n {
                     break;
                 }
-            }
 
             for directory in group {
                 // Format the directory status.
