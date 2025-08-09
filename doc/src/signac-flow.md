@@ -36,7 +36,8 @@ Commands:
 | `project.py <command> -f <FILTER>` | `row <command> $(signac find <FILTER>)` |
 | `project.py <command> -j a1234` | `row <command> a1234`_TAB_ |
 
-> Note: [Enable tab completion] before attempting to use _TAB_ to complete action or
+> [!IMPORTANT]
+> [Enable tab completion] before attempting to use _TAB_ to complete action or
 > directory names.
 
 [Enable tab completion]: install.md#configuring-shell-autocompletion

@@ -46,7 +46,8 @@ elements make a *condition*.
 **Row** applies each *condition* to all directories in the workspace. When a
 *condition* is true, the directory is included in the action's **groups**.
 
-> Note: This implies that every JSON pointer used in an `include` condition **MUST**
+> [!IMPORTANT]
+> This implies that every JSON pointer used in an `include` condition **MUST**
 > be present in every value file.
 
 ## Showing values
@@ -128,7 +129,8 @@ with `action.group.reverse_sort = true`.
 `row submit` processes directories in the sorted order, so you can use `sort_by` to
 prioritize the directories you want to execute first.
 
-> Note: You can sort by numbers, strings, and arrays of numbers and/or strings. You
+> [!NOTE]
+> You can sort by numbers, strings, and arrays of numbers and/or strings. You
 > cannot sort by objects.
 
 ## Splitting into separate groups
@@ -200,7 +202,8 @@ You can use `split_by_sort_key = true` to execute related simulations at the sam
 Or, you could use it to average the results of all replicate simulations. Think
 of other ways that you might utilize `split_by_sort_key` in your workflows.
 
-> Note: You may find the `-n` option useful. It instructs `row submit` to launch only
+> [!TIP]
+> You may find the `-n` option useful. It instructs `row submit` to launch only
 > the first *N* jobs.
 
 ## Limiting the maximum group size
@@ -237,7 +240,8 @@ in parallel for each directory. Set `maximum_size = 8` (or 16, 24, ...) to use
 1 (or 2, 3, ...) whole nodes on a cluster with 128 CPU cores per node.
 This tutorial will cover cluster job submissions and resources in the next section.
 
-> Note: When you set both `maximum_size` and `split_by_sort_key = true`, **Row** first
+> [!TIP]
+> When you set both `maximum_size` and `split_by_sort_key = true`, **Row** first
 > splits by the sort key, then splits the resulting groups into that are larger than
 > the maximum size.
 

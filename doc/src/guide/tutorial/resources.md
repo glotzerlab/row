@@ -5,9 +5,7 @@
 This section shows how you can use **row** to automatically generate **job scripts**
 that request the **resources** your actions need to execute. This guide cannot
 anticipate what codes you use, so it demonstrates commonly used patterns without
-providing fully working examples.
-
-> Note: For a complete description, see
+providing fully working examples. For a complete description, see
 [resources in workflow.toml](../../workflow/action/resources.md).
 
 ## Execute directories on 1 CPU in serial
@@ -80,7 +78,8 @@ processes.per_submission = 16
 walltime.per_directory = "04:00:00"
 ```
 
-> Note: You should **not** manually insert `srun`, `mpirun` or other launcher commands.
+> [!IMPORTANT]
+> You should **not** manually insert `srun`, `mpirun` or other launcher commands.
 > Use `launchers = ["mpi"]`. Configure [`launchers.toml`](../../launchers/index.md)
 > if the default does not function correctly on your system.
 
@@ -118,7 +117,8 @@ gpus_per_process = 1
 walltime.per_directory = "08:00:00"
 ```
 
-> Note: You can of course combine processes, threads, and GPUs all in the same
+> [!NOTE]
+> You can of course combine processes, threads, and GPUs all in the same
 > submission, provided you **know** that your application will make full use of all
 > requested resources.
 

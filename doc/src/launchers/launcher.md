@@ -34,7 +34,8 @@ When `launcher.processes` is set, add the following option to the launcher prefi
 where `total_processes` is `n_directories * resources.processes.per_directory` or
 `resources.processes.per_submission` depending on the resource configuration.
 
-> Note: **Row** exits with an error when `total_processes > 1` and the action requests
+> [!IMPORTANT]
+> **Row** exits with an error when `total_processes > 1` and the action requests
 > *no* launchers that set `processes`.
 
 ## threads_per_process

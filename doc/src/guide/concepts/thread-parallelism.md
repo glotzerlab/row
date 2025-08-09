@@ -44,7 +44,8 @@ threads_per_process = 8
 walltime.per_directory = "01:00:00"
 ```
 
-> Note: This action *always* requests the same number of CPU cores - even when there are
+> [!WARNING]
+> This action *always* requests the same number of CPU cores - even when there are
 > **fewer directories**. You must ensure that you only submit this action on groups of
 > directories larger than or equal to `threads_per_process`.
 > [Process parallelism](process-parallelism.md) describes a method that automatically

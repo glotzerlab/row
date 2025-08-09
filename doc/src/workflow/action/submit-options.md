@@ -22,7 +22,8 @@ output_file_path = "path/to/output"
 output_file_name = "{action_name}-%j.out"
 ```
 
-> Note: You may omit `[submit_options]` entirely.
+> [!NOTE]
+> You may omit `[submit_options]` entirely.
 
 ## `<name>.account`
 
@@ -54,7 +55,8 @@ partition when submitting jobs to the queue on cluster `<name>`. When omitted, *
 will automatically determine the correct partition based on the configuration in
 [`clusters.toml`](../../clusters/index.md).
 
-> Note: You should almost always omit `partition`. Set it *only* when your action
+> [!TIP]
+> You should almost always omit `partition`. Set it *only* when your action
 > **requires** a *specialty* partition that is not automatically selected.
 
 

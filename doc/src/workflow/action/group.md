@@ -15,7 +15,8 @@ reverse_sort = true
 condition = ["/subproject", "==", "project_one"]
 ```
 
-> Note: You may omit `[action.group]` entirely.
+> [!TIP]
+> You may omit `[action.group]` entirely.
 
 Execute [`row show directories --action action`](../../row/show/directories.md) to display the
 groups of directories included in a given action.
@@ -66,7 +67,8 @@ all = [["/value", ">", 0.2], ["/value", "<", 0.9]]
 condition = ["/value", "==", 0.05]
 ```
 
-> Note: **Row** compares arrays *lexicographically*.
+> [!NOTE]
+> **Row** compares arrays *lexicographically*.
 
 <div class="warning">
 JSON Objects (also known as maps or dictionaries) are not comparable. You must use

@@ -40,7 +40,8 @@ on this cluster. The table **must** have one of the following keys:
 * `always`: **bool** - Set to `true` to always identify this cluster. When `false`,
   this cluster may only be chosen by an explicit `--cluster` option.
 
-> Note: The *first* cluster in the list that sets `identify.always = true` will prevent
+> [!CAUTION]
+> The *first* cluster in the list that sets `identify.always = true` will prevent
 > any later cluster from being identified (except by explicit `--cluster=name`).
 
 ## scheduler
@@ -114,7 +115,8 @@ When `cpus_per_node` is set, **row** will **also** request the minimal number of
 needed to satisfy `n_nodes * cpus_per_node >= total_cpus`. This may result in longer
 queue times, but will lead to more stable performance for users.
 
-> Note: Set `cpus_per_node` only when all nodes in the partition have the same number
+> [!TIP]
+> Set `cpus_per_node` only when all nodes in the partition have the same number
 > of CPUs.
 
 ### minimum_gpus_per_job

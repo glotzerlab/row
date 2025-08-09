@@ -68,9 +68,10 @@ When set, the given value will be passed to the SLURM option `--mem-per-cpu` or
 smaller than the partition's. **Row** returns an error when the user requests more
 memory than the partition has available to prevent unexpected additional costs.
 
-> Note: Most users should omit the memory request. When omitted **row** will
-automatically select the maximum amount of memory possible without incurring
-extra charges on your HPC resources.
+> [!TIP]
+> Most users should omit the memory request. When omitted **row** will
+> automatically select the maximum amount of memory possible without incurring
+> extra charges on your HPC resources.
 
 *Added:*
 

@@ -65,7 +65,8 @@ Hello, directory1!
 Hello, directory2!
 ```
 
-> Note: If you are following this tutorial on a cluster, `row submit` may submit the
+> [!NOTE]
+> If you are following this tutorial on a cluster, `row submit` may submit the
 > job to the queue instead! Later tutorial sections will cover clusters in more detail.
 > For now, you can use `row submit --cluster=none` to execute actions directly in your
 > current terminal session.

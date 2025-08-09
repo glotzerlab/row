@@ -8,7 +8,8 @@ This guide will show you how to structure all of your actions in a single file:
 `actions.py`. This layout is inspired by **row's** predecessor **signac-flow**
 and its `project.py`.
 
-> Note: If you are familiar with **signac-flow**, see [migrating from signac-flow][1]
+> [!TIP]
+> If you are familiar with **signac-flow**, see [migrating from signac-flow][1]
 > for many helpful tips.
 
 [1]: ../../signac-flow.md
@@ -37,7 +38,8 @@ Execute:
 ```
 to initialize the signac workspace and populate it with directories.
 
-> Note: If you are not familiar with **signac**, then go read the [*basic* tutorial].
+> [!NOTE]
+> If you are not familiar with **signac**, then go read the [*basic* tutorial].
 > Come back to the **row** documentation when you get to the section on *workflows*.
 > For extra credit, reimplement the **signac** tutorial workflow in **row** after you
 > finish reading this guide.
@@ -56,7 +58,8 @@ an array of jobs as an argument: `def square(*jobs)` and `def compute_sum(*jobs)
 `if __name__ == "__main__":` block parses the command line arguments, forms an array of
 signac jobs, and calls the requested **action** function.
 
-> Note: This example demonstrates looping over directories in **serial**. However, this
+> [!NOTE]
+> This example demonstrates looping over directories in **serial**. However, this
 > structure also gives you the ability to choose **serial** or **[parallel]** execution.
 > Grouping many directories into a single cluster job submission will increase your
 > workflow's throughput.
@@ -113,7 +116,8 @@ Proceed? [Y/n]: y
 
 It worked! `sum` printed the result `285`.
 
-> Note: If you are on a cluster, use `--cluster=none` or wait for jobs to complete
+> [!NOTE]
+> If you are on a cluster, use `--cluster=none` or wait for jobs to complete
 > after submitting.
 
 ## Applying this structure to your workflows
@@ -129,7 +133,8 @@ these steps:
     ```
     to your `workflow.toml` file.
 
-> Note: You may write functions that take only one job `def action(job)` without
+> [!NOTE]
+> You may write functions that take only one job `def action(job)` without
 > modifying the given implementation of `__main__`. However, you will need to set
 > `action.group.maximum_size = 1` or use `{directory}` to ensure that `action.py` is
 > given a single directory.

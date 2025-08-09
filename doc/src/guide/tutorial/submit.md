@@ -32,10 +32,11 @@ node, GPU, etc...). Your final script must request the correct `--partition` to 
 the command and charge accounts properly. `clusters.toml` describes rules by which
 **row** automatically selects partitions when it generates job scripts.
 
-> Note: Feel free to ask on the [discussion board][discussion] if you need help
+> [!TIP]
+> Feel free to ask on the [discussion board] if you need help
 > writing configuration files for your cluster.
 
-[discussion]: https://github.com/glotzerlab/row/discussions
+[discussion board]: https://github.com/glotzerlab/row/discussions
 
 Check that the output of `row show cluster` and `row show launchers` is what you expect
 before continuing.
@@ -85,7 +86,8 @@ Notice the selection of 1 task on the `shared` **partition**. This is correct fo
 where the `shared` **partition** allows jobs smaller than one node and charges based
 on the number of CPU cores quested.
 
-> Note: When using **row** on one of the built-in clusters **row** should always select
+> [!NOTE]
+> When using **row** on one of the built-in clusters **row** should always select
 > the correct partition for your jobs. Please open an
 > [issue](https://github.com/glotzerlab/row/issues) if it does not.
 

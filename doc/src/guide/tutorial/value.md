@@ -15,7 +15,8 @@ should include a [JSON] file in each directory that identifies its **value**.
 
 [JSON]: https://www.json.org
 
-> Note: For pedagogical reasons, this next code block manually creates directory names
+> [!NOTE]
+> For pedagogical reasons, this next code block manually creates directory names
 > and value files. In practice, you will likely find [signac] more
 > convenient to work with - it will create the JSON files and directories for you with
 > a cleaner syntax. This tutorial will cover **row** ↔ **signac** interoperation in a
