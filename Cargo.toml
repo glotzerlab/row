@@ -2,7 +2,7 @@
 name = "row"
 version = "0.6.0"
 edition = "2024"
-rust-version = "1.85"
+rust-version = "1.88"
 description = "Row is a command line tool that helps you manage workflows on HPC resources."
 homepage = "https://glotzerlab.engin.umich.edu"
 documentation = "https://row.readthedocs.io"
