@@ -56,10 +56,11 @@ pub fn scan(
     let mut matching_action_count = 0;
     for action in workflow.action {
         if let Some(selection) = args.action.as_ref()
-            && selection != action.name() {
-                complete.remove(action.name());
-                continue;
-            }
+            && selection != action.name()
+        {
+            complete.remove(action.name());
+            continue;
+        }
         trace!(
             "Including complete directories for action '{}'.",
             action.name()

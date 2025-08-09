@@ -134,9 +134,10 @@ pub fn submit<W: Write>(
         let mut job_count = 0;
         for group in groups {
             if let Some(n) = args.n
-                && action_directories.len() >= n {
-                    break;
-                }
+                && action_directories.len() >= n
+            {
+                break;
+            }
 
             cost = cost + action.resources.cost(group.len());
             action_directories.push((action.clone(), group.clone()));
@@ -155,9 +156,10 @@ pub fn submit<W: Write>(
         total_cost = total_cost + cost;
 
         if let Some(n) = args.n
-            && action_directories.len() >= n {
-                break;
-            }
+            && action_directories.len() >= n
+        {
+            break;
+        }
     }
 
     if action_directories.is_empty() {

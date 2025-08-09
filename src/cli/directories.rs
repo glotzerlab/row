@@ -164,9 +164,10 @@ pub fn print_matching<W: Write>(
 
         for (group_idx, group) in groups.iter().enumerate() {
             if let Some(n) = args.n_groups
-                && group_idx >= n {
-                    break;
-                }
+                && group_idx >= n
+            {
+                break;
+            }
 
             for directory in group {
                 // Format the directory status.
