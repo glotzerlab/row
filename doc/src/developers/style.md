@@ -21,11 +21,8 @@ files. Use reference-style links for long URLs.
 
 ## Spelling/grammar
 
-Contributors **must** configure their editors to perform spell checking (and preferably
-grammar checking as well). **Row's** pre-commit runs
-[typos](https://github.com/crate-ci/typos) which has a low rate of false positives.
-Developers *should* also configure a more thorough checker of their choice to ensure
-that code comments and documentation are free of errors. Suggested tools:
-* [typos](https://github.com/crate-ci/typos)
-* [ltex-ls](https://github.com/valentjn/ltex-ls)
+Contributors **must** configure their editors to perform spell checking.
+Suggested tools:
+* [codebook](https://github.com/blopker/codebook)
 * [cspell](https://cspell.org/)
+* [typos](https://github.com/crate-ci/typos)
