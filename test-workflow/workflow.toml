@@ -1,4 +1,0 @@
-[[action]]
-name = "hello"
-command = 'echo "Hello, {directory}!"'
-resources.gpus_per_process = 0

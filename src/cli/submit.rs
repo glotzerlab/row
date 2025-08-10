@@ -133,10 +133,10 @@ pub fn submit<W: Write>(
         let mut cost = ResourceCost::new();
         let mut job_count = 0;
         for group in groups {
-            if let Some(n) = args.n {
-                if action_directories.len() >= n {
-                    break;
-                }
+            if let Some(n) = args.n
+                && action_directories.len() >= n
+            {
+                break;
             }
 
             cost = cost + action.resources.cost(group.len());
@@ -155,10 +155,10 @@ pub fn submit<W: Write>(
         }
         total_cost = total_cost + cost;
 
-        if let Some(n) = args.n {
-            if action_directories.len() >= n {
-                break;
-            }
+        if let Some(n) = args.n
+            && action_directories.len() >= n
+        {
+            break;
         }
     }
 

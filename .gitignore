@@ -1,5 +1,6 @@
 /target
 /workflow.toml
+/test-workflow
 workspace
 .row
 .signac

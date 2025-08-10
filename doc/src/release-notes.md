@@ -2,9 +2,23 @@
 
 ## 0.7.0 (not yet released)
 
+*Highlights:*
+
+**Row** 0.7 allows users to produce product files in subdirectories.
+
+For example:
+```toml
+[[action]]
+products = ['file1.dat', 'subdir/file2.h5', 'long/path/to/file3.gsd']
+```
+
+*Added:*
+
+* `products` can now contain files in subdirectories.
+
 *Changed:*
 
-* Test with Rust 1.87.0.
+* Rust 1.88.0 is required to build **row** from source.
 
 ## 0.6.0 (2025-05-02)
 
