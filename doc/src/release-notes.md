@@ -4,7 +4,8 @@
 
 *Highlights:*
 
-**Row** 0.7 allows users to produce product files in subdirectories.
+**Row** 0.7 allows users to place product files in subdirectories. The code is more
+readable now using if-let chains that require Rust 1.88.
 
 For example:
 ```toml
