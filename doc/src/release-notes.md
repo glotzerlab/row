@@ -4,14 +4,13 @@
 
 *Highlights:*
 
-**Row** 0.7 allows users to place product files in subdirectories. The code is more
-readable now using if-let chains that require Rust 1.88.
-
-For example:
+**Row** 0.7 allows users to place product files in subdirectories. For example:
 ```toml
 [[action]]
 products = ['file1.dat', 'subdir/file2.h5', 'long/path/to/file3.gsd']
 ```
+
+The code is also more readable now using if-let chains that require Rust 1.88.
 
 *Added:*
 
