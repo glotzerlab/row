@@ -1,18 +1,23 @@
 # Installing row
 
-## Installing binaries with conda
+## Installation methods
 
-**Row** is available on [conda-forge] for the *linux-64*, *linux-aarch64*, *osx-64*,
-*osx-arm64* architectures. Install with [micromamba]:
+Choose one of the installation methods below.
 
+### Installing binaries with cargo binstall
+
+[cargo-binstall] downloads the prebuilt releases directly from GitHub and installs
+them. First, [install cargo-binstall] (follow the link for instructions). Then
+execute
 ```bash
-micromamba install row
+cargo binstall row
 ```
+to install **row**. Follow the on-screen prompts.
 
-[conda-forge]: https://conda-forge.org/
-[micromamba]: https://mamba.readthedocs.io/en/latest/user_guide/micromamba.html
+[cargo-binstall]: https://github.com/cargo-bins/cargo-binstall
+[install cargo-binstall]: https://github.com/cargo-bins/cargo-binstall?tab=readme-ov-file#installation
 
-## Installing binaries manually
+### Installing binaries manually
 
 Download binary from [latest row release] that matches your operating system and
 hardware architecture.
@@ -31,7 +36,19 @@ Place the executable `row` in a directory that is on your `$PATH`.
 
 [latest row release]: https://github.com/glotzerlab/row/releases
 
-## Building the latest release from source
+### Installing binaries with conda
+
+**Row** is available on [conda-forge] for the *linux-64*, *linux-aarch64*, *osx-64*,
+*osx-arm64* architectures. Install with [micromamba]:
+
+```bash
+micromamba install row
+```
+
+[conda-forge]: https://conda-forge.org/
+[micromamba]: https://mamba.readthedocs.io/en/latest/user_guide/micromamba.html
+
+### Building the latest release from source
 
 Install [Rust]. Then execute:
 
@@ -47,7 +64,7 @@ Ensure that `$HOME/.cargo/bin` is on your `$PATH`.
 [Rust]: https://doc.rust-lang.org/stable/book/
 [cargo-update]: https://github.com/nabijaczleweli/cargo-update
 
-## Building the latest development version
+### Building the latest development version
 
 Clone the repository:
 ```bash
