@@ -26,7 +26,8 @@ tar -xvf row-*.tar.zst
 
 Place the executable `row` in a directory that is on your `$PATH`.
 
-> Note: If you are unsure what your system architecture is, execute `uname -sm`.
+> [!TIP]
+> If you are unsure what your system architecture is, execute `uname -sm`.
 
 [latest row release]: https://github.com/glotzerlab/row/releases
 
@@ -40,7 +41,8 @@ cargo install row --locked
 
 Ensure that `$HOME/.cargo/bin` is on your `$PATH`.
 
-> Note: You can keep your installation up to date with **[cargo-update]**.
+> [!TIP]
+> You can keep your installation up to date with **[cargo-update]**.
 
 [Rust]: https://doc.rust-lang.org/stable/book/
 [cargo-update]: https://github.com/nabijaczleweli/cargo-update

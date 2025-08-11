@@ -28,7 +28,8 @@ walltime.per_submission = "04:00:00"
 `action.name`: **string** - The action's name. You must set a name for each
 action. The name may be set by [from](#from).
 
-> Note: Two or more conceptually identical elements in the actions array *may* have
+> [!TIP]
+> Two or more *conceptually* identical elements in the actions array *may* have
 > the same name. All elements with the same name **must** have identical
 > [`products`](#products) and [`previous_actions`](#previous_actions). All elements
 > with the same name **must also** select non-intersecting subsets of directories with
@@ -147,7 +148,8 @@ the key. When all 3 locations omit the key, the "when omitted" behavior takes ef
 
 `from` is a convenient way to [submit the same action to different groups/resources].
 
-> Note: `name` and `command` may be provided by `from` or `action.default` but may not
+> [!IMPORTANT]
+> `name` and `command` may be provided by `from` or `action.default` but may not
 > be omitted entirely.
 
 [submit the same action to different groups/resources]: ../../guide/howto/same.md

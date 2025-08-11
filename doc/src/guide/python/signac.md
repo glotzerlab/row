@@ -14,5 +14,6 @@ value_file = "signac_statepoint.json"
 
 Now you can use any values in your state points to form **groups**.
 
-> Note: **signac** has a rich command line interface as well. You should consider using
+> [!NOTE]
+> **signac** has a rich command line interface as well. You should consider using
 > **signac** even if you are not a Python user.

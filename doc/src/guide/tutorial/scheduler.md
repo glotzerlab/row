@@ -22,7 +22,8 @@ times what you expected them to.
 
 With that warning out of the way, let's cover some of the basics you need to know.
 
-> Note: This guide is generic and covers only the topics directly related to **row**.
+> [!NOTE]
+> This guide is generic and covers only the topics directly related to **row**.
 > You can find more information in your **cluster's** documentation.
 
 ## Login and compute nodes
@@ -49,7 +50,8 @@ squeue
 ```
 on a **login node**.
 
-> Note: This guide assumes your cluster uses Slurm. Refer to your cluster's
+> [!NOTE]
+> This guide assumes your cluster uses Slurm. Refer to your cluster's
 > documentation for equivalent commands if it uses a different scheduler.
 
 You will likely see some **PENDING** and **RUNNING** jobs. **RUNNING** jobs have been
@@ -84,7 +86,8 @@ To submit the **job** to the **scheduler**, execute:
 sbatch job.sh
 ```
 
-> Note: Check the documentation for your cluster before submitting this job. If
+> [!IMPORTANT]
+> Check the documentation for your cluster before submitting this job. If
 > `sbatch` reported an error, you may also need to set `--account`, `--partition`, or
 > other options.
 
@@ -106,7 +109,8 @@ Hello, World!
 pid 830675's current affinity list: 99
 ```
 
-> Note: If you see more than one number in the affinity list (e.g. 0-127), then the
+> [!NOTE]
+> If you see more than one number in the affinity list (e.g. 0-127), then the
 > **scheduler** gave your job access to more CPU cores than `--ntasks=1` asks for.
 > This may be because your **cluster** allocates **whole nodes** to jobs. Refer to
 > your **cluster's** documentation to see specific details on how jobs are allocated

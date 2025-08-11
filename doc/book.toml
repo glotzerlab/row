@@ -7,8 +7,11 @@ title = "Row documentation"
 [build]
 create-missing = false
 
+[preprocessor.alerts]
+
 # [output.html] must be the last table so that .readthedocs.yaml can easily add a key to it
 [output.html]
 git-repository-url = "https://github.com/glotzerlab/row"
-additional-css = ["rtd-mdbook.css"]
+additional-css = ["rtd-mdbook.css", "theme/pagetoc.css" ]
+additional-js = ["theme/pagetoc.js"]
 edit-url-template = "https://github.com/glotzerlab/row/edit/trunk/doc/{path}"

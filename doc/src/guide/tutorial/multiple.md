@@ -37,7 +37,8 @@ its input both to the given file and the terminal, so these two changes together
 Write `hello.out` into the directory and 2) Instruct **row** that the action is complete
 when `hello.out` is present.
 
-> Note: Commands in **row** should be a single line. Multiple shell commands can be
+> [!IMPORTANT]
+> Commands in **row** should be a single line. Multiple shell commands can be
 > chained with `|` to transfer output to input or `&&` to ensure that each command in
 > the sequence completes without error before starting the next.
 

@@ -10,7 +10,8 @@ processes.per_submission = 10
 threads_per_process = 4
 walltime.per_submission = "04:00:00"
 ```
-> Note: You may omit `[action.resources]` entirely.
+> [!TIP]
+> You may omit `[action.resources]` entirely.
 
 ## processes
 
@@ -78,9 +79,10 @@ When omitted, `walltime` defaults to `per_directory = 01:00:00`.
 `action.resources.memory_per_cpu_mb`: **integer** - The number of megabytes of memory to
 request per CPU (thread). `memory_per_cpu_mb` is used when `gpus_per_process` is unset.
 
-> Note: Most users should omit `memory_per_cpu_mb`. When omitted **row** will
-automatically select the maximum amount of memory possible without incurring
-extra charges on your HPC resources.
+> [!IMPORTANT]
+> Most users should omit `memory_per_cpu_mb`. When omitted **row** will
+> automatically select the maximum amount of memory possible without incurring
+> extra charges on your HPC resources.
 
 ## memory_per_gpu_mb
 

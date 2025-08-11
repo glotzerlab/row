@@ -21,7 +21,8 @@ submit_options.cluster1.account = "alternate-account"
 ```
 
 <!-- ANCHOR: delta -->
-> Note: NCSA Delta assigns `<prefix>-cpu` and `<prefix>-gpu` accounts. Set
+> [!IMPORTANT]
+> NCSA Delta assigns `<prefix>-cpu` and `<prefix>-gpu` accounts. Set
 > `submit_options.delta.account = "<prefix>"`. **Row** will automatically append the
 > `-cpu` or `-gpu` when submitting to the CPU or GPU partitions respectively.
 <!-- ANCHOR_END: delta -->

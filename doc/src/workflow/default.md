@@ -16,7 +16,8 @@ an [action array element](action/index.md). When an action array element omits a
 the default key is used. When both the action **and** the default action omit a key,
 the individually documented "when omitted" behavior takes effect.
 
-> Note: This rule applies to all sub-keys as well. For example:
+> [!IMPORTANT]
+> This rule applies to all sub-keys as well. For example:
 > ```toml
 > [default.action.resources]
 > processes.per_submission = 8

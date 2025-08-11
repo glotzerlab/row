@@ -25,7 +25,8 @@ This pattern also allows you to *continue* running one calculation over several 
 submissions. Move the output file to its final location only after the final submission
 completes the calculation.
 
-> Note: If you wrote directly to `output.dat`, **row** might identify your computation
+> [!IMPORTANT]
+> If you write directly to `output.dat`, **row** might identify your computation
 > as **complete** right after it starts.
 
 ## Group directories whenever possible, but not to an extreme degree.

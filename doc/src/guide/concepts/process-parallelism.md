@@ -51,7 +51,8 @@ processes.per_directory = 1
 walltime.per_submission = "08:00:00"
 ```
 
-> Note: Adjust `maximum_size` to control how many directories are submitted per job.
+> [!TIP]
+> Adjust `maximum_size` to control how many directories are submitted per job.
 
 ## Executing multiple MPI decomposed simulations in parallel with **HOOMD-blue**.
 

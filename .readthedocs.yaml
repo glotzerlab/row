@@ -1,9 +1,17 @@
 version: 2
 build:
   os: "ubuntu-24.04"
+  tools:
+    rust: "1.86"
   commands:
-    - mkdir -p bin
-    - curl -sSL "https://github.com/rust-lang/mdBook/releases/download/v0.4.49/mdbook-v0.4.49-x86_64-unknown-linux-gnu.tar.gz" | tar -xvz --directory "bin"
+    # Install cargo binstall
+    - mkdir -p "${PATH%%:*}"
+    - curl -sSL "https://github.com/cargo-bins/cargo-binstall/releases/latest/download/cargo-binstall-x86_64-unknown-linux-gnu.tgz" | tar -xvz --directory "${PATH%%:*}"
+    # Install mdbook
+    - cargo binstall mdbook@0.4.52 mdbook-alerts@0.8.0 --no-confirm --install-path "${PATH%%:*}"
+    # Build the book
     - mkdir -p $READTHEDOCS_OUTPUT/html
     - echo "site-url = \"/$READTHEDOCS_LANGUAGE/$READTHEDOCS_VERSION/\"" >> doc/book.toml
-    - bin/mdbook build doc --dest-dir=$READTHEDOCS_OUTPUT/html
+    - mdbook build doc --dest-dir=$READTHEDOCS_OUTPUT/html
+    # List the output files
+    - ls -lR $READTHEDOCS_OUTPUT/html

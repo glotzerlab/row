@@ -9,7 +9,8 @@ path = "my_workspace"
 value_file = "value.json"
 ```
 
-> Note: You may omit `[workspace]` entirely.
+> [!TIP]
+> You may omit `[workspace]` entirely.
 
 ## path
 

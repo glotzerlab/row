@@ -4,7 +4,8 @@
 
 *Highlights:*
 
-**Row** 0.7 allows users to produce product files in subdirectories.
+**Row** 0.7 allows users to place product files in subdirectories. The code is more
+readable now using if-let chains that require Rust 1.88.
 
 For example:
 ```toml
@@ -68,9 +69,10 @@ When set, the given value will be passed to the SLURM option `--mem-per-cpu` or
 smaller than the partition's. **Row** returns an error when the user requests more
 memory than the partition has available to prevent unexpected additional costs.
 
-> Note: Most users should omit the memory request. When omitted **row** will
-automatically select the maximum amount of memory possible without incurring
-extra charges on your HPC resources.
+> [!TIP]
+> Most users should omit the memory request. When omitted **row** will
+> automatically select the maximum amount of memory possible without incurring
+> extra charges on your HPC resources.
 
 *Added:*
 
