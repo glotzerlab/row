@@ -20,7 +20,6 @@ env:
   CARGO_TERM_COLOR: always
   ROW_COLOR: always
   CLICOLOR: 1
-  RUST_LATEST_VERSION: 1.89.0
 
 jobs:
   unit_test:
@@ -46,10 +45,11 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-    - name: Update rust
-      run: rustup install ${{ matrix.rust }} --no-self-update && rustup default ${{ matrix.rust }}
-    - name: Check rust installation
-      run: rustc -vV
+    - name: Configure Rust
+      id: rust_toolchain
+      uses: dtolnay/rust-toolchain@b3b07ba8b418998c39fb20f53e8b695cdcc8de1b
+      with:
+        toolchain: ${{ matrix.rust }}
     - uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
       with:
         path: |
@@ -57,7 +57,7 @@ jobs:
           ~/.cargo/registry/cache/
           ~/.cargo/git/db/
           target/
-        key: ${{ runner.os }}-rust-${{ matrix.rust }}-cargo-unit-test-${{ matrix.mode }}-${{ hashFiles('**/Cargo.lock') }}
+        key: ${{ runner.os }}-rust-${{steps.rust_toolchain.outputs.name}}-cargo-unit-test-${{ matrix.mode }}-${{ hashFiles('**/Cargo.lock') }}
     - name: Build
       run: cargo build ${{ matrix.mode == 'release' && '--release' || '' }} --verbose
     - name: Run tests
@@ -69,10 +69,11 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-    - name: Update rust
-      run: rustup install "$RUST_LATEST_VERSION" --no-self-update && rustup default "$RUST_LATEST_VERSION"
-    - name: Check rust installation
-      run: rustc -vV
+    - name: Configure Rust
+      id: rust_toolchain
+      uses: dtolnay/rust-toolchain@b3b07ba8b418998c39fb20f53e8b695cdcc8de1b
+      with:
+        toolchain: 1.89.0
     - uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
       with:
         path: |
@@ -80,7 +81,7 @@ jobs:
           ~/.cargo/registry/cache/
           ~/.cargo/git/db/
           target/
-        key: ${{ runner.os }}-rust-${{ env.RUST_LATEST_VERSION }}-cargo-execute-tutorials-${{ hashFiles('**/Cargo.lock') }}
+        key: ${{ runner.os }}-rust-${{steps.rust_toolchain.outputs.name}}-cargo-execute-tutorials-${{ hashFiles('**/Cargo.lock') }}
     - name: Install
       run: cargo install --path . --locked --verbose
     - name: Run hello.sh
