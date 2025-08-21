@@ -1,6 +1,6 @@
 [package]
 name = "row"
-version = "0.7.0"
+version = "0.7.1"
 edition = "2024"
 rust-version = "1.88"
 description = "Row is a command line tool that helps you manage workflows on HPC resources."
