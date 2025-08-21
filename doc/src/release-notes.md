@@ -1,5 +1,12 @@
 # Release notes
 
+## 0.7.1 (2025-08-21)
+
+*Fixed:*
+
+* Statically link Linux binaries so that `cargo binstall row` installs a working version
+  even on old Linux distributions.
+
 ## 0.7.0 (2025-08-11)
 
 *Highlights:*
