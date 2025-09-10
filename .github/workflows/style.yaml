@@ -46,7 +46,7 @@ jobs:
       with:
         toolchain: 1.89.0
         components: rustfmt
-    - run: cargo fmt --check
+    - run: cargo fmt --check -- --color=always
 
   prek:
     runs-on: ubuntu-24.04
