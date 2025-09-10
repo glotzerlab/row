@@ -46,9 +46,7 @@ jobs:
       with:
         toolchain: 1.89.0
         components: rustfmt
-    - run: cargo fmt
-    - run: git diff
-      if: always()
+    - run: cargo fmt --check
 
   prek:
     runs-on: ubuntu-24.04
