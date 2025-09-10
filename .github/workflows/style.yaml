@@ -1,4 +1,4 @@
-name: pre-commit
+name: Style
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
