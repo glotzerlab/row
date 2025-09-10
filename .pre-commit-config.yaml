@@ -17,7 +17,7 @@ repos:
   rev: 'v0.13.0'
   hooks:
   - id: ruff-format
-  - id: ruff
+  - id: ruff-check
 - repo: https://github.com/glotzerlab/fix-license-header
   rev: v0.4.1
   hooks:
