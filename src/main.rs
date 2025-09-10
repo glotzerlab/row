@@ -22,7 +22,7 @@ use row::MultiProgressContainer;
 use row::format::HumanDuration;
 use ui::MultiProgressWriter;
 
-fn main_detail() -> Result<(), Box<dyn Error>>  {
+fn main_detail() -> Result<(), Box<dyn Error>> {
     let instant = Instant::now();
 
     // Autocomplete
