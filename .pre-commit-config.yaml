@@ -1,22 +1,4 @@
-ci:
-  autoupdate_schedule: quarterly
-  autoupdate_branch: 'trunk'
-  autofix_prs: false
-  # rust does not work on pre-commit.ci
-  skip: [fmt, check, clippy]
-
 repos:
-- repo: https://github.com/glotzerlab/pre-commit-rust-hooks
-  rev: 766490b4a83f979ad61bf6ee6fb03ba394fe4170
-  hooks:
-  - id: fmt
-  - id: check
-  - id: clippy
-    args:
-      - --all-targets
-      - --all-features
-      - --
-      - -Dwarnings
 - repo: https://github.com/pre-commit/pre-commit-hooks
   rev: 'v5.0.0'
   hooks:
