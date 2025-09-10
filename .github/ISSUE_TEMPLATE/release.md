@@ -7,6 +7,7 @@ assignees: 'joaander'
 
 ---
 
+- [ ] Run `prek autoupdate`.
 - [ ] Run *bumpversion*.
 - [ ] Run `cargo check`
 - [ ] Run `cargo update`
