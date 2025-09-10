@@ -22,7 +22,7 @@ jobs:
       uses: dtolnay/rust-toolchain@e97e2d8cc328f1b50210efc529dca0028893a2d9
       with:
         toolchain: 1.89.0
-    - run: cargo check --color=always --all-targets --all-features -- -Dwarnings
+    - run: cargo check --all-targets --all-features -- -Dwarnings
 
   cargo-clippy:
     runs-on: ubuntu-24.04
