@@ -1,24 +1,6 @@
-ci:
-  autoupdate_schedule: quarterly
-  autoupdate_branch: 'trunk'
-  autofix_prs: false
-  # rust does not work on pre-commit.ci
-  skip: [fmt, check, clippy]
-
 repos:
-- repo: https://github.com/glotzerlab/pre-commit-rust-hooks
-  rev: 766490b4a83f979ad61bf6ee6fb03ba394fe4170
-  hooks:
-  - id: fmt
-  - id: check
-  - id: clippy
-    args:
-      - --all-targets
-      - --all-features
-      - --
-      - -Dwarnings
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: 'v5.0.0'
+  rev: 'v6.0.0'
   hooks:
   - id: end-of-file-fixer
   - id: trailing-whitespace
@@ -32,10 +14,10 @@ repos:
   hooks:
     - id: actionlint
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: 'v0.12.2'
+  rev: 'v0.13.0'
   hooks:
   - id: ruff-format
-  - id: ruff
+  - id: ruff-check
 - repo: https://github.com/glotzerlab/fix-license-header
   rev: v0.4.1
   hooks:

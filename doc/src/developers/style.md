@@ -2,16 +2,16 @@
 
 ## Rust
 
-**Row's** rust code follows the [Rust style guide][1]. **Row's** [pre-commit][2]
+**Row's** rust code follows the [Rust style guide][1]. **Row's** [prek][2]
 configuration applies style fixes with `rustfmt` and checks for common errors with
 `clippy`.
 
 [1]: https://doc.rust-lang.org/style-guide/index.html
-[2]: https://pre-commit.com/
+[2]: https://prek.j178.dev/
 
 ## Python
 
-**Row's** pre-commit configuration both formats and checks Python code with `ruff`.
+**Row's** `prek` configuration both formats and checks Python code with `ruff`.
 
 ## Markdown
 
