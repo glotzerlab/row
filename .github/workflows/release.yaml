@@ -112,6 +112,11 @@ jobs:
       with:
         toolchain: 1.89.0
         targets: ${{ matrix.target }}
+    - name: Cache
+      uses: Swatinem/rust-cache@f13886b937689c021905a6b90929199931d60db1 # v2.8.1
+      with:
+        cache-bin: false
+        key: ${{ matrix.target }}
     - name: Install musl-tools on Linux
       run: sudo apt-get update --yes && sudo apt-get install --yes musl-tools
       if: contains(matrix.target, 'musl')
