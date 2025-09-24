@@ -27,6 +27,10 @@ jobs:
       uses: dtolnay/rust-toolchain@6d653acede28d24f02e3cd41383119e8b1b35921
       with:
         toolchain: 1.89.0
+    - name: Cache
+      uses: Swatinem/rust-cache@f13886b937689c021905a6b90929199931d60db1 # v2.8.1
+      with:
+        cache-bin: false
     - run: cargo check --all-targets --all-features
 
   cargo-clippy:
@@ -39,6 +43,10 @@ jobs:
       with:
         toolchain: 1.89.0
         components: clippy
+    - name: Cache
+      uses: Swatinem/rust-cache@f13886b937689c021905a6b90929199931d60db1 # v2.8.1
+      with:
+        cache-bin: false
     - run: cargo clippy --all-targets --all-features -- -Dwarnings
 
   cargo-fmt:

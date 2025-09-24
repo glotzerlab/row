@@ -50,6 +50,11 @@ jobs:
       uses: dtolnay/rust-toolchain@6d653acede28d24f02e3cd41383119e8b1b35921
       with:
         toolchain: ${{ matrix.rust }}
+    - name: Cache
+      uses: Swatinem/rust-cache@f13886b937689c021905a6b90929199931d60db1 # v2.8.1
+      with:
+        key: ${{ matrix.mode }}
+        cache-bin: false
     - name: Build
       run: cargo build ${{ matrix.mode == 'release' && '--release' || '' }} --verbose
     - name: Run tests
@@ -66,6 +71,10 @@ jobs:
       uses: dtolnay/rust-toolchain@6d653acede28d24f02e3cd41383119e8b1b35921
       with:
         toolchain: 1.89.0
+    - name: Cache
+      uses: Swatinem/rust-cache@f13886b937689c021905a6b90929199931d60db1 # v2.8.1
+      with:
+        cache-bin: false
     - name: Install
       run: cargo install --path . --locked --verbose
     - name: Run hello.sh
