@@ -17,7 +17,6 @@ use row::MultiProgressContainer;
 use row::project::Project;
 
 #[derive(Args, Debug)]
-#[allow(clippy::struct_excessive_bools)]
 pub struct Arguments {
     /// Show jobs running on these directories (defaults to all). Use 'show jobs -' to read from stdin.
     #[arg(add=ArgValueCandidates::new(autocomplete::get_directory_candidates))]

@@ -26,7 +26,6 @@ pub struct Arguments {
 
 #[derive(Args, Debug)]
 #[group(multiple = true)]
-#[allow(clippy::struct_excessive_bools)]
 pub struct Selection {
     /// Remove the directory cache.
     #[arg(long, display_order = 0)]

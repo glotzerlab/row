@@ -50,7 +50,6 @@ pub struct Arguments {
 }
 
 /// Submit workflow actions to the scheduler.
-#[allow(clippy::too_many_lines)]
 pub fn submit<W: Write>(
     options: &GlobalOptions,
     args: Arguments,

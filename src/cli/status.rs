@@ -17,7 +17,6 @@ use row::MultiProgressContainer;
 use row::project::{Project, Status};
 use row::workflow::ResourceCost;
 
-#[allow(clippy::struct_excessive_bools)]
 #[derive(Args, Debug)]
 pub struct Arguments {
     /// Select the actions to summarize with a wildcard pattern.

@@ -16,7 +16,6 @@ use row::MultiProgressContainer;
 use row::project::Project;
 
 #[derive(Args, Debug)]
-#[allow(clippy::struct_excessive_bools)]
 pub struct Arguments {
     /// Select directories to summarize (defaults to all). Use 'show directories -' to read from stdin.
     #[arg(add=ArgValueCandidates::new(autocomplete::get_directory_candidates))]
@@ -86,7 +85,6 @@ pub fn directories<W: Write>(
     }
 }
 
-#[allow(clippy::too_many_lines)]
 pub fn print_matching<W: Write>(
     action_name: &str,
     options: &GlobalOptions,

@@ -264,7 +264,6 @@ impl ResourceCost {
     }
 
     /// Create a new `ResourceCost`.
-    #[allow(clippy::similar_names)]
     pub fn with_values(cpu_hours: f64, gpu_hours: f64) -> Self {
         Self {
             cpu_hours,
