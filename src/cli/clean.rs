@@ -6,8 +6,8 @@ use log::{debug, info, warn};
 use std::error::Error;
 use std::{fs, io};
 
-use crate::cli::GlobalOptions;
 use crate::MultiProgressContainer;
+use crate::cli::GlobalOptions;
 use crate::project::Project;
 use crate::{
     COMPLETED_CACHE_FILE_NAME, DATA_DIRECTORY_NAME, DIRECTORY_CACHE_FILE_NAME,

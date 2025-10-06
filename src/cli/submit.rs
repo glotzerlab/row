@@ -19,8 +19,8 @@ use std::sync::atomic::AtomicBool;
 use std::time::Instant;
 use wildmatch::WildMatch;
 
-use crate::cli::{GlobalOptions, autocomplete};
 use crate::MultiProgressContainer;
+use crate::cli::{GlobalOptions, autocomplete};
 use crate::format::HumanDuration;
 use crate::project::Project;
 use crate::workflow::{Action, ResourceCost};

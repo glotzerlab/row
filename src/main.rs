@@ -1,21 +1,21 @@
 // Copyright (c) 2024-2025 The Regents of the University of Michigan.
 // Part of row, released under the BSD 3-Clause License.
 
-use std::process::ExitCode;
 use log::error;
+use std::process::ExitCode;
 
-mod main_detail;
-mod cli;
-mod ui;
 pub(crate) mod builtin;
+mod cli;
 pub mod cluster;
 mod expr;
 pub mod format;
 pub mod launcher;
+mod main_detail;
 pub mod progress_styles;
 pub mod project;
 pub mod scheduler;
 pub mod state;
+mod ui;
 pub mod workflow;
 pub mod workspace;
 

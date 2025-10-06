@@ -10,10 +10,10 @@ use std::error::Error;
 use std::io::Write;
 use std::path::PathBuf;
 
-use crate::cli::{self, GlobalOptions, autocomplete};
-use crate::ui::{Alignment, Item, Row, Table};
 use crate::MultiProgressContainer;
+use crate::cli::{self, GlobalOptions, autocomplete};
 use crate::project::Project;
+use crate::ui::{Alignment, Item, Row, Table};
 
 #[derive(Args, Debug)]
 pub struct Arguments {

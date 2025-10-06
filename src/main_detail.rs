@@ -14,9 +14,9 @@ use std::time::Instant;
 use crate::cli;
 use crate::ui;
 
-use cli::{ColorMode, Commands, Options, ShowCommands};
 use crate::MultiProgressContainer;
 use crate::format::HumanDuration;
+use cli::{ColorMode, Commands, Options, ShowCommands};
 use ui::MultiProgressWriter;
 
 pub(crate) fn main_detail() -> Result<(), Box<dyn Error>> {
