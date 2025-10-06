@@ -1,0 +1,5 @@
+words = [
+    "cpus",
+    "gpus",
+    "slurm",
+]

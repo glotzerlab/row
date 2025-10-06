@@ -28,7 +28,9 @@ pub struct Configuration {
 }
 
 /** Cluster
-`Cluster` stores everything needed to define a single cluster. It is readom the `clusters.toml` file.
+
+[`Cluster`] stores everything needed to define a single cluster. It is read from the `clusters.toml`
+file.
 */
 #[derive(Clone, Debug, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(deny_unknown_fields)]
@@ -123,9 +125,9 @@ impl Configuration {
     Identifying the current cluster consumes the `Configuration`.
 
     # Errors
-    * `row::Error::ClusterNameNotFound` when a cluster by the given name
+    * `crate::Error::ClusterNameNotFound` when a cluster by the given name
       is not present in the configuration (when `name = Some(_)`).
-    * `row::Error::ClusterNotFound` when the automatic identification
+    * `crate::Error::ClusterNotFound` when the automatic identification
       fails to find a cluster in the configuration.
     */
     pub fn identify(self, name: Option<&str>) -> Result<Cluster, Error> {
@@ -151,7 +153,7 @@ impl Configuration {
     the built-in configuration.
 
     # Errors
-    Returns `Err(row::Error)` when the file cannot be read or if there is
+    Returns `Err(crate::Error)` when the file cannot be read or if there is
     as parse error.
     */
     pub fn open() -> Result<Self, Error> {
@@ -232,7 +234,7 @@ impl Cluster {
     /** Find the partition to use for the given job.
 
     # Errors
-    Returns `Err<row::Error>` when the partition is not found.
+    Returns `Err<crate::Error>` when the partition is not found.
     */
     pub fn find_partition(
         &self,
@@ -272,7 +274,6 @@ impl Cluster {
 
 impl Partition {
     /// Check if a given job may use this partition.
-    #[allow(clippy::similar_names)]
     fn matches(&self, resources: &Resources, n_directories: usize, reason: &mut String) -> bool {
         let total_cpus = resources.total_cpus(n_directories);
         let total_gpus = resources.total_gpus(n_directories);
@@ -291,7 +292,7 @@ impl Partition {
 
         if self
             .require_cpus_multiple_of
-            .is_some_and(|x| total_cpus % x != 0)
+            .is_some_and(|x| !total_cpus.is_multiple_of(x))
         {
             let _ = writeln!(
                 reason,
@@ -303,7 +304,7 @@ impl Partition {
 
         if self
             .warn_cpus_not_multiple_of
-            .is_some_and(|x| total_cpus % x != 0)
+            .is_some_and(|x| !total_cpus.is_multiple_of(x))
         {
             warn!(
                 "{}: CPUs ({}) not a preferred multiple.",
@@ -328,7 +329,7 @@ impl Partition {
         }
         if self
             .require_gpus_multiple_of
-            .is_some_and(|x| total_gpus == 0 || total_gpus % x != 0)
+            .is_some_and(|x| total_gpus == 0 || !total_gpus.is_multiple_of(x))
         {
             let _ = writeln!(
                 reason,
@@ -340,7 +341,7 @@ impl Partition {
 
         if self
             .warn_gpus_not_multiple_of
-            .is_some_and(|x| total_gpus == 0 || total_gpus % x != 0)
+            .is_some_and(|x| total_gpus == 0 || !total_gpus.is_multiple_of(x))
         {
             warn!(
                 "{}: GPUs ({}) not a preferred multiple. ",

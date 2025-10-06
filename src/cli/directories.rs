@@ -10,13 +10,12 @@ use std::error::Error;
 use std::io::Write;
 use std::path::PathBuf;
 
+use crate::MultiProgressContainer;
 use crate::cli::{self, GlobalOptions, autocomplete};
+use crate::project::Project;
 use crate::ui::{Alignment, Item, Row, Table};
-use row::MultiProgressContainer;
-use row::project::Project;
 
 #[derive(Args, Debug)]
-#[allow(clippy::struct_excessive_bools)]
 pub struct Arguments {
     /// Select directories to summarize (defaults to all). Use 'show directories -' to read from stdin.
     #[arg(add=ArgValueCandidates::new(autocomplete::get_directory_candidates))]
@@ -86,7 +85,6 @@ pub fn directories<W: Write>(
     }
 }
 
-#[allow(clippy::too_many_lines)]
 pub fn print_matching<W: Write>(
     action_name: &str,
     options: &GlobalOptions,
@@ -114,7 +112,7 @@ pub fn print_matching<W: Write>(
     project
         .workflow()
         .action_by_name(action_name)
-        .ok_or_else(|| row::Error::ActionNotFound(action_name.to_string()))?;
+        .ok_or_else(|| crate::Error::ActionNotFound(action_name.to_string()))?;
 
     let mut table = Table::new().with_hide_header(if args.short { true } else { args.no_header });
     table.header = vec![
@@ -224,7 +222,7 @@ pub fn print_matching<W: Write>(
                     let value = project.state().values()[directory]
                         .pointer(pointer)
                         .ok_or_else(|| {
-                            row::Error::JSONPointerNotFound(directory.clone(), pointer.clone())
+                            crate::Error::JSONPointerNotFound(directory.clone(), pointer.clone())
                         })?;
                     row.push(
                         Item::new(value.to_string(), Style::new()).with_alignment(Alignment::Right),

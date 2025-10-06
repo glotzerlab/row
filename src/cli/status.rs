@@ -11,13 +11,12 @@ use std::io::Write;
 use std::path::PathBuf;
 use wildmatch::WildMatch;
 
+use crate::MultiProgressContainer;
 use crate::cli::{self, GlobalOptions, autocomplete};
+use crate::project::{Project, Status};
 use crate::ui::{Alignment, Item, Row, Table};
-use row::MultiProgressContainer;
-use row::project::{Project, Status};
-use row::workflow::ResourceCost;
+use crate::workflow::ResourceCost;
 
-#[allow(clippy::struct_excessive_bools)]
 #[derive(Args, Debug)]
 pub struct Arguments {
     /// Select the actions to summarize with a wildcard pattern.

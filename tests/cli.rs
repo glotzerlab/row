@@ -8,7 +8,7 @@ use predicates::prelude::*;
 use serial_test::parallel;
 use std::fs;
 
-use row::DATA_DIRECTORY_NAME;
+pub const DATA_DIRECTORY_NAME: &str = ".row";
 
 /// Create a sample workflow and workspace to use with the tests.
 fn setup_sample_workflow(

@@ -30,7 +30,7 @@ pub trait Scheduler {
     A `String` containing the job script.
 
     # Errors
-    Returns `Err<row::Error>` when the script cannot be created.
+    Returns `Err<crate::Error>` when the script cannot be created.
     */
     fn make_script(
         &self,
@@ -60,7 +60,7 @@ pub trait Scheduler {
     exit early (if possible) with `Err(Error::Interrupted)` when set.
 
     # Errors
-    Returns `Err(row::Error)` on error, which may be due to a non-zero exit
+    Returns `Err(crate::Error)` on error, which may be due to a non-zero exit
     status from the submission.
     */
     fn submit(
@@ -84,7 +84,7 @@ pub trait Scheduler {
     collar performs other work.
 
     # Errors
-    Returns `Err<row::Error>` when the job queue query cannot be executed.
+    Returns `Err<crate::Error>` when the job queue query cannot be executed.
     */
     fn active_jobs(&self, jobs: &[u32]) -> Result<Box<dyn ActiveJobs>, Error>;
 }
@@ -94,7 +94,7 @@ pub trait ActiveJobs {
     /** Complete the operation and return the currently active jobs.
 
     # Errors
-    Returns `Err<row::Error>` when the job queue query cannot be executed.
+    Returns `Err<crate::Error>` when the job queue query cannot be executed.
     */
     fn get(self: Box<Self>) -> Result<HashSet<u32>, Error>;
 }

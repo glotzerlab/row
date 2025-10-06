@@ -71,7 +71,7 @@ impl Project {
     /// Open a project from the current working directory or any parents.
     ///
     /// # Errors
-    /// Returns `Err<row::Error>` when the project cannot be opened.
+    /// Returns `Err<crate::Error>` when the project cannot be opened.
     ///
     pub fn open(
         io_threads: u16,
@@ -133,7 +133,7 @@ impl Project {
     /// an error after opening the project.
     ///
     /// # Errors
-    /// Returns `Err<row::Error>` when there is an error taking these steps.
+    /// Returns `Err<crate::Error>` when there is an error taking these steps.
     ///
     pub fn close(&mut self, multi_progress: &mut MultiProgressContainer) -> Result<(), Error> {
         debug!("Closing project.");
@@ -169,7 +169,7 @@ impl Project {
     /// the action's **include** directive.
     ///
     /// # Errors
-    /// `Err(row::Error)` when any action's include pointer cannot be resolved.
+    /// `Err(crate::Error)` when any action's include pointer cannot be resolved.
     ///
     /// # Warnings
     /// Logs with `warn!` when `subset` contains directories that are not
@@ -258,7 +258,7 @@ impl Project {
     /// `Ok(Status)` listing all input `directories` in categories.
     ///
     /// # Errors
-    /// `Err(row::Error)` when a given directory is not present.
+    /// `Err(crate::Error)` when a given directory is not present.
     ///
     pub fn separate_by_status(
         &self,
@@ -306,7 +306,7 @@ impl Project {
     /// Separate directories into groups based on the given parameters
     ///
     /// # Errors
-    /// `Err(row::Error)` when a given directory is not present or a JSON
+    /// `Err(crate::Error)` when a given directory is not present or a JSON
     /// pointer used for sorting is not present.
     ///
     /// # Panics

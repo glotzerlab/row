@@ -264,7 +264,6 @@ impl ResourceCost {
     }
 
     /// Create a new `ResourceCost`.
-    #[allow(clippy::similar_names)]
     pub fn with_values(cpu_hours: f64, gpu_hours: f64) -> Self {
         Self {
             cpu_hours,
@@ -565,7 +564,7 @@ impl Workflow {
     file, parse it, and return a `Workflow`.
 
     # Errors
-    Returns `Err(row::Error)` when the file is not found, cannot be read, or there is a parse
+    Returns `Err(crate::Error)` when the file is not found, cannot be read, or there is a parse
     error.
     */
     pub fn open() -> Result<Self, Error> {
@@ -585,7 +584,7 @@ impl Workflow {
     Parse the contents of the given string as if it were `workflow.toml` at the given `path`.
 
     # Errors
-    Returns `Err(row::Error)` when the file is not found, cannot be read, or there is a parse
+    Returns `Err(crate::Error)` when the file is not found, cannot be read, or there is a parse
     error.
     */
     pub(crate) fn open_str(path: &Path, toml: &str) -> Result<Self, Error> {
@@ -750,7 +749,7 @@ where
 Looks in the current working directory and all parent directories.
 
 # Errors
-Returns `Err(row::Error)` when the file is not found or cannot be opened.
+Returns `Err(crate::Error)` when the file is not found or cannot be opened.
 
 # Returns
 `Ok(PathBuf, File)` including the path where the file was found and the open file handle.

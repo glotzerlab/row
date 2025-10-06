@@ -11,7 +11,7 @@ use std::io::Write;
 use std::path::{self, Path, PathBuf};
 
 use crate::cli::GlobalOptions;
-use row::{DATA_DIRECTORY_NAME, Error};
+use crate::{DATA_DIRECTORY_NAME, Error};
 
 #[derive(Args, Debug)]
 pub struct Arguments {
@@ -62,7 +62,7 @@ pub fn init<W: Write>(
     debug!("Scanning the workspace for completed actions.");
 
     if args.workspace.contains(path::MAIN_SEPARATOR_STR) {
-        return Err(Box::new(row::Error::WorkspacePathNotRelative(
+        return Err(Box::new(crate::Error::WorkspacePathNotRelative(
             args.workspace.clone(),
         )));
     }
@@ -71,13 +71,13 @@ pub fn init<W: Write>(
     let (project_found, existing_path) = is_project(&project_directory)?;
 
     match (project_found, existing_path == project_directory) {
-        (true, true) => return Err(Box::new(row::Error::ProjectExists(existing_path))),
-        (true, false) => return Err(Box::new(row::Error::ParentProjectExists(existing_path))),
+        (true, true) => return Err(Box::new(crate::Error::ProjectExists(existing_path))),
+        (true, false) => return Err(Box::new(crate::Error::ParentProjectExists(existing_path))),
         (_, _) => (),
     }
 
     if project_directory.clone().join(DATA_DIRECTORY_NAME).exists() {
-        return Err(Box::new(row::Error::ProjectCacheExists(
+        return Err(Box::new(crate::Error::ProjectCacheExists(
             project_directory.into(),
         )));
     }

@@ -19,11 +19,11 @@ use std::sync::atomic::AtomicBool;
 use std::time::Instant;
 use wildmatch::WildMatch;
 
+use crate::MultiProgressContainer;
 use crate::cli::{GlobalOptions, autocomplete};
-use row::MultiProgressContainer;
-use row::format::HumanDuration;
-use row::project::Project;
-use row::workflow::{Action, ResourceCost};
+use crate::format::HumanDuration;
+use crate::project::Project;
+use crate::workflow::{Action, ResourceCost};
 
 #[derive(Args, Debug)]
 pub struct Arguments {
@@ -50,7 +50,6 @@ pub struct Arguments {
 }
 
 /// Submit workflow actions to the scheduler.
-#[allow(clippy::too_many_lines)]
 pub fn submit<W: Write>(
     options: &GlobalOptions,
     args: Arguments,
@@ -98,7 +97,7 @@ pub fn submit<W: Write>(
             )?;
             for group in &groups {
                 if !whole_groups.contains(group) {
-                    return Err(Box::new(row::Error::PartialGroupSubmission(
+                    return Err(Box::new(crate::Error::PartialGroupSubmission(
                         action.name().into(),
                     )));
                 }
@@ -108,7 +107,7 @@ pub fn submit<W: Write>(
         for group in &groups {
             for directory in group {
                 if !action_directory_set.insert((action.name.clone(), directory.clone())) {
-                    return Err(Box::new(row::Error::WouldSubmitMultipleTimes(
+                    return Err(Box::new(crate::Error::WouldSubmitMultipleTimes(
                         directory.clone(),
                         action.name().into(),
                     )));

@@ -6,10 +6,10 @@ use log::{debug, info, warn};
 use std::error::Error;
 use std::{fs, io};
 
+use crate::MultiProgressContainer;
 use crate::cli::GlobalOptions;
-use row::MultiProgressContainer;
-use row::project::Project;
-use row::{
+use crate::project::Project;
+use crate::{
     COMPLETED_CACHE_FILE_NAME, DATA_DIRECTORY_NAME, DIRECTORY_CACHE_FILE_NAME,
     SUBMITTED_CACHE_FILE_NAME,
 };
@@ -26,7 +26,6 @@ pub struct Arguments {
 
 #[derive(Args, Debug)]
 #[group(multiple = true)]
-#[allow(clippy::struct_excessive_bools)]
 pub struct Selection {
     /// Remove the directory cache.
     #[arg(long, display_order = 0)]
@@ -74,7 +73,7 @@ pub fn clean(
         }
         if force_needed && !args.force {
             warn!("You should wait for these jobs to complete.");
-            return Err(Box::new(row::Error::ForceCleanNeeded));
+            return Err(Box::new(crate::Error::ForceCleanNeeded));
         }
     }
 
@@ -86,7 +85,7 @@ pub fn clean(
         if let Err(error) = fs::remove_file(&path) {
             match error.kind() {
                 io::ErrorKind::NotFound => (),
-                _ => return Err(Box::new(row::Error::FileRemove(path.clone(), error))),
+                _ => return Err(Box::new(crate::Error::FileRemove(path.clone(), error))),
             }
         }
     }
@@ -96,7 +95,7 @@ pub fn clean(
         if let Err(error) = fs::remove_file(&path) {
             match error.kind() {
                 io::ErrorKind::NotFound => (),
-                _ => return Err(Box::new(row::Error::FileRemove(path.clone(), error))),
+                _ => return Err(Box::new(crate::Error::FileRemove(path.clone(), error))),
             }
         }
     }
@@ -106,7 +105,7 @@ pub fn clean(
         if let Err(error) = fs::remove_file(&path) {
             match error.kind() {
                 io::ErrorKind::NotFound => (),
-                _ => return Err(Box::new(row::Error::FileRemove(path.clone(), error))),
+                _ => return Err(Box::new(crate::Error::FileRemove(path.clone(), error))),
             }
         }
     }
