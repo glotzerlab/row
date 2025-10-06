@@ -165,7 +165,7 @@ impl State {
     /** Read the state cache from disk.
 
     # Errors
-    Returns `Err<row::Error>` when the cache files cannot be read or parsed.
+    Returns `Err<crate::Error>` when the cache files cannot be read or parsed.
     */
     pub fn from_cache(workflow: &Workflow) -> Result<State, Error> {
         let mut state = State {
@@ -278,7 +278,7 @@ impl State {
     /** Save the state cache to the filesystem.
 
     # Errors
-    Returns `Err<row::Error>` when a cache file cannot be saved.
+    Returns `Err<crate::Error>` when a cache file cannot be saved.
     */
     pub fn save_cache(
         &mut self,
@@ -403,7 +403,7 @@ impl State {
 
     # Errors
 
-    * Returns `Error<row::Error>` when there is an I/O error reading the
+    * Returns `Error<crate::Error>` when there is an I/O error reading the
       workspace directory
     */
     pub(crate) fn synchronize_workspace(

@@ -19,7 +19,7 @@ use crate::{Error, MIN_PROGRESS_BAR_SIZE, MultiProgressContainer, progress_style
 /** List all directories in the workspace as found on the filesystem.
 
 # Errors
-Returns `Err<row::Error>` when the workspace directory cannot be accessed.
+Returns `Err<crate::Error>` when the workspace directory cannot be accessed.
 */
 pub fn list_directories(
     workflow: &Workflow,
@@ -237,7 +237,7 @@ impl CompletedDirectories {
     /** Get the directories that have been completed for each action.
 
     # Errors
-    Returns `Err<row::Error>` when the workspace directories cannot be accessed.
+    Returns `Err<crate::Error>` when the workspace directories cannot be accessed.
 
     # Panics
     This method should not panic.

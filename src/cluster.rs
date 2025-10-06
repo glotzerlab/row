@@ -125,9 +125,9 @@ impl Configuration {
     Identifying the current cluster consumes the `Configuration`.
 
     # Errors
-    * `row::Error::ClusterNameNotFound` when a cluster by the given name
+    * `crate::Error::ClusterNameNotFound` when a cluster by the given name
       is not present in the configuration (when `name = Some(_)`).
-    * `row::Error::ClusterNotFound` when the automatic identification
+    * `crate::Error::ClusterNotFound` when the automatic identification
       fails to find a cluster in the configuration.
     */
     pub fn identify(self, name: Option<&str>) -> Result<Cluster, Error> {
@@ -153,7 +153,7 @@ impl Configuration {
     the built-in configuration.
 
     # Errors
-    Returns `Err(row::Error)` when the file cannot be read or if there is
+    Returns `Err(crate::Error)` when the file cannot be read or if there is
     as parse error.
     */
     pub fn open() -> Result<Self, Error> {
@@ -234,7 +234,7 @@ impl Cluster {
     /** Find the partition to use for the given job.
 
     # Errors
-    Returns `Err<row::Error>` when the partition is not found.
+    Returns `Err<crate::Error>` when the partition is not found.
     */
     pub fn find_partition(
         &self,

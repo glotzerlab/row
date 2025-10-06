@@ -337,14 +337,14 @@ pub enum Commands {
 - One "-" input reads directories from stdin.
 - Otherwise, pass through the given directories from the command line.
 
-`Err(row::Error)` when there is an error reading from stdin.
+`Err(crate::Error)` when there is an error reading from stdin.
 */
 pub fn parse_directories<F>(
     mut query_directories: Vec<PathBuf>,
     get_all_directories: F,
-) -> Result<Vec<PathBuf>, row::Error>
+) -> Result<Vec<PathBuf>, crate::Error>
 where
-    F: FnOnce() -> Result<Vec<PathBuf>, row::Error>,
+    F: FnOnce() -> Result<Vec<PathBuf>, crate::Error>,
 {
     if query_directories.len() == 1 && query_directories[0] == PathBuf::from("-") {
         trace!("Reading directories from stdin.");

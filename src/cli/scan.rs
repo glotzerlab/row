@@ -11,8 +11,8 @@ use std::path::PathBuf;
 use uuid::Uuid;
 
 use crate::cli::{self, GlobalOptions, autocomplete};
-use row::workflow::Workflow;
-use row::{
+use crate::workflow::Workflow;
+use crate::{
     COMPLETED_DIRECTORY_NAME, DATA_DIRECTORY_NAME, Error, MultiProgressContainer, workspace,
 };
 

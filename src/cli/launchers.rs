@@ -7,8 +7,8 @@ use std::error::Error;
 use std::io::Write;
 
 use crate::cli::GlobalOptions;
-use row::cluster;
-use row::launcher;
+use crate::cluster;
+use crate::launcher;
 
 #[derive(Args, Debug)]
 pub struct Arguments {

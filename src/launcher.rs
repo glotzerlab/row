@@ -96,7 +96,7 @@ impl Configuration {
     the built-in configuration.
 
     # Errors
-    Returns `Err(row::Error)` when the file cannot be read or if there is
+    Returns `Err(crate::Error)` when the file cannot be read or if there is
     as parse error.
     */
     pub fn open() -> Result<Self, Error> {

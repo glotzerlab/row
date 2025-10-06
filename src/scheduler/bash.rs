@@ -274,9 +274,9 @@ done
 
     # Errors
 
-    * `Err(row::JSONPointerNotFound)` when a JSON pointer named in `command` is not present
+    * `Err(crate::JSONPointerNotFound)` when a JSON pointer named in `command` is not present
       in the values for the given directory.
-    * `Err(row::InvalidTemplate)` when an unexpected name appears between `{` and `}`.
+    * `Err(crate::InvalidTemplate)` when an unexpected name appears between `{` and `}`.
     */
     fn substitute(&self, command: &str, directory: &Path) -> Result<String, Error> {
         let replacement = |caps: &Captures| -> Result<String, Error> {
