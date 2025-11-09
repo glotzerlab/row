@@ -9,13 +9,13 @@ For example, given the JSON document:
   "a": 1,
   "b": {
     "c": "str1",
-    "d": 3.14
-  },
-  "e": [
-    1,
-    2,
-    "str2"
-  ]
+    "d": 3.14,
+    "e": [
+      1,
+      2,
+      "str2"
+    ]
+  }
 }
 ```
 you can access any element with a pointer:
