@@ -1,5 +1,11 @@
 # Release notes
 
+## 0.7.1 (2025-11-09)
+
+*Fixed:*
+
+* b/c strucuture corrected in json-pointers.md example
+
 ## 0.7.1 (2025-08-21)
 
 *Fixed:*
