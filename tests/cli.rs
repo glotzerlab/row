@@ -1,7 +1,7 @@
 // Copyright (c) 2024-2025 The Regents of the University of Michigan.
 // Part of row, released under the BSD 3-Clause License.
 
-use assert_cmd::Command;
+use assert_cmd::cargo::cargo_bin_cmd;
 use assert_fs::TempDir;
 use assert_fs::prelude::*;
 use predicates::prelude::*;
@@ -74,7 +74,7 @@ fn complete_action(
 #[test]
 #[parallel]
 fn requires_subcommand() -> Result<(), Box<dyn std::error::Error>> {
-    let mut cmd = Command::cargo_bin("row")?;
+    let mut cmd = cargo_bin_cmd!("row");
 
     cmd.assert()
         .failure()
@@ -86,7 +86,7 @@ fn requires_subcommand() -> Result<(), Box<dyn std::error::Error>> {
 #[test]
 #[parallel]
 fn no_workflow_file() -> Result<(), Box<dyn std::error::Error>> {
-    let mut cmd = Command::cargo_bin("row")?;
+    let mut cmd = cargo_bin_cmd!("row");
     let temp = TempDir::new()?;
 
     cmd.args(["show", "status"])
@@ -102,7 +102,7 @@ fn no_workflow_file() -> Result<(), Box<dyn std::error::Error>> {
 #[test]
 #[parallel]
 fn help() -> Result<(), Box<dyn std::error::Error>> {
-    let mut cmd = Command::cargo_bin("row")?;
+    let mut cmd = cargo_bin_cmd!("row");
 
     cmd.arg("--help");
     cmd.assert()
@@ -115,7 +115,7 @@ fn help() -> Result<(), Box<dyn std::error::Error>> {
 #[test]
 #[parallel]
 fn empty_workflow() -> Result<(), Box<dyn std::error::Error>> {
-    let mut cmd = Command::cargo_bin("row")?;
+    let mut cmd = cargo_bin_cmd!("row");
     cmd.env("ROW_HOME", "/not/a/path");
 
     let temp = TempDir::new()?;
@@ -138,7 +138,7 @@ fn status() -> Result<(), Box<dyn std::error::Error>> {
     let temp = TempDir::new()?;
     let _ = setup_sample_workflow(&temp, 10);
 
-    Command::cargo_bin("row")?
+    cargo_bin_cmd!("row")
         .args(["show", "status"])
         .args(["--cluster", "none"])
         .current_dir(temp.path())
@@ -160,7 +160,7 @@ fn status_waiting() -> Result<(), Box<dyn std::error::Error>> {
     let temp = TempDir::new()?;
     let _ = setup_sample_workflow(&temp, 10);
 
-    Command::cargo_bin("row")?
+    cargo_bin_cmd!("row")
         .args(["show", "status"])
         .args(["--cluster", "none"])
         .args(["--waiting"])
@@ -183,7 +183,7 @@ fn status_eligible() -> Result<(), Box<dyn std::error::Error>> {
     let temp = TempDir::new()?;
     let _ = setup_sample_workflow(&temp, 10);
 
-    Command::cargo_bin("row")?
+    cargo_bin_cmd!("row")
         .args(["show", "status"])
         .args(["--cluster", "none"])
         .args(["--eligible"])
@@ -206,7 +206,7 @@ fn status_submitted() -> Result<(), Box<dyn std::error::Error>> {
     let temp = TempDir::new()?;
     let _ = setup_sample_workflow(&temp, 10);
 
-    Command::cargo_bin("row")?
+    cargo_bin_cmd!("row")
         .args(["show", "status"])
         .args(["--cluster", "none"])
         .args(["--submitted"])
@@ -229,7 +229,7 @@ fn status_all() -> Result<(), Box<dyn std::error::Error>> {
     let temp = TempDir::new()?;
     let _ = setup_sample_workflow(&temp, 10);
 
-    Command::cargo_bin("row")?
+    cargo_bin_cmd!("row")
         .args(["show", "status"])
         .args(["--cluster", "none"])
         .args(["--all"])
@@ -252,7 +252,7 @@ fn status_completed() -> Result<(), Box<dyn std::error::Error>> {
     let temp = TempDir::new()?;
     let _ = setup_sample_workflow(&temp, 10);
 
-    Command::cargo_bin("row")?
+    cargo_bin_cmd!("row")
         .arg("submit")
         .args(["--cluster", "none"])
         .current_dir(temp.path())
@@ -262,7 +262,7 @@ fn status_completed() -> Result<(), Box<dyn std::error::Error>> {
         .assert()
         .success();
 
-    Command::cargo_bin("row")?
+    cargo_bin_cmd!("row")
         .args(["show", "status"])
         .args(["--cluster", "none"])
         .args(["--completed"])
@@ -284,7 +284,7 @@ fn status_action_selection() -> Result<(), Box<dyn std::error::Error>> {
     let temp = TempDir::new()?;
     let _ = setup_sample_workflow(&temp, 10);
 
-    Command::cargo_bin("row")?
+    cargo_bin_cmd!("row")
         .args(["show", "status"])
         .args(["--cluster", "none"])
         .arg("-a")
@@ -307,7 +307,7 @@ fn status_directories() -> Result<(), Box<dyn std::error::Error>> {
     let temp = TempDir::new()?;
     let _ = setup_sample_workflow(&temp, 10);
 
-    Command::cargo_bin("row")?
+    cargo_bin_cmd!("row")
         .args(["show", "status"])
         .args(["--cluster", "none"])
         .arg("dir1")
@@ -332,7 +332,7 @@ fn status_directories_stdin() -> Result<(), Box<dyn std::error::Error>> {
     let temp = TempDir::new()?;
     let _ = setup_sample_workflow(&temp, 10);
 
-    Command::cargo_bin("row")?
+    cargo_bin_cmd!("row")
         .args(["show", "status"])
         .args(["--cluster", "none"])
         .arg("-")
@@ -356,7 +356,7 @@ fn scan() -> Result<(), Box<dyn std::error::Error>> {
     let temp = TempDir::new()?;
     let _ = setup_sample_workflow(&temp, 10);
 
-    Command::cargo_bin("row")?
+    cargo_bin_cmd!("row")
         .args(["show", "status"])
         .args(["--cluster", "none"])
         .current_dir(temp.path())
@@ -371,7 +371,7 @@ fn scan() -> Result<(), Box<dyn std::error::Error>> {
     complete_action("one", &temp, 8)?;
     complete_action("two", &temp, 4)?;
 
-    Command::cargo_bin("row")?
+    cargo_bin_cmd!("row")
         .args(["show", "status"])
         .args(["--cluster", "none"])
         .current_dir(temp.path())
@@ -386,7 +386,7 @@ fn scan() -> Result<(), Box<dyn std::error::Error>> {
     let completed = temp.child(".row").child("completed");
     completed.assert(predicate::path::missing());
 
-    Command::cargo_bin("row")?
+    cargo_bin_cmd!("row")
         .arg("scan")
         .current_dir(temp.path())
         .env_remove("ROW_COLOR")
@@ -397,7 +397,7 @@ fn scan() -> Result<(), Box<dyn std::error::Error>> {
     completed.assert(predicate::path::exists());
     assert_eq!(fs::read_dir(completed.path())?.count(), 1);
 
-    Command::cargo_bin("row")?
+    cargo_bin_cmd!("row")
         .args(["show", "status"])
         .args(["--cluster", "none"])
         .current_dir(temp.path())
@@ -420,7 +420,7 @@ fn scan_action() -> Result<(), Box<dyn std::error::Error>> {
     let temp = TempDir::new()?;
     let _ = setup_sample_workflow(&temp, 10);
 
-    Command::cargo_bin("row")?
+    cargo_bin_cmd!("row")
         .args(["show", "status"])
         .args(["--cluster", "none"])
         .current_dir(temp.path())
@@ -435,7 +435,7 @@ fn scan_action() -> Result<(), Box<dyn std::error::Error>> {
     complete_action("one", &temp, 8)?;
     complete_action("two", &temp, 4)?;
 
-    Command::cargo_bin("row")?
+    cargo_bin_cmd!("row")
         .arg("scan")
         .arg("-a")
         .arg("one")
@@ -446,7 +446,7 @@ fn scan_action() -> Result<(), Box<dyn std::error::Error>> {
         .assert()
         .success();
 
-    Command::cargo_bin("row")?
+    cargo_bin_cmd!("row")
         .args(["show", "status"])
         .args(["--cluster", "none"])
         .current_dir(temp.path())
@@ -467,7 +467,7 @@ fn scan_directories() -> Result<(), Box<dyn std::error::Error>> {
     let temp = TempDir::new()?;
     let _ = setup_sample_workflow(&temp, 10);
 
-    Command::cargo_bin("row")?
+    cargo_bin_cmd!("row")
         .args(["show", "status"])
         .args(["--cluster", "none"])
         .current_dir(temp.path())
@@ -482,7 +482,7 @@ fn scan_directories() -> Result<(), Box<dyn std::error::Error>> {
     complete_action("one", &temp, 8)?;
     complete_action("two", &temp, 4)?;
 
-    Command::cargo_bin("row")?
+    cargo_bin_cmd!("row")
         .arg("scan")
         .arg("dir5")
         .current_dir(temp.path())
@@ -492,7 +492,7 @@ fn scan_directories() -> Result<(), Box<dyn std::error::Error>> {
         .assert()
         .success();
 
-    Command::cargo_bin("row")?
+    cargo_bin_cmd!("row")
         .args(["show", "status"])
         .args(["--cluster", "none"])
         .current_dir(temp.path())
@@ -513,7 +513,7 @@ fn submit() -> Result<(), Box<dyn std::error::Error>> {
     let temp = TempDir::new()?;
     let _ = setup_sample_workflow(&temp, 10);
 
-    Command::cargo_bin("row")?
+    cargo_bin_cmd!("row")
         .arg("submit")
         .args(["--cluster", "none"])
         .current_dir(temp.path())
@@ -523,7 +523,7 @@ fn submit() -> Result<(), Box<dyn std::error::Error>> {
         .assert()
         .success();
 
-    Command::cargo_bin("row")?
+    cargo_bin_cmd!("row")
         .args(["show", "status"])
         .args(["--cluster", "none"])
         .current_dir(temp.path())
@@ -544,7 +544,7 @@ fn directories_no_action() -> Result<(), Box<dyn std::error::Error>> {
     let temp = TempDir::new()?;
     let _ = setup_sample_workflow(&temp, 4);
 
-    Command::cargo_bin("row")?
+    cargo_bin_cmd!("row")
         .args(["show", "directories"])
         .args(["--cluster", "none"])
         .env_remove("ROW_COLOR")
@@ -564,7 +564,7 @@ fn directories() -> Result<(), Box<dyn std::error::Error>> {
     let temp = TempDir::new()?;
     let _ = setup_sample_workflow(&temp, 10);
 
-    Command::cargo_bin("row")?
+    cargo_bin_cmd!("row")
         .args(["show", "directories"])
         .args(["--cluster", "none"])
         .args(["--action", "one"])
@@ -595,7 +595,7 @@ fn directories_select_directories() -> Result<(), Box<dyn std::error::Error>> {
     let temp = TempDir::new()?;
     let _ = setup_sample_workflow(&temp, 10);
 
-    Command::cargo_bin("row")?
+    cargo_bin_cmd!("row")
         .args(["show", "directories"])
         .args(["--cluster", "none"])
         .args(["--action", "one"])
@@ -628,7 +628,7 @@ fn directories_no_header() -> Result<(), Box<dyn std::error::Error>> {
     let temp = TempDir::new()?;
     let _ = setup_sample_workflow(&temp, 10);
 
-    Command::cargo_bin("row")?
+    cargo_bin_cmd!("row")
         .args(["show", "directories"])
         .args(["--cluster", "none"])
         .args(["--action", "one"])
@@ -650,7 +650,7 @@ fn directories_value() -> Result<(), Box<dyn std::error::Error>> {
     let temp = TempDir::new()?;
     let _ = setup_sample_workflow(&temp, 10);
 
-    Command::cargo_bin("row")?
+    cargo_bin_cmd!("row")
         .args(["show", "directories"])
         .args(["--cluster", "none"])
         .args(["--value", "/v"])
@@ -679,7 +679,7 @@ fn directories_short() -> Result<(), Box<dyn std::error::Error>> {
     let temp = TempDir::new()?;
     let _ = setup_sample_workflow(&temp, 4);
 
-    Command::cargo_bin("row")?
+    cargo_bin_cmd!("row")
         .args(["show", "directories"])
         .args(["--cluster", "none"])
         .args(["--action", "one"])
@@ -701,7 +701,7 @@ fn directories_short_no_action() -> Result<(), Box<dyn std::error::Error>> {
     let temp = TempDir::new()?;
     let _ = setup_sample_workflow(&temp, 10);
 
-    Command::cargo_bin("row")?
+    cargo_bin_cmd!("row")
         .args(["show", "directories"])
         .args(["--cluster", "none"])
         .arg("--short")
@@ -724,7 +724,7 @@ fn directories_short_no_action() -> Result<(), Box<dyn std::error::Error>> {
 fn show_cluster() -> Result<(), Box<dyn std::error::Error>> {
     let temp = TempDir::new()?;
 
-    Command::cargo_bin("row")?
+    cargo_bin_cmd!("row")
         .args(["show", "cluster"])
         .args(["--cluster", "none"])
         .current_dir(temp.path())
@@ -742,7 +742,7 @@ fn show_cluster() -> Result<(), Box<dyn std::error::Error>> {
 fn show_cluster_short() -> Result<(), Box<dyn std::error::Error>> {
     let temp = TempDir::new()?;
 
-    Command::cargo_bin("row")?
+    cargo_bin_cmd!("row")
         .args(["show", "cluster"])
         .args(["--cluster", "none"])
         .arg("--short")
@@ -762,7 +762,7 @@ fn show_cluster_short() -> Result<(), Box<dyn std::error::Error>> {
 fn show_launchers() -> Result<(), Box<dyn std::error::Error>> {
     let temp = TempDir::new()?;
 
-    Command::cargo_bin("row")?
+    cargo_bin_cmd!("row")
         .args(["show", "launchers"])
         .args(["--cluster", "none"])
         .current_dir(temp.path())
@@ -780,7 +780,7 @@ fn show_launchers() -> Result<(), Box<dyn std::error::Error>> {
 fn show_launchers_short() -> Result<(), Box<dyn std::error::Error>> {
     let temp = TempDir::new()?;
 
-    Command::cargo_bin("row")?
+    cargo_bin_cmd!("row")
         .args(["show", "launchers"])
         .args(["--cluster", "none"])
         .arg("--short")
@@ -799,7 +799,7 @@ fn show_launchers_short() -> Result<(), Box<dyn std::error::Error>> {
 #[test]
 #[parallel]
 fn init_conflicting_args() -> Result<(), Box<dyn std::error::Error>> {
-    let mut cmd = Command::cargo_bin("row")?;
+    let mut cmd = cargo_bin_cmd!("row");
     let temp = TempDir::new()?;
 
     cmd.args(["init"])
@@ -816,7 +816,7 @@ fn init_conflicting_args() -> Result<(), Box<dyn std::error::Error>> {
 #[test]
 #[parallel]
 fn init_invalid_path() -> Result<(), Box<dyn std::error::Error>> {
-    let mut cmd = Command::cargo_bin("row")?;
+    let mut cmd = cargo_bin_cmd!("row");
     let temp = TempDir::new()?;
 
     cmd.args(["init"])
@@ -833,7 +833,7 @@ fn init_invalid_path() -> Result<(), Box<dyn std::error::Error>> {
 #[test]
 #[parallel]
 fn init_workflow_exists() -> Result<(), Box<dyn std::error::Error>> {
-    let mut cmd = Command::cargo_bin("row")?;
+    let mut cmd = cargo_bin_cmd!("row");
     let temp = TempDir::new()?;
     temp.child("workflow.toml").touch()?;
 
@@ -848,7 +848,7 @@ fn init_workflow_exists() -> Result<(), Box<dyn std::error::Error>> {
 #[test]
 #[parallel]
 fn init_parent_exists() -> Result<(), Box<dyn std::error::Error>> {
-    let mut cmd = Command::cargo_bin("row")?;
+    let mut cmd = cargo_bin_cmd!("row");
     let temp = TempDir::new()?;
     temp.child("workflow.toml").touch()?;
 
@@ -866,7 +866,7 @@ fn init_parent_exists() -> Result<(), Box<dyn std::error::Error>> {
 #[test]
 #[parallel]
 fn init_cache_exists() -> Result<(), Box<dyn std::error::Error>> {
-    let mut cmd = Command::cargo_bin("row")?;
+    let mut cmd = cargo_bin_cmd!("row");
     let temp = TempDir::new()?;
     temp.child(DATA_DIRECTORY_NAME).touch()?;
 
@@ -882,7 +882,7 @@ fn init_cache_exists() -> Result<(), Box<dyn std::error::Error>> {
 #[test]
 #[parallel]
 fn init() -> Result<(), Box<dyn std::error::Error>> {
-    let mut cmd = Command::cargo_bin("row")?;
+    let mut cmd = cargo_bin_cmd!("row");
     let temp = TempDir::new()?;
 
     cmd.args(["init"]).arg(".").current_dir(temp.path());
@@ -901,7 +901,7 @@ fn show_jobs() -> Result<(), Box<dyn std::error::Error>> {
     let temp = TempDir::new()?;
     let _ = setup_sample_workflow(&temp, 4);
 
-    Command::cargo_bin("row")?
+    cargo_bin_cmd!("row")
         .args(["show", "jobs"])
         .args(["--cluster", "none"])
         .env_remove("ROW_COLOR")
