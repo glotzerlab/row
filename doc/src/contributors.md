@@ -9,3 +9,4 @@ The following people have contributed to the development of **row**:
 * Tim Moore, University of Michigan
 * Corwin Kerr, University of Michigan
 * Trevor Teague, University of Michigan
+* Jared Shi, University of Michigan
