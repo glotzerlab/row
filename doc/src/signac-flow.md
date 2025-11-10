@@ -40,7 +40,7 @@ Commands:
 > [Enable tab completion] before attempting to use _TAB_ to complete action or
 > directory names.
 
-[Enable tab completion]: install.md#configuring-shell-autocompletion
+[Enable tab completion]: guide/install.md#configuring-shell-autocompletion
 
 Conditions:
 | flow | row |
