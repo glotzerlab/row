@@ -258,6 +258,28 @@ mod tests {
 
     #[test]
     #[parallel]
+    fn rayon_prefix() {
+        setup();
+        let launchers = Configuration::built_in();
+        let launchers_by_cluster = launchers.by_cluster("any_cluster");
+        let rayon = launchers_by_cluster
+            .get("rayon")
+            .expect("a valid Launcher");
+
+        let no_threads = Resources::default();
+        assert_eq!(rayon.prefix(&no_threads, 10), "");
+        assert_eq!(rayon.prefix(&no_threads, 1), "");
+
+        let threads = Resources {
+            threads_per_process: Some(5),
+            ..Resources::default()
+        };
+        assert_eq!(rayon.prefix(&threads, 10), "RAYON_NUM_THREADS=5 ");
+        assert_eq!(rayon.prefix(&threads, 1), "RAYON_NUM_THREADS=5 ");
+    }
+
+    #[test]
+    #[parallel]
     fn mpi_prefix_none() {
         setup();
         let launchers = Configuration::built_in();
@@ -375,9 +397,10 @@ executable = "e"
         let launchers = Configuration::open_from_path(temp.path().into()).expect("valid launcher");
 
         let built_in = Configuration::built_in();
-        assert_eq!(launchers.launchers.len(), 3);
+        assert_eq!(launchers.launchers.len(), 4);
         assert_eq!(launchers.launchers["openmp"], built_in.launchers["openmp"]);
         assert_eq!(launchers.launchers["mpi"], built_in.launchers["mpi"]);
+        assert_eq!(launchers.launchers["rayon"], built_in.launchers["rayon"]);
 
         let launchers_by_cluster = launchers.by_cluster("non_default");
         let non_default = launchers_by_cluster.get("new_launcher").unwrap();

@@ -791,7 +791,8 @@ fn show_launchers_short() -> Result<(), Box<dyn std::error::Error>> {
         .assert()
         .success()
         .stdout(predicate::str::contains("mpi"))
-        .stdout(predicate::str::contains("openmp\n"));
+        .stdout(predicate::str::contains("openmp\n"))
+        .stdout(predicate::str::contains("rayon\n"));
 
     Ok(())
 }
