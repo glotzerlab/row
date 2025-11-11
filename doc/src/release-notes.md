@@ -1,6 +1,10 @@
 # Release notes
 
-## 0.7.1 (2025-11-09)
+## 1.0.0 (not yet released)
+
+*Added:*
+
+* Rayon launcher that prefixes commands with `RAYON_NUM_THREADS={T}`.
 
 *Fixed:*
 
