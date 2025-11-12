@@ -5,6 +5,7 @@
 *Added:*
 
 * Rayon launcher that prefixes commands with `RAYON_NUM_THREADS={T}`.
+* `slurm_gpus_per_task` cluster option.
 
 *Fixed:*
 
