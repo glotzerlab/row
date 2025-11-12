@@ -93,6 +93,7 @@ fn andes() -> Cluster {
                 ..Partition::default()
             },
         ],
+        ..Cluster::default()
     }
 }
 
@@ -153,6 +154,7 @@ fn anvil() -> Cluster {
                 ..Partition::default()
             },
         ],
+        ..Cluster::default()
     }
 }
 
@@ -211,6 +213,7 @@ fn delta() -> Cluster {
                 ..Partition::default()
             },
         ],
+        ..Cluster::default()
     }
 }
 
@@ -231,6 +234,7 @@ fn frontier() -> Cluster {
                 ..Partition::default()
             },
         ],
+        ..Cluster::default()
     }
 }
 
@@ -300,6 +304,7 @@ fn greatlakes() -> Cluster {
                 ..Partition::default()
             },
         ],
+        ..Cluster::default()
     }
 }
 
@@ -314,6 +319,7 @@ fn none() -> Cluster {
             name: "none".into(),
             ..Partition::default()
         }],
+        ..Cluster::default()
     }
 }
 

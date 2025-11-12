@@ -27,6 +27,10 @@ pub struct Configuration {
     pub cluster: Vec<Cluster>,
 }
 
+fn default_slurm_gpus_per_task() -> String {
+    "--gpus-per-task=".to_string()
+}
+
 /** Cluster
 
 [`Cluster`] stores everything needed to define a single cluster. It is read from the `clusters.toml`
@@ -46,9 +50,26 @@ pub struct Cluster {
     /// The partitions in the cluster's queue.
     pub partition: Vec<Partition>,
 
+    /// Slurm command line option to set gpus per task.
+    #[serde(default = "default_slurm_gpus_per_task")]
+    pub slurm_gpus_per_task: String,
+
     /// Submit options to include in every job submitted to this cluster.
     #[serde(default)]
     pub submit_options: Vec<String>,
+}
+
+impl Default for Cluster {
+    fn default() -> Self {
+        Self {
+            name: "cluster".to_string(),
+            identify: IdentificationMethod::Always(true),
+            scheduler: SchedulerType::Bash,
+            submit_options: Vec::new(),
+            slurm_gpus_per_task: default_slurm_gpus_per_task(),
+            partition: Vec::new(),
+        }
+    }
 }
 
 /// Methods to identify clusters.
@@ -402,6 +423,7 @@ mod tests {
                 scheduler: SchedulerType::Bash,
                 partition: Vec::new(),
                 submit_options: Vec::new(),
+                ..Cluster::default()
             },
             Cluster {
                 name: "cluster1".into(),
@@ -409,6 +431,7 @@ mod tests {
                 scheduler: SchedulerType::Bash,
                 partition: Vec::new(),
                 submit_options: Vec::new(),
+                ..Cluster::default()
             },
             Cluster {
                 name: "cluster2".into(),
@@ -416,6 +439,7 @@ mod tests {
                 scheduler: SchedulerType::Bash,
                 partition: Vec::new(),
                 submit_options: Vec::new(),
+                ..Cluster::default()
             },
             Cluster {
                 name: "cluster3".into(),
@@ -423,6 +447,7 @@ mod tests {
                 scheduler: SchedulerType::Bash,
                 partition: Vec::new(),
                 submit_options: Vec::new(),
+                ..Cluster::default()
             },
             Cluster {
                 name: "cluster4".into(),
@@ -430,6 +455,7 @@ mod tests {
                 scheduler: SchedulerType::Bash,
                 partition: Vec::new(),
                 submit_options: Vec::new(),
+                ..Cluster::default()
             },
         ];
         let cluster_configuration = Configuration { cluster: clusters };
@@ -607,6 +633,7 @@ mod tests {
             scheduler: SchedulerType::Bash,
             partition: partitions,
             submit_options: Vec::new(),
+            ..Cluster::default()
         };
 
         let cpu_resources = Resources {

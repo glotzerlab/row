@@ -142,7 +142,11 @@ impl Scheduler for Slurm {
             let _ = writeln!(preamble, "#SBATCH --cpus-per-task={threads_per_process}");
         }
         if let Some(gpus_per_process) = action.resources.gpus_per_process {
-            let _ = writeln!(preamble, "#SBATCH --gpus-per-task={gpus_per_process}");
+            let _ = writeln!(
+                preamble,
+                "#SBATCH {}{gpus_per_process}",
+                self.cluster.slurm_gpus_per_task
+            );
 
             if let Some(ref gpus_per_node) = partition.gpus_per_node {
                 let n_nodes = action
@@ -225,7 +229,7 @@ impl Scheduler for Slurm {
         directory_values: &HashMap<PathBuf, Value>,
         should_terminate: Arc<AtomicBool>,
     ) -> Result<Option<u32>, Error> {
-        debug!("Submtitting '{}' with sbatch.", action.name());
+        debug!("Submitting '{}' with sbatch.", action.name());
 
         // output() below is blocking with no convenient way to interrupt it.
         // If the user pressed ctrl-C, let the current call to submit() finish
@@ -384,6 +388,7 @@ mod tests {
             scheduler: SchedulerType::Slurm,
             partition: vec![Partition::default()],
             submit_options: Vec::new(),
+            ..Cluster::default()
         };
 
         let slurm = Slurm::new(cluster, launchers.by_cluster("cluster"));
@@ -582,6 +587,22 @@ mod tests {
 
     #[test]
     #[parallel]
+    fn custom_gpus_per_task() {
+        let (mut action, directories, mut slurm) = setup();
+        slurm.cluster.slurm_gpus_per_task = "--custom=".to_string();
+
+        action.resources.gpus_per_process = Some(5);
+
+        let script = slurm
+            .make_script(&action, &directories, &PathBuf::default(), &HashMap::new())
+            .expect("valid script");
+        println!("{script}");
+
+        assert!(script.contains("#SBATCH --custom=5"));
+    }
+
+    #[test]
+    #[parallel]
     fn mem_per_cpu() {
         let (mut action, directories, _) = setup();
 
@@ -595,6 +616,7 @@ mod tests {
                 memory_per_cpu_mb: Some(5),
                 ..Partition::default()
             }],
+            ..Cluster::default()
         };
 
         let slurm = Slurm::new(cluster, launchers.by_cluster("cluster"));
@@ -638,6 +660,7 @@ mod tests {
                 memory_per_gpu_mb: Some(12),
                 ..Partition::default()
             }],
+            ..Cluster::default()
         };
 
         let slurm = Slurm::new(cluster, launchers.by_cluster("cluster"));
@@ -683,6 +706,7 @@ mod tests {
                 cpus_per_node: Some(10),
                 ..Partition::default()
             }],
+            ..Cluster::default()
         };
 
         let slurm = Slurm::new(cluster, launchers.by_cluster("cluster"));
@@ -712,6 +736,7 @@ mod tests {
                 gpus_per_node: Some(5),
                 ..Partition::default()
             }],
+            ..Cluster::default()
         };
 
         let slurm = Slurm::new(cluster, launchers.by_cluster("cluster"));
