@@ -645,6 +645,29 @@ mod tests {
 
     #[test]
     #[parallel]
+    fn execution_rayon() {
+        let (mut action, directories, launchers) = setup();
+        action.resources.processes = Some(Processes::PerSubmission(1));
+        action.launchers = Some(vec!["rayon".into()]);
+        action.command = Some("command {directories}".to_string());
+
+        let script = BashScriptBuilder::new(
+            "cluster",
+            &action,
+            &directories,
+            &PathBuf::default(),
+            &HashMap::new(),
+            &launchers,
+        )
+        .build()
+        .expect("Valid script.");
+        println!("{script}");
+
+        assert!(script.contains("RAYON_NUM_THREADS=4 command \"${directories[@]}\""));
+    }
+
+    #[test]
+    #[parallel]
     fn execution_mpi() {
         let (mut action, directories, launchers) = setup();
         action.launchers = Some(vec!["mpi".into()]);

@@ -28,6 +28,17 @@ impl BuiltIn for launcher::Configuration {
 
         result.launchers.insert("openmp".into(), openmp);
 
+        let mut rayon = HashMap::with_capacity(1);
+        rayon.insert(
+            "default".into(),
+            Launcher {
+                threads_per_process: Some("RAYON_NUM_THREADS=".into()),
+                ..Launcher::default()
+            },
+        );
+
+        result.launchers.insert("rayon".into(), rayon);
+
         let mut mpi = HashMap::with_capacity(3);
         mpi.insert(
             "default".into(),
