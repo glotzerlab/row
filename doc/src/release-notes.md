@@ -9,6 +9,7 @@
 *Fixed:*
 
 * Fix "JSON Pointers" example.
+* Handle non-numeric suffixes written by `sbatch`.
 
 ## 0.7.1 (2025-08-21)
 
