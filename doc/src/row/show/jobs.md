@@ -57,3 +57,7 @@ Show only the job IDs.
   ```bash
   row show jobs --action two --short | xargs scancel
   ```
+* Show SLURM job status for the current workspace:
+  ```bash
+  squeue --me -j $(row show jobs --short | paste -sd,)
+  ```
