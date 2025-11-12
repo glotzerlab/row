@@ -262,7 +262,7 @@ impl Scheduler for Slurm {
         if output.status.success() {
             let job_id_string = str::from_utf8(&output.stdout).expect("Valid UTF-8 output");
             let job_id = job_id_string
-                .trim_end_matches(char::is_whitespace)
+                .trim_end_matches(|c| !char::is_numeric(c))
                 .parse::<u32>()
                 .map_err(|_| Error::UnexpectedOutput("sbatch".into(), job_id_string.into()))?;
             Ok(Some(job_id))
