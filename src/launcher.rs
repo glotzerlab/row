@@ -262,9 +262,7 @@ mod tests {
         setup();
         let launchers = Configuration::built_in();
         let launchers_by_cluster = launchers.by_cluster("any_cluster");
-        let rayon = launchers_by_cluster
-            .get("rayon")
-            .expect("a valid Launcher");
+        let rayon = launchers_by_cluster.get("rayon").expect("a valid Launcher");
 
         let no_threads = Resources::default();
         assert_eq!(rayon.prefix(&no_threads, 10), "");
