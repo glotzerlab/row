@@ -1,5 +1,10 @@
 words = [
     "cpus",
     "gpus",
+    "mpi",
+    "noheader",
+    "ntasks",
+    "sbatch",
     "slurm",
+    "squeue",
 ]
