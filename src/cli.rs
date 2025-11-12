@@ -346,7 +346,7 @@ pub fn parse_directories<F>(
 where
     F: FnOnce() -> Result<Vec<PathBuf>, crate::Error>,
 {
-    if query_directories.len() == 1 && *query_directories[0] == *"-" {
+    if query_directories.len() == 1 && query_directories[0] == PathBuf::from("-") {
         trace!("Reading directories from stdin.");
         query_directories.clear();
         for line in io::stdin().lines() {
