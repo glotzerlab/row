@@ -1,6 +1,6 @@
 # Release notes
 
-## 1.0.0 (not yet released)
+## Next release
 
 *Added:*
 
