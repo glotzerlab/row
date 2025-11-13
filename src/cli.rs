@@ -346,6 +346,7 @@ pub fn parse_directories<F>(
 where
     F: FnOnce() -> Result<Vec<PathBuf>, crate::Error>,
 {
+    #[allow(clippy::cmp_owned, reason = "Requires Rust 1.91.1 to avoid")]
     if query_directories.len() == 1 && query_directories[0] == PathBuf::from("-") {
         trace!("Reading directories from stdin.");
         query_directories.clear();

@@ -456,7 +456,6 @@ mod tests {
     use speedate::Duration;
 
     use crate::builtin::BuiltIn;
-    use crate::cluster::{IdentificationMethod, SchedulerType};
     use crate::launcher;
     use crate::workflow::Walltime;
     use crate::workflow::{Resources, SubmitOptions};
@@ -792,13 +791,7 @@ mod tests {
     #[parallel]
     fn scheduler() {
         let (action, directories, launchers) = setup();
-        let cluster = Cluster {
-            name: "cluster".into(),
-            scheduler: SchedulerType::Bash,
-            identify: IdentificationMethod::Always(false),
-            partition: Vec::new(),
-            submit_options: Vec::new(),
-        };
+        let cluster = Cluster::default();
         let script = Bash::new(cluster, launchers)
             .make_script(&action, &directories, &PathBuf::default(), &HashMap::new())
             .expect("Valid script");

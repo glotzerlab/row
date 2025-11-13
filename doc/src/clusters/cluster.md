@@ -52,6 +52,12 @@ be one of:
 * `"slurm"`
 * `"bash"`
 
+## slurm_gpus_per_task
+
+`cluster.slurm_gpus_per_task`: **string** - Set the `sbatch` command line option that
+selects the number of gpus per task (used only by the `slurm` scheduler). When omitted,
+`slurm_gpus_per_task` defaults to `--gpus-per-task=`.
+
 ## submit_options
 
 `cluster.submit_options`: **array** of **strings** - Scheduler submission options that
