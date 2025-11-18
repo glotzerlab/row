@@ -1,8 +1,12 @@
 ![Row](row-horizontal.svg)
 
+[![Crates.io Version](https://img.shields.io/crates/v/row?color=a44300)](https://crates.io/crates/row)
 [![Read the Docs](https://img.shields.io/readthedocs/row/latest.svg)](https://row.readthedocs.io/)
+[![GitHub Repository](https://img.shields.io/badge/github-repo-blue?logo=github)](https://github.com/glotzerlab/row)
+[![GitHub Discussions](https://img.shields.io/github/discussions/glotzerlab/row)](https://github.com/glotzerlab/row/discussions/)
+[![GitHub commit activity](https://img.shields.io/github/commit-activity/y/glotzerlab/row?label=commits)](https://github.com/glotzerlab/row)
 [![Contributors](https://img.shields.io/github/contributors-anon/glotzerlab/row.svg?style=flat)](https://row.readthedocs.io/en/latest/contributors.html)
-[![License](https://img.shields.io/badge/license-BSD--3--Clause-green.svg)](https://row.readthedocs.io/en/latest/license.html)
+[![GitHub top language](https://img.shields.io/github/languages/top/glotzerlab/row?color=a44300)](https://rust-lang.org/)
 
 Row is a command line tool that helps you manage workflows on HPC resources. Define
 **actions** in a workflow configuration file that apply to **groups** of **directories**
