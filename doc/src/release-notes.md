@@ -4,17 +4,17 @@
 
 *Added:*
 
-* Rayon launcher that prefixes commands with `RAYON_NUM_THREADS={T}`. #195
-* `slurm_gpus_per_task` cluster option. #197
+* Rayon launcher that prefixes commands with `RAYON_NUM_THREADS={T}` (#195).
+* `slurm_gpus_per_task` cluster option (#197).
 
 *Changed:*
 
-* Build the documentation with mdBook 0.5.0. #203
+* Build the documentation with mdBook 0.5.0 (#203).
 
 *Fixed:*
 
-* Fix "JSON Pointers" example. #191
-* Handle non-numeric suffixes written by `sbatch`. #197
+* Fix "JSON Pointers" example (#191).
+* Handle non-numeric suffixes written by `sbatch` (#197).
 
 ## 0.7.1 (2025-08-21)
 
