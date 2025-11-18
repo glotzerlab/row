@@ -63,5 +63,5 @@ GitHub release. After a few hours, the conda-forge autotick bot will submit a PR
 for the new release.
 
 - [ ] Check that the GitHub release posted correctly: https://github.com/glotzerlab/row/releases
-- [ ] Check that the crates.io upload succeeded: https://crates.io/crates/row 
+- [ ] Check that the crates.io upload succeeded: https://crates.io/crates/row
 - [ ] Merge the conda-forge recipe, updating it first if necessary (e.g. when adding dependencies).
