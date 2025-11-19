@@ -1,6 +1,6 @@
 # Release notes
 
-## Next release
+## 1.0.0 (2025-11-19)
 
 *Highlights:*
 
