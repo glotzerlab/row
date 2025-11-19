@@ -2,6 +2,29 @@
 
 ## Next release
 
+*Highlights:*
+
+This release is labeled 1.0 in recognition that **row** has been stable for some
+time now. Future releases will continue to follow semantic versioning. Specifically,
+future changes will be considered breaking if they would require users to modify
+`workflow.toml` or if they change the `--short` output format of any command. Changes to
+the human-readable output will not be considered breaking.
+
+**Row** 1.0 can now set the number of threads per process for applications that
+use [rayon]. Set `"rayon"` as the first element in `launchers`:
+```toml
+[[action]]
+launchers = ["rayon"]
+```
+
+The documentation now shows the current page's headings in the left sidebar. Click on a
+heading to navigate to that section.
+
+**Row** 1.0 also adds support for certain SLURM configurations that do not accept
+`--gpus-per-task`.
+
+[rayon]: https://github.com/rayon-rs/rayon/
+
 *Added:*
 
 * Rayon launcher that prefixes commands with `RAYON_NUM_THREADS={T}` (#195).
@@ -13,8 +36,8 @@
 
 *Fixed:*
 
-* Fix "JSON Pointers" example (#191).
-* Handle non-numeric suffixes written by `sbatch` (#197).
+* Fix the "JSON Pointers" example (#191).
+* Handle non-numeric suffixes output by `sbatch` (#197).
 
 ## 0.7.1 (2025-08-21)
 
