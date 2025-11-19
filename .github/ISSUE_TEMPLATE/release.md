@@ -37,7 +37,7 @@ On that branch, take the following steps (committing after each step when needed
   ```
 
 > [!IMPORTANT]
-> Make sure to **exclude** `v` in the tag name!
+> Make sure to **exclude** `v` from the tag name!
 
 - [ ] Add a blank release notes entry for the next release:
   ```
