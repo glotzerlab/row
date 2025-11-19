@@ -28,16 +28,16 @@ On that branch, take the following steps (committing after each step when needed
 - [ ] Push the branch and open a pull request.
 - [ ] Check that readthedocs builds the docs correctly in the pull request checks.
 - [ ] Merge the pull request after all tests pass.
-- [ ] Make a new tag on the main branch:
+- [ ] Make a new tag on the trunk branch:
   ```
-  git switch main
+  git switch trunk
   git pull
-  git tag -a v{X.Y.Z}
+  git tag -a {X.Y.Z}
   git push origin --tags
   ```
 
 > [!IMPORTANT]
-> Make sure to include the `v` in the tag name!
+> Make sure to **exclude** `v` in the tag name!
 
 - [ ] Add a blank release notes entry for the next release:
   ```
