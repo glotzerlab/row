@@ -18,13 +18,13 @@ On that branch, take the following steps (committing after each step when needed
   Add entries to `.mailmap` to remove duplicates.
 - [ ] Review `release-notes.md` and revise if needed.
 - [ ] Add highlights to release notes.
-- [ ] Run `cargo check`
-- [ ] Run `cargo update`
-- [ ] Run `cargo bundle-licenses --format yaml --output THIRDPARTY.yaml`
 - [ ] Run `bump-my-version bump {type}`. Replace `{type}` with:
   - `patch` when this release *only* includes bug fixes.
   - `minor` when this release includes new features and possibly bug fixes.
   - `major` when this release includes API breaking changes.
+- [ ] Run `cargo check`
+- [ ] Run `cargo update`
+- [ ] Run `cargo bundle-licenses --format yaml --output THIRDPARTY.yaml`
 - [ ] Push the branch and open a pull request.
 - [ ] Check that readthedocs builds the docs correctly in the pull request checks.
 - [ ] Merge the pull request after all tests pass.
