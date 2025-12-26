@@ -30,7 +30,7 @@ regex = "1.11.1"
 serde = { version = "1.0.219", features = ["derive"] }
 serde_json = "1.0.142"
 shell-quote = { version = "0.7.2", default-features = false, features = ["bash"] }
-signal-hook = { version = "0.3.18", default-features = false }
+signal-hook = { version = "0.4.0", default-features = false }
 speedate = "0.17.0"
 thiserror = "2.0.12"
 toml = "0.9.5"
