@@ -93,7 +93,7 @@ jobs:
       with:
         python-version: "3.14"
     - name: Set up Python environment
-      uses: glotzerlab/workflows/setup-uv@2245be9e78600bf7846aaf9555da322446f46110 # 0.11.0
+      uses: glotzerlab/workflows/setup-uv@204dc7c0f82720090703712694b7cab761aacaa0 # 0.13.0
       with:
         lockfile: ".github/workflows/signac-requirements.txt"
     - name: Run signac.sh
@@ -109,7 +109,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
     - name: Set up mdbook
-      uses: glotzerlab/workflows/setup-mdbook@2245be9e78600bf7846aaf9555da322446f46110 # 0.11.0
+      uses: glotzerlab/workflows/setup-mdbook@204dc7c0f82720090703712694b7cab761aacaa0 # 0.13.0
       with:
         mdbook_version: 0.5.0
     - name: Build documentation
