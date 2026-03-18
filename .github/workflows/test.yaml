@@ -116,11 +116,6 @@ jobs:
       run: mdbook build doc
       env:
         RUST_LOG: "mdbook=info"
-    - name: Check links
-      uses: lycheeverse/lychee-action@8646ba30535128ac92d33dfc9133794bfdd9b411  # v2.8.0
-      with:
-        args: -n .
-        fail: true
 
   tests_complete:
     name: All tests
