@@ -32,14 +32,14 @@ jobs:
           - macos-14
         rust:
           - 1.88.0
-          - 1.91.1
+          - 1.94.0
         mode:
          - debug
 
         include:
         # Add a release build on linux with the latest version of rust
         - os: ubuntu-24.04
-          rust: 1.91.1
+          rust: 1.94.0
           mode: release
 
     steps:
@@ -70,7 +70,7 @@ jobs:
       id: rust_toolchain
       uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9
       with:
-        toolchain: 1.91.1
+        toolchain: 1.94.0
     - name: Cache
       uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
       with:
