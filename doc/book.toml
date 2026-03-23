@@ -8,5 +8,6 @@ create-missing = false
 
 # [output.html] must be the last table so that .readthedocs.yaml can easily add a key to it
 [output.html]
+additional-css = ["./theme/catppuccin.css"]
 git-repository-url = "https://github.com/glotzerlab/row"
 edit-url-template = "https://github.com/glotzerlab/row/edit/trunk/doc/{path}"
