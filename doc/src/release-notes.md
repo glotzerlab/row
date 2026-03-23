@@ -4,6 +4,9 @@
 
 *Added:*
 
+* [Catppuccin](https://catppuccin.com/) themes are now available in the
+  Row book (#303).
+
 *Changed:*
 
 *Deprecated:*
