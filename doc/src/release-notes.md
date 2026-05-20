@@ -9,6 +9,8 @@
 
 *Changed:*
 
+* Build the documentation with mdBook 0.5.3 (#325).
+
 *Deprecated:*
 
 *Removed:*
