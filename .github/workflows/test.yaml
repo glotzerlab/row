@@ -32,14 +32,14 @@ jobs:
           - macos-14
         rust:
           - 1.88.0
-          - 1.94.0
+          - 1.96.0
         mode:
          - debug
 
         include:
         # Add a release build on linux with the latest version of rust
         - os: ubuntu-24.04
-          rust: 1.94.0
+          rust: 1.96.0
           mode: release
 
     steps:
