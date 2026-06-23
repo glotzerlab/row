@@ -133,7 +133,7 @@ export ACTION_WALLTIME_IN_MINUTES={}
         }
 
         if let Some(gpus_per_process) = self.action.resources.gpus_per_process {
-            let _ = writeln!(result, "export ACTION_GPUS_PER_PROCESS={gpus_per_process}",);
+            let _ = writeln!(result, "export ACTION_GPUS_PER_PROCESS={gpus_per_process}");
         }
 
         Ok(result)
