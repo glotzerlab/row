@@ -6,6 +6,7 @@
 
 * [Catppuccin](https://catppuccin.com/) themes are now available in the
   Row book (#303).
+* "Writing actions in Rust" documentation page (#347).
 
 *Changed:*
 
