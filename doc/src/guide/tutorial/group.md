@@ -18,7 +18,7 @@ As mentioned previously, `echo` is used here to create a _minimal_ script that y
 execute to follow along. For any serious production work you will likely find [signac]
 more convenient to work with.
 
-[signac]: ../python/signac.md
+[signac]: ../signac/signac.md
 
 ## Grouping by value
 

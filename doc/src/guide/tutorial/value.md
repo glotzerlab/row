@@ -22,7 +22,7 @@ should include a [JSON] file in each directory that identifies its **value**.
 > a cleaner syntax. This tutorial will cover **row** ↔ **signac** interoperation in a
 > later section.
 
-[signac]: ../python/signac.md
+[signac]: ../signac/signac.md
 
 Create a new workflow project and place JSON files in each directory:
 ```bash

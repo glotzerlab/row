@@ -98,7 +98,7 @@ jobs:
         lockfile: ".github/workflows/signac-requirements.txt"
     - name: Run signac.sh
       run: bash signac.sh
-      working-directory: doc/src/guide/python
+      working-directory: doc/src/guide/signac
       env:
         ROW_YES: "true"
 
