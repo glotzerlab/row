@@ -15,7 +15,7 @@ Concepts:
 | *label* | Not implemented. |
 | *hooks* | Not implemented. |
 | *environments* | [`clusters.toml`](clusters/index.md) |
-| `project.py` | [`workflow.toml`](workflow/index.md) combined with [`actions.py`](guide/python/actions.md) |
+| `project.py` | [`workflow.toml`](workflow/index.md) combined with [`actions.py`](guide/signac/python.md) |
 
 Commands:
 | flow | row |
