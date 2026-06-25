@@ -1,5 +1,17 @@
 # Release notes
 
+## Next release
+
+*Added:*
+
+*Changed:*
+
+*Deprecated:*
+
+*Removed:*
+
+*Fixed:*
+
 ## 1.0.1 (2026-06-25)
 
 *Added:*
