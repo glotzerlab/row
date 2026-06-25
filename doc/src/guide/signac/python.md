@@ -1,4 +1,4 @@
-# Writing action commands in Python
+# Writing actions in Python
 
 In **row**, actions execute arbitrary **shell commands**. When your action is **Python**
 code, you must wrap it with command line parsing that takes directories as arguments.
