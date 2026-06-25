@@ -12,6 +12,8 @@ on:
 
   workflow_dispatch:
 
+permissions: {}
+
 env:
   name: row
   CARGO_TERM_COLOR: always
@@ -20,9 +22,13 @@ env:
 jobs:
   cargo-check:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     steps:
     - name: Checkout
       uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      with:
+       persist-credentials: false
     - name: Configure Rust
       uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9
       with:
@@ -35,9 +41,13 @@ jobs:
 
   cargo-clippy:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     steps:
     - name: Checkout
       uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      with:
+       persist-credentials: false
     - name: Configure Rust
       uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9
       with:
@@ -51,9 +61,13 @@ jobs:
 
   cargo-fmt:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     steps:
     - name: Checkout
       uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      with:
+       persist-credentials: false
     - name: Configure Rust
       uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9
       with:
@@ -63,22 +77,42 @@ jobs:
 
   prek:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     steps:
     - name: Checkout
       uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      with:
+       persist-credentials: false
     - name: prek
       uses: j178/prek-action@bdca6f102f98e2b4c7029491a53dfd366469e33d # v2.0.4
       with:
         prek-version: '0.3.8'
 
+  zizmor:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+    - name: Checkout
+      uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      with:
+        persist-credentials: false
+
+    - name: Run zizmor
+      uses: zizmorcore/zizmor-action@192e21d79ab29983730a13d1382995c2307fbcaa # v0.5.7
+      with:
+        advanced-security: false
+
   # This job is used to provide a single requirement for branch merge conditions.
   tests_complete:
     name: All style checks
     if: always()
-    needs: [cargo-check, cargo-clippy, cargo-fmt, prek]
+    needs: [cargo-check, cargo-clippy, cargo-fmt, prek, zizmor]
     runs-on: ubuntu-24.04
 
     steps:
-    - run: jq --exit-status 'all(.result == "success")' <<< '${{ toJson(needs) }}'
-    - name: Done
-      run: exit 0
+    - run: jq --exit-status 'all(.result == "success")' <<< "${NEEDS}"
+      env:
+        NEEDS: ${{ toJson(needs) }}
+    - run: exit 0
