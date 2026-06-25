@@ -12,6 +12,8 @@ on:
 
   workflow_dispatch:
 
+permissions: {}
+
 defaults:
   run:
     shell: bash
@@ -25,6 +27,8 @@ jobs:
   unit_test:
     name: Unit test [${{ matrix.mode }}-rust-${{ matrix.rust }}-${{ matrix.os }}]
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
     strategy:
       matrix:
         os:
@@ -45,6 +49,8 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      with:
+       persist-credentials: false     
     - name: Configure Rust
       id: rust_toolchain
       uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9
@@ -63,9 +69,13 @@ jobs:
   execute_tutorials:
     name: Execute tutorials
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     steps:
     - name: Checkout
       uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      with:
+       persist-credentials: false     
     - name: Configure Rust
       id: rust_toolchain
       uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9
@@ -105,9 +115,13 @@ jobs:
   build_documentation:
     name: Build documentation
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     steps:
     - name: Checkout
       uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      with:
+       persist-credentials: false     
     - name: Set up mdbook
       uses: glotzerlab/workflows/setup-mdbook@00c67cb577c36bdc2570845fc62d1a30e3383012 # 0.14.0
       with:
@@ -124,6 +138,7 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
-    - run: jq --exit-status 'all(.result == "success")' <<< '${{ toJson(needs) }}'
-    - name: Done
-      run: exit 0
+    - run: jq --exit-status 'all(.result == "success")' <<< "${NEEDS}"
+      env:
+        NEEDS: ${{ toJson(needs) }}
+    - run: exit 0
