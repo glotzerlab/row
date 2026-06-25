@@ -1,6 +1,6 @@
 # Release notes
 
-## Next release
+## 1.0.1 (2026-06-25)
 
 *Added:*
 
@@ -11,12 +11,6 @@
 *Changed:*
 
 * Build the documentation with mdBook 0.5.3 (#325).
-
-*Deprecated:*
-
-*Removed:*
-
-*Fixed:*
 
 ## 1.0.0 (2025-11-19)
 

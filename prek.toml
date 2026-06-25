@@ -23,14 +23,14 @@ hooks = [
 
 [[repos]]
 repo = "https://github.com/rhysd/actionlint"
-rev = "v1.7.8"
+rev = "914e7df21a07ef503a81201c76d2b11c789d3fca"  # frozen: v1.7.12
 hooks = [
   { id = "actionlint" }
 ]
 
 [[repos]]
 repo = "https://github.com/astral-sh/ruff-pre-commit"
-rev = "v0.14.5"
+rev = "745be0411e3c150e246d527e531e5a221b8c3462"  # frozen: v0.15.19
 hooks = [
   { id = "ruff-format" },
   { id = "ruff-check" }
@@ -38,7 +38,7 @@ hooks = [
 
 [[repos]]
 repo = "https://github.com/glotzerlab/fix-license-header"
-rev = "v0.4.1"
+rev = "96a6da2d22354ecb4dbc50809e9455c7f1e20fe8"  # frozen: v0.4.1
 hooks = [
   {
     id = "fix-license-header",
@@ -53,7 +53,7 @@ hooks = [
 
 [[repos]]
 repo = "https://github.com/mit-d/check-unicode"
-rev = "v0.5.0"
+rev = "9d217f6f91d9e2de6bc31b54575ff35e595173f5"  # frozen: v0.6.0
 hooks = [
   { id = "check-unicode",
     args = [
