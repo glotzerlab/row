@@ -125,7 +125,7 @@ jobs:
     - name: Set up mdbook
       uses: glotzerlab/workflows/setup-mdbook@00c67cb577c36bdc2570845fc62d1a30e3383012 # 0.14.0
       with:
-        mdbook_version: 0.5.3
+        mdbook_version: 0.5.4
     - name: Build documentation
       run: mdbook build doc
       env:
