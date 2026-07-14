@@ -40,7 +40,7 @@ pub fn cluster<W: Write>(
             }
         } else {
             info!("All cluster configurations:");
-            write!(output, "{}", &toml::to_string_pretty(&clusters)?)?;
+            write!(output, "{}", toml::to_string_pretty(&clusters)?)?;
         }
     } else {
         let cluster = clusters.identify(options.cluster.as_deref())?;
@@ -49,7 +49,7 @@ pub fn cluster<W: Write>(
         if args.short {
             writeln!(output, "{}", cluster.name)?;
         } else {
-            write!(output, "{}", &toml::to_string_pretty(&cluster)?)?;
+            write!(output, "{}", toml::to_string_pretty(&cluster)?)?;
         }
     }
 
