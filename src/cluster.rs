@@ -651,50 +651,58 @@ mod tests {
             cluster
                 .find_partition(None, &cpu_resources, 1)
                 .unwrap()
-                .name, "cpu"
+                .name,
+            "cpu"
         );
         assert_eq!(
             cluster
                 .find_partition(None, &cpu_resources, 10)
                 .unwrap()
-                .name, "cpu"
+                .name,
+            "cpu"
         );
         assert_eq!(
             cluster
                 .find_partition(None, &gpu_resources, 1)
                 .unwrap()
-                .name, "gpu"
+                .name,
+            "gpu"
         );
         assert_eq!(
             cluster
                 .find_partition(None, &gpu_resources, 10)
                 .unwrap()
-                .name, "gpu"
+                .name,
+            "gpu"
         );
 
         assert_eq!(
             cluster
                 .find_partition(None, &cpu_resources, 11)
                 .unwrap()
-                .name, "other"
+                .name,
+            "other"
         );
         assert_eq!(
             cluster
                 .find_partition(None, &gpu_resources, 11)
                 .unwrap()
-                .name, "other"
+                .name,
+            "other"
         );
         assert_eq!(
             cluster
                 .find_partition(None, &cpu_resources, 20)
                 .unwrap()
-                .name, "other"
+                .name,
+            "other"
         );
         assert_eq!(
             cluster
                 .find_partition(None, &gpu_resources, 20)
                 .unwrap()
-                .name, "other"
+                .name,
+            "other"
         );
 
         assert!(matches!(
@@ -710,7 +718,8 @@ mod tests {
             cluster
                 .find_partition(Some("other"), &gpu_resources, 20)
                 .unwrap()
-                .name, "other"
+                .name,
+            "other"
         );
         assert!(matches!(
             cluster.find_partition(Some("other"), &cpu_resources, 21),
