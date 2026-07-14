@@ -575,7 +575,7 @@ impl Workflow {
             .read_to_string(&mut workflow_string)
             .map_err(|e| Error::FileRead(path.join("workflow.toml"), e))?;
 
-        trace!("Parsing '{}/workflow.toml'.", &path.display());
+        trace!("Parsing '{}/workflow.toml'.", path.display());
         Self::open_str(&path, &workflow_string)
     }
 
