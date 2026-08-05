@@ -10,3 +10,4 @@ The following people have contributed to the development of **row**:
 * Corwin Kerr, University of Michigan
 * Trevor Teague, University of Michigan
 * Jared Shi, University of Michigan
+* Philipp Schönhöfer, University of Michigan
