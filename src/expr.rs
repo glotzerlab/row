@@ -64,6 +64,7 @@ pub(crate) fn evaluate_json_comparison(
         (Comparison::LessThan, Some(Ordering::Less)) => Some(true),
         (Comparison::LessThanOrEqualTo, Some(Ordering::Less | Ordering::Equal)) => Some(true),
         (Comparison::EqualTo, Some(Ordering::Equal)) => Some(true),
+        (Comparison::NotEqualTo, Some(Ordering::Less | Ordering::Greater)) => Some(true),
         (Comparison::GreaterThanOrEqualTo, Some(Ordering::Greater | Ordering::Equal)) => Some(true),
         (Comparison::GreaterThan, Some(Ordering::Greater)) => Some(true),
         (_, None) => None,
@@ -164,6 +165,22 @@ mod tests {
         assert_eq!(
             evaluate_json_comparison(&Comparison::EqualTo, &Value::from(5), &Value::from(5)),
             Some(true)
+        );
+        assert_eq!(
+            evaluate_json_comparison(&Comparison::NotEqualTo, &Value::from(5), &Value::from(10)),
+            Some(true)
+        );
+        assert_eq!(
+            evaluate_json_comparison(&Comparison::NotEqualTo, &Value::from(5), &Value::from(5)),
+            Some(false)
+        );
+        assert_eq!(
+            evaluate_json_comparison(
+                &Comparison::NotEqualTo,
+                &Value::from(5),
+                &Value::from("abcd")
+            ),
+            None
         );
         assert_eq!(
             evaluate_json_comparison(

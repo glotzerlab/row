@@ -30,7 +30,7 @@ Each selector is a **table** with only one of the following keys:
 * `condition`: An array of three elements: The *JSON pointer*, *the operator*, and the
   *operand*. The [JSON pointer](../../guide/concepts/json-pointers.md) references a
   specific portion of the directory's value. The operator may be `"<"`, `"<="`,
-  `"=="`, `">="`, or `">"`. Both operands **must** have the same data type. The element
+  `"=="`, `"!="`, `">="`, or `">"`. Both operands **must** have the same data type. The element
   referenced by each JSON pointer must be present in the value of **every** directory.
 * `all`: Array of conditions (see above). All conditions must be `true` for this selector
   to be `true`. `all` is evaluated with short-circuit logic. When an element in `all`
