@@ -4,6 +4,8 @@
 
 *Added:*
 
+* `action.group.include` now supports `!=` comparisons (#359)
+
 *Changed:*
 
 *Deprecated:*
