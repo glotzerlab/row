@@ -233,6 +233,15 @@ fn frontier() -> Cluster {
                 gpus_per_node: Some(8),
                 ..Partition::default()
             },
+            // The following partitions may only be selected manually.
+            Partition {
+                name: "extended".into(),
+                maximum_gpus_per_job: Some(512),
+                warn_gpus_not_multiple_of: Some(8),
+                gpus_per_node: Some(8),
+                prevent_auto_select: true,
+                ..Partition::default()
+            },
         ],
         ..Cluster::default()
     }

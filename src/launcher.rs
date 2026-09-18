@@ -117,7 +117,7 @@ impl Configuration {
                 io::ErrorKind::NotFound => {
                     trace!(
                         "'{}' does not exist, using built-in launchers.",
-                        &launchers_toml_path.display()
+                        launchers_toml_path.display()
                     );
                     return Ok(launchers);
                 }
@@ -131,7 +131,7 @@ impl Configuration {
             .read_to_string(&mut launchers_string)
             .map_err(|e| Error::FileRead(launchers_toml_path.clone(), e))?;
 
-        trace!("Parsing '{}'.", &launchers_toml_path.display());
+        trace!("Parsing '{}'.", launchers_toml_path.display());
         let user_config = Self::parse_str(&launchers_toml_path, &launchers_string)?;
         launchers.merge(user_config);
         launchers.validate()?;

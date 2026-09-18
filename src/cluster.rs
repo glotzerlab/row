@@ -195,7 +195,7 @@ impl Configuration {
                 io::ErrorKind::NotFound => {
                     trace!(
                         "'{}' does not exist, using built-in clusters.",
-                        &clusters_toml_path.display()
+                        clusters_toml_path.display()
                     );
                     return Ok(clusters);
                 }
@@ -209,7 +209,7 @@ impl Configuration {
             .read_to_string(&mut clusters_string)
             .map_err(|e| Error::FileRead(clusters_toml_path.clone(), e))?;
 
-        trace!("Parsing '{}'.", &clusters_toml_path.display());
+        trace!("Parsing '{}'.", clusters_toml_path.display());
         let user_config = Self::parse_str(&clusters_toml_path, &clusters_string)?;
         clusters.merge(&user_config);
         Ok(clusters)
@@ -647,62 +647,62 @@ mod tests {
             ..Resources::default()
         };
 
-        assert!(
+        assert_eq!(
             cluster
                 .find_partition(None, &cpu_resources, 1)
                 .unwrap()
-                .name
-                == "cpu"
+                .name,
+            "cpu"
         );
-        assert!(
+        assert_eq!(
             cluster
                 .find_partition(None, &cpu_resources, 10)
                 .unwrap()
-                .name
-                == "cpu"
+                .name,
+            "cpu"
         );
-        assert!(
+        assert_eq!(
             cluster
                 .find_partition(None, &gpu_resources, 1)
                 .unwrap()
-                .name
-                == "gpu"
+                .name,
+            "gpu"
         );
-        assert!(
+        assert_eq!(
             cluster
                 .find_partition(None, &gpu_resources, 10)
                 .unwrap()
-                .name
-                == "gpu"
+                .name,
+            "gpu"
         );
 
-        assert!(
+        assert_eq!(
             cluster
                 .find_partition(None, &cpu_resources, 11)
                 .unwrap()
-                .name
-                == "other"
+                .name,
+            "other"
         );
-        assert!(
+        assert_eq!(
             cluster
                 .find_partition(None, &gpu_resources, 11)
                 .unwrap()
-                .name
-                == "other"
+                .name,
+            "other"
         );
-        assert!(
+        assert_eq!(
             cluster
                 .find_partition(None, &cpu_resources, 20)
                 .unwrap()
-                .name
-                == "other"
+                .name,
+            "other"
         );
-        assert!(
+        assert_eq!(
             cluster
                 .find_partition(None, &gpu_resources, 20)
                 .unwrap()
-                .name
-                == "other"
+                .name,
+            "other"
         );
 
         assert!(matches!(
@@ -714,12 +714,12 @@ mod tests {
             Err(Error::PartitionNameNotFound(_))
         ));
 
-        assert!(
+        assert_eq!(
             cluster
                 .find_partition(Some("other"), &gpu_resources, 20)
                 .unwrap()
-                .name
-                == "other"
+                .name,
+            "other"
         );
         assert!(matches!(
             cluster.find_partition(Some("other"), &cpu_resources, 21),

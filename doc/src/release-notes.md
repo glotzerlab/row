@@ -5,8 +5,11 @@
 *Added:*
 
 * `action.group.include` now supports `!=` comparisons (#359)
+* Add 'extended' as a partition for Frontier (#389).
 
 *Changed:*
+
+* Build the documentation with mdBook 0.5.4 (#360).
 
 *Deprecated:*
 

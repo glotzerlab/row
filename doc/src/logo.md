@@ -4,8 +4,9 @@ Download the row logo for use in posters and presentations.
 
 Vertical:
 
-[![Vertical logo](row-vertical.svg)](row-vertical.svg)
+<img src="row-vertical.svg" alt="row vertical logo" width="400"/>
+
 
 Horizontal:
 
-[![Horizontal logo](row-horizontal.svg)](row-horizontal.svg)
+<img src="row-horizontal.svg" alt="row horizontal logo" width="100%"/>

@@ -1,7 +1,6 @@
-![Row](row-horizontal.svg)
+<img src="row-horizontal.svg" alt="row horizontal logo" width="100%"/>
 
 [![Crates.io Version](https://img.shields.io/crates/v/row?color=a44300)](https://crates.io/crates/row)
-[![Read the Docs](https://img.shields.io/readthedocs/row/latest.svg)](https://row.readthedocs.io/)
 [![GitHub Repository](https://img.shields.io/badge/github-repo-blue?logo=github)](https://github.com/glotzerlab/row)
 [![GitHub Discussions](https://img.shields.io/github/discussions/glotzerlab/row)](https://github.com/glotzerlab/row/discussions/)
 [![GitHub commit activity](https://img.shields.io/github/commit-activity/y/glotzerlab/row?label=commits)](https://github.com/glotzerlab/row)

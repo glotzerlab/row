@@ -140,13 +140,13 @@ impl Table {
                     if i == row.len() - 1 {
                         item.text.clone()
                     } else {
-                        format!("{:<width$}", &item.text, width = column_width[i])
+                        format!("{:<width$}", item.text, width = column_width[i])
                     }
                 }
-                Alignment::Right => format!("{:>width$}", &item.text, width = column_width[i]),
+                Alignment::Right => format!("{:>width$}", item.text, width = column_width[i]),
             };
 
-            write!(writer, "{}", &item.style.apply_to(text))?;
+            write!(writer, "{}", item.style.apply_to(text))?;
             if i != row.len() - 1 {
                 write!(writer, " ")?;
             }

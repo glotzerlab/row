@@ -39,7 +39,7 @@ pub fn launchers<W: Write>(
         write!(
             output,
             "{}",
-            &toml::to_string_pretty(launchers.full_config())?
+            toml::to_string_pretty(launchers.full_config())?
         )?;
     } else {
         let clusters = cluster::Configuration::open()?;
@@ -54,7 +54,7 @@ pub fn launchers<W: Write>(
             write!(
                 output,
                 "{}",
-                &toml::to_string_pretty(&launchers.by_cluster(&cluster.name))?
+                toml::to_string_pretty(&launchers.by_cluster(&cluster.name))?
             )?;
         }
     }
