@@ -4,6 +4,7 @@
 
 *Added:*
 
+* `action.group.include` now supports `!=` comparisons (#359)
 * Add 'extended' as a partition for Frontier (#389).
 
 *Changed:*

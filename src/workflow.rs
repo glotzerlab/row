@@ -186,6 +186,8 @@ pub enum Comparison {
     LessThanOrEqualTo,
     #[serde(rename(deserialize = "=="))]
     EqualTo,
+    #[serde(rename(deserialize = "!="))]
+    NotEqualTo,
     #[serde(rename(deserialize = ">="))]
     GreaterThanOrEqualTo,
     #[serde(rename(deserialize = ">"))]
