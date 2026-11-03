@@ -75,28 +75,6 @@ impl BuiltIn for launcher::Configuration {
     }
 }
 
-fn andes() -> Cluster {
-    ////////////////////////////////////////////////////////////////////////////////////////
-    // OLCF Andes
-    Cluster {
-        name: "andes".into(),
-        identify: IdentificationMethod::ByEnvironment("LMOD_SYSTEM_NAME".into(), "andes".into()),
-        scheduler: SchedulerType::Slurm,
-        submit_options: Vec::new(),
-        partition: vec![
-            // Auto-detected partitions: batch
-            Partition {
-                name: "batch".into(),
-                maximum_gpus_per_job: Some(0),
-                warn_cpus_not_multiple_of: Some(32),
-                cpus_per_node: Some(32),
-                ..Partition::default()
-            },
-        ],
-        ..Cluster::default()
-    }
-}
-
 fn anvil() -> Cluster {
     ////////////////////////////////////////////////////////////////////////////////////////
     // Purdue Anvil
@@ -317,6 +295,32 @@ fn greatlakes() -> Cluster {
     }
 }
 
+fn riker() -> Cluster {
+    ////////////////////////////////////////////////////////////////////////////////////////
+    // OLCF Riker
+    Cluster {
+        name: "riker".into(),
+        identify: IdentificationMethod::ByEnvironment("LMOD_SYSTEM_NAME".into(), "riker".into()),
+        scheduler: SchedulerType::Slurm,
+        partition: vec![
+            // Auto-detected partitions: batch, gpu
+            Partition {
+                name: "batch".into(),
+                maximum_gpus_per_job: Some(0),
+                cpus_per_node: Some(128),
+                ..Partition::default()
+            },
+            Partition {
+                name: "gpu".into(),
+                minimum_gpus_per_job: Some(1),
+                gpus_per_node: Some(2),
+                ..Partition::default()
+            },
+        ],
+        ..Cluster::default()
+    }
+}
+
 fn none() -> Cluster {
     // Fallback none cluster.
     Cluster {
@@ -334,7 +338,7 @@ fn none() -> Cluster {
 
 impl BuiltIn for cluster::Configuration {
     fn built_in() -> Self {
-        let cluster = vec![andes(), anvil(), delta(), frontier(), greatlakes(), none()];
+        let cluster = vec![anvil(), delta(), frontier(), greatlakes(), riker(), none()];
 
         cluster::Configuration { cluster }
     }
