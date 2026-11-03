@@ -209,6 +209,7 @@ fn frontier() -> Cluster {
                 name: "batch".into(),
                 warn_gpus_not_multiple_of: Some(8),
                 gpus_per_node: Some(8),
+                cpus_per_node: Some(56),
                 ..Partition::default()
             },
             // The following partitions may only be selected manually.
@@ -217,6 +218,7 @@ fn frontier() -> Cluster {
                 maximum_gpus_per_job: Some(512),
                 warn_gpus_not_multiple_of: Some(8),
                 gpus_per_node: Some(8),
+                cpus_per_node: Some(56),
                 prevent_auto_select: true,
                 ..Partition::default()
             },
