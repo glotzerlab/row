@@ -2,16 +2,6 @@
 
 **Row** includes built-in support for the following clusters.
 
-## Andes (OLCF)
-
-**Row** automatically selects from the following partitions on [Andes]:
-* `batch`
-
-> [!IMPORTANT]
-> Andes has no shared partition. All jobs must use 32 CPUs per node.
-
-[Andes]: https://docs.olcf.ornl.gov/systems/andes_user_guide.html
-
 ## Anvil (Purdue)
 
 **Row** automatically selects from the following partitions on [Anvil]:
@@ -77,3 +67,16 @@ allows full-node jobs and does not incur extra charges.
 > larger number of nodes that can run your job.
 
 [Great Lakes]: https://its.umich.edu/advanced-research-computing/high-performance-computing/great-lakes
+
+## Riker (OLCF)
+
+**Row** automatically selects from the following partitions on [Riker]:
+* `batch`
+* `gpu`
+
+> [!IMPORTANT]
+> Riker **requires** the SLURM option `--cpus-per-node` on the `batch` partition.
+> You must set a non-default `action.resources.threads_per_process`. Set it to 1
+> to achieve the default behavior on most clusters.
+
+[Riker]: https://docs.olcf.ornl.gov/systems/riker_user_guide.html
