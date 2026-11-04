@@ -4,11 +4,17 @@
 
 *Added:*
 
+* Added built-in support for OLCF Riker (#448).
+
 *Changed:*
+
+* Set `cpus_per_node` for the `frontier cluster (#448).
 
 *Deprecated:*
 
 *Removed:*
+
+* Removed the built-in `andes` cluster (#448).
 
 *Fixed:*
 
