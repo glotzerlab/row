@@ -8,7 +8,7 @@
 
 *Changed:*
 
-* Set `cpus_per_node` for the `frontier cluster (#448).
+* Set `cpus_per_node` for the `frontier` cluster (#448).
 
 *Removed:*
 
