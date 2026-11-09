@@ -10,13 +10,9 @@
 
 * Set `cpus_per_node` for the `frontier cluster (#448).
 
-*Deprecated:*
-
 *Removed:*
 
 * Removed the built-in `andes` cluster (#448).
-
-*Fixed:*
 
 ## 1.1.0 (2026-09-18)
 
