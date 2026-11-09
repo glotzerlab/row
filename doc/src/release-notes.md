@@ -1,6 +1,6 @@
 # Release notes
 
-## Next release
+## 1.2.0 (2026-11-09)
 
 *Added:*
 
@@ -8,15 +8,11 @@
 
 *Changed:*
 
-* Set `cpus_per_node` for the `frontier cluster (#448).
-
-*Deprecated:*
+* Set `cpus_per_node` for the `frontier` cluster (#448).
 
 *Removed:*
 
 * Removed the built-in `andes` cluster (#448).
-
-*Fixed:*
 
 ## 1.1.0 (2026-09-18)
 
