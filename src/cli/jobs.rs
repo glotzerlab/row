@@ -42,7 +42,7 @@ struct JobDetails {
 }
 
 /** Find jobs that match the given directories and the action wildcard on the selected cluster.
-*/
+ */
 fn find(
     directories: Vec<PathBuf>,
     action: &str,
